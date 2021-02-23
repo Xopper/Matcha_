@@ -8,6 +8,7 @@
 		"@fortawesome/free-solid-svg-icons": "^5.15.2",
 		"@fortawesome/react-fontawesome": "^0.1.14",
 		"@react-google-maps/api": "^2.1.1",
+		"@sweetalert2/theme-bulma": "^4.0.3",
 		"@testing-library/jest-dom": "^5.11.9",
 		"@testing-library/react": "^11.2.3",
 		"@testing-library/user-event": "^12.6.0",
@@ -21,6 +22,7 @@
 		"react-fontawesome": "^1.7.1",
 		"react-router-dom": "^5.2.0",
 		"react-scripts": "4.0.1",
+		"sweetalert2": "^10.15.5",
 		"web-vitals": "^0.2.4"
 	},
 	"scripts": {

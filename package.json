@@ -12,9 +12,9 @@
     "is-base64": "^1.1.0",
     "jsonwebtoken": "^8.5.1",
     "mysql2": "^2.2.5",
-    "nodemailer": "^6.4.18"
+    "nodemailer": "^6.4.18",
+    "nodemon": "^2.0.7"
   },
-  "devDependencies": {},
   "scripts": {
     "start": "nodemon app"
   },

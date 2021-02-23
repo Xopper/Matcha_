@@ -6,18 +6,19 @@ import Account from './Pages/account';
 import Auth from './Pages/auth';
 import { useState } from 'react';
 import MyFooter from './Inc/myFooter';
+import AuthProvider from '../src/Contexts/authContext';
 
 function App() {
-	const [ displayToggle, SetDisplayToggle ] = useState(false);
+	const [displayToggle, SetDisplayToggle] = useState(false);
 	return (
 		<Router>
-			<div className="container">
+			<div className='container'>
 				<NavBar parentDisplay={displayToggle} SetDisplayToggle={SetDisplayToggle} />
 				<div className={`app ${displayToggle ? 'open' : ''}`}>
 					<Switch>
-						<Route path="/account" component={Account} />
-						<Route path="/auth" component={Auth} />
-						<Route exact path="/" component={Home} />
+						<Route path='/account' component={Account} />
+						<Route path='/auth' component={Auth} />
+						<Route exact path='/' component={Home} />
 					</Switch>
 				</div>
 			</div>
@@ -26,4 +27,12 @@ function App() {
 	);
 }
 
-export default App;
+function AppWithStore() {
+	return (
+		<AuthProvider>
+			<App />
+		</AuthProvider>
+	);
+}
+
+export default AppWithStore;

@@ -1,8 +1,9 @@
-import React, { Fragment } from 'react'; //rfc
+import React, { Fragment, useContext } from 'react'; //rfc
 import useForm from '../useForm';
 import validate from '../validateLogin';
-import axios from 'axios'
-// import MapWithAMarker from '../streetMap';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+import { AuthContexts } from '../../Contexts/authContext';
 
 function LogForm(props) {
 	// you can acces an arrow function before declared but you can acces a normal function :\
@@ -16,15 +17,30 @@ function LogForm(props) {
 	};
 
 	const { handleSubmit, handleChange, values, errors, firstHitSubmit } = useForm(submit, validate, formSchema);
+	const authContext = useContext(AuthContexts);
 
-	function submit() {
-		console.log('Form submitted');
-		// alert(JSON.stringify(values));
-		axios.post("http://localhost:5000/authLogin/validate/login", {values}).then(res =>{
-			console.log(">>Login responde", res.data)
-		}).catch(err =>{
-			console.log(err)
-		})
+	async function submit() {
+		try {
+			const { data } = await axios.post('http://localhost:5000/authLogin/validate/login', { values });
+			if (data.status === 1) {
+				Swal.fire({
+					title: 'Error!',
+					text: data.errors.userNameOrPasswordError,
+					icon: 'error',
+					confirmButtonText: 'close'
+				});
+			} else {
+				Swal.fire({
+					title: 'Cool!',
+					text: 'Save token and redirect to browse page',
+					icon: 'success',
+					confirmButtonText: 'close'
+				});
+				localStorage.setItem('token', data.authToken);
+				authContext.setAuth({ token: data.authToken });
+				console.log(data.authToken);
+			}
+		} catch (e) {}
 	}
 
 	const { username, password } = values;
@@ -43,27 +59,27 @@ function LogForm(props) {
 			<h2>Sign in.</h2>
 			<p>There Are No Limits To What You Can Accomplish, Except The Limits You Place On Your Own Thinking.</p>
 			<form onSubmit={handleSubmit} noValidate>
-				<label htmlFor="username">
+				<label htmlFor='username'>
 					Username
 					<input
 						className={handleClassName('username')}
-						name="username"
-						type="text"
-						id="username"
-						placeholder="username to connect"
+						name='username'
+						type='text'
+						id='username'
+						placeholder='username to connect'
 						value={username}
 						onChange={handleChange}
 					/>
 					<h5>{errors.username && `${errors.username}`}</h5>
 				</label>
-				<label htmlFor="Password">
+				<label htmlFor='Password'>
 					Password
 					<input
 						className={handleClassName('password')}
-						name="password"
-						type="password"
-						id="Password"
-						placeholder="at least 8 characters"
+						name='password'
+						type='password'
+						id='Password'
+						placeholder='at least 8 characters'
 						value={password}
 						onChange={handleChange}
 					/>
@@ -74,7 +90,7 @@ function LogForm(props) {
 					<span>keep me logged in</span>
 				</label> */}
 				<div>
-					<input type="submit" value="Login in" />
+					<input type='submit' value='Login in' />
 				</div>
 			</form>
 		</Fragment>
