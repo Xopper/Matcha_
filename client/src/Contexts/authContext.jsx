@@ -1,4 +1,4 @@
-import React, { useState, createContext, useEffect } from 'react';
+import React, { useState, createContext, useEffect, useContext } from 'react';
 
 export const AuthContexts = createContext();
 
@@ -7,11 +7,17 @@ function AuthProvider(props) {
 
 	useEffect(() => {
 		const token = localStorage.getItem('token');
-		if (token) {
-			setAuth({ token });
-		}
+		// TODO >> check token from backend
+		// note => i dont need spinner loader till the moment
+		console.log('comes from authContext >> ', token);
+		setAuth({ token });
 	}, []);
 	return <AuthContexts.Provider value={{ auth, setAuth }}>{props.children}</AuthContexts.Provider>;
 }
+
+export const IsLogged = () => {
+	const { auth } = useContext(AuthContexts);
+	return auth.token;
+};
 
 export default AuthProvider;

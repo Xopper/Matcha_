@@ -57,7 +57,7 @@ function RegForm() {
 			<p>You Don’t Have To Be Great To Start, But You Have To Start To Be Great.</p>
 			<form onSubmit={handleSubmit} noValidate>
 				<label htmlFor='firstName'>
-					First name
+					<strong>First name</strong>
 					<input
 						className={handleClassName('firstName')}
 						name='firstName'
@@ -126,7 +126,7 @@ function RegForm() {
 					<span>keep me logged in</span>
 				</label> */}
 				<div>
-					<input type='submit' value='Create Account' />
+					<input className='submit__btn' type='submit' value='Create Account' />
 				</div>
 			</form>
 		</Fragment>

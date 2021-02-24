@@ -1,10 +1,12 @@
 import React from 'react';
 import matcha from '../img/matcha.jpg';
-import { Switch, Route } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
 import EditInfos from '../Inc/account/editInfos';
 import EditPrefs from '../Inc/account/editPrefs';
 import EditSec from '../Inc/account/editSec';
 import StepForm from '../Inc/stepForm';
+import EditPics from '../Inc/account/editPics';
+import PrivateRoute from '../routes/privateRoute';
 
 function Account() {
 	return (
@@ -13,11 +15,12 @@ function Account() {
 				<section className='auth__first_section'>
 					<div className='auth__first'>
 						<Switch>
-							<Route exact path='/account/init' component={StepForm} />
-							<Route exact path='/account/infos' component={EditInfos} />
-							<Route exact path='/account/preferences' component={EditPrefs} />
-							<Route exact path='/account/password' component={EditSec} />
-							<Route exact path='/account' component={EditInfos} />
+							<PrivateRoute exact path='/account/init' component={StepForm} />
+							<PrivateRoute exact path='/account/infos' component={EditInfos} />
+							<PrivateRoute exact path='/account/preferences' component={EditPrefs} />
+							<PrivateRoute exact path='/account/password' component={EditSec} />
+							<PrivateRoute exact path='/account/pictures' component={EditPics} />
+							<PrivateRoute exact path='/account' component={EditInfos} />
 						</Switch>
 					</div>
 				</section>

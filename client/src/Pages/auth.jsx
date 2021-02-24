@@ -1,33 +1,34 @@
 import React from 'react';
 import matcha from '../img/matcha2.jpg';
-import { Switch, Route } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
 import LogForm from '../Inc/auth/logForm';
 import RegForm from '../Inc/auth/regFrom';
 import ForgetForm from '../Inc/auth/forgetForm';
+import ProtectedRoute from '../routes/protectedRoute';
 
 function Auth() {
 	return (
-		<div className="auth__container">
-			<div className="auth">
-				<section className="auth__first_section">
-					<div className="auth__first">
+		<div className='auth__container'>
+			<div className='auth'>
+				<section className='auth__first_section'>
+					<div className='auth__first'>
 						<Switch>
 							{/* need to add reset password page*/}
-							<Route path="/auth/forgetpass" component={ForgetForm} />
-							<Route path="/auth/register" component={RegForm} />
-							<Route path="/auth/login" component={LogForm} />
-							<Route path="/auth" component={LogForm} />
+							<ProtectedRoute path='/auth/forgetpass' component={ForgetForm} />
+							<ProtectedRoute path='/auth/register' component={RegForm} />
+							<ProtectedRoute path='/auth/login' component={LogForm} />
+							<ProtectedRoute path='/auth' component={LogForm} />
 						</Switch>
 					</div>
 				</section>
 				<section
-					className="auth__second_section"
+					className='auth__second_section'
 					style={{
 						backgroundImage: `url(${matcha})`
 					}}
 				>
-					<div className="auth__second">
-						<div className="auth__second__text">
+					<div className='auth__second'>
+						<div className='auth__second__text'>
 							<h3>Shop With Confidendce</h3>
 							<p>
 								Browse a catalog of ecommerce services by our vetted experts or submit custom requests.

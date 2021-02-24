@@ -60,7 +60,7 @@ function LogForm(props) {
 			<p>There Are No Limits To What You Can Accomplish, Except The Limits You Place On Your Own Thinking.</p>
 			<form onSubmit={handleSubmit} noValidate>
 				<label htmlFor='username'>
-					Username
+					<strong>Username</strong>
 					<input
 						className={handleClassName('username')}
 						name='username'
@@ -73,7 +73,7 @@ function LogForm(props) {
 					<h5>{errors.username && `${errors.username}`}</h5>
 				</label>
 				<label htmlFor='Password'>
-					Password
+					<strong>Password</strong>
 					<input
 						className={handleClassName('password')}
 						name='password'
@@ -90,7 +90,7 @@ function LogForm(props) {
 					<span>keep me logged in</span>
 				</label> */}
 				<div>
-					<input type='submit' value='Login in' />
+					<input className='submit__btn' type='submit' value='Login in' />
 				</div>
 			</form>
 		</Fragment>
