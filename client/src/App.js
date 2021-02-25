@@ -1,11 +1,11 @@
 import './App.css';
 import { Switch, Route, BrowserRouter as Router } from 'react-router-dom';
 import Home from './Pages/Home';
-import NavBar from './Inc/Navbar';
+import NavBar from './assets/Navbar';
 import Account from './Pages/account';
 import Auth from './Pages/auth';
 import { useState } from 'react';
-import MyFooter from './Inc/myFooter';
+import MyFooter from './assets/myFooter';
 import AuthProvider from '../src/Contexts/authContext';
 
 function App() {

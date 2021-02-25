@@ -1,6 +1,6 @@
 import React, { Fragment, useContext } from 'react'; //rfc
-import useForm from '../useForm';
-import validate from '../validateLogin';
+import useForm from '../../helpers/useForm';
+import validate from '../../validators/validateLogin';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { AuthContexts } from '../../Contexts/authContext';
@@ -60,7 +60,7 @@ function LogForm(props) {
 			<p>There Are No Limits To What You Can Accomplish, Except The Limits You Place On Your Own Thinking.</p>
 			<form onSubmit={handleSubmit} noValidate>
 				<label htmlFor='username'>
-					<strong>Username</strong>
+					<strong>Username.</strong>
 					<input
 						className={handleClassName('username')}
 						name='username'
@@ -73,7 +73,7 @@ function LogForm(props) {
 					<h5>{errors.username && `${errors.username}`}</h5>
 				</label>
 				<label htmlFor='Password'>
-					<strong>Password</strong>
+					<strong>Password.</strong>
 					<input
 						className={handleClassName('password')}
 						name='password'

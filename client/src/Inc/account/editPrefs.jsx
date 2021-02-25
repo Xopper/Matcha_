@@ -37,46 +37,49 @@ function EditPrefs(props) {
 
 	return (
 		<Fragment>
-			<h2>Be in Matcha.</h2>
-			<p>Please fill all data before start matching.</p>
+			<h2>Be in Preferences.</h2>
+			<p>When you choose your friends, don't be short-changed by choosing personality over character.</p>
 			<form onSubmit={e => handlesubmit(e)} noValidate>
 				<label className='labelSelect'>
-					Choose your gender:
+					<strong>Choose your gender.</strong>
 					<select name='gender' className='select' onChange={e => handleChange(e)}>
 						<option value='male'>Male</option>
 						<option value='female'>Female</option>
 					</select>
 				</label>
 				<label className='labelSelect'>
-					Choose your interests:
+					<strong>Choose your interests.</strong>
 					<select name='interests' className='select' onChange={e => handleChange(e)}>
 						<option value='bi'>bisexual</option>
 						<option value='male'>Male</option>
 						<option value='female'>Female</option>
 					</select>
 				</label>
-				<div className='tagsContainer'>
-					<ul>
-						{values.tags.map((tag, index) => (
-							<li key={index}>
-								<span>{tag} </span>
-								<FontAwesomeIcon
-									icon={faTimesCircle}
-									className='clickable'
-									onClick={() => delTag(index)}
-								/>
-							</li>
-						))}
-					</ul>
-					<input
-						type='text'
-						placeholder='Press enter to add tags'
-						onKeyPress={e => {
-							e.key === 'Enter' && e.preventDefault();
-							e.key === 'Enter' && addTag(e);
-						}}
-					/>
-				</div>
+				<label className='labelSelect'>
+					<strong>Tags.</strong>
+					<div className='tagsContainer'>
+						<ul>
+							{values.tags.map((tag, index) => (
+								<li key={index}>
+									<span>{tag} </span>
+									<FontAwesomeIcon
+										icon={faTimesCircle}
+										className='clickable'
+										onClick={() => delTag(index)}
+									/>
+								</li>
+							))}
+						</ul>
+						<input
+							type='text'
+							placeholder='Press enter to add tags'
+							onKeyPress={e => {
+								e.key === 'Enter' && e.preventDefault();
+								e.key === 'Enter' && addTag(e);
+							}}
+						/>
+					</div>
+				</label>
 				<div className='editPrefs__class--input'>
 					<input className='submit__btn' type='submit' value='Save changes' />
 				</div>

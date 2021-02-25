@@ -4,7 +4,7 @@ import { Switch } from 'react-router-dom';
 import EditInfos from '../Inc/account/editInfos';
 import EditPrefs from '../Inc/account/editPrefs';
 import EditSec from '../Inc/account/editSec';
-import StepForm from '../Inc/stepForm';
+import StepForm from '../Inc/account/stepForm';
 import EditPics from '../Inc/account/editPics';
 import PrivateRoute from '../routes/privateRoute';
 

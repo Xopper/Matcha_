@@ -27,6 +27,7 @@ body {
 	/* flex-direction: column; */
 	/* justify-content: center; */
 	/* align-items: center; */
+	padding: 0;
 }
 
 /* navbar */
@@ -54,11 +55,18 @@ a {
 	color: #333;
 }
 
+.navbar__siteName {
+	margin-left: 10px;
+}
+
 .navbar__list {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	margin-right: 10px;
 }
+
+
 
 .navbar__list li {
 	margin-left: 20px;
@@ -275,8 +283,8 @@ a {
 
 .auth__container {
 	min-height: 1000px;
-	margin-top: 60px;
-	margin-bottom: 60px;
+	margin-top: 42px;
+    margin-bottom: 42px;
 }
 
 .auth {
@@ -359,13 +367,15 @@ a {
 	/* height: 50px; */
 	height: 42px;
 	width: 100%;
-	font-size: 12px;
+	font-size: 13px;
 	padding-left: 10px;
 	/* My Editing */
 	border: none;
 	border-left: 1px solid #00e6cb;
 	border-radius: 15px;
 	background: #f3f3f4;
+	color: #2d2d2d;
+	margin-top: 2px;
 	/* Errors */
 	/* for border=#dd2f43, background=#ffeeee */
 	/* Sucssec, i think im gonna let it with no style*/
@@ -456,13 +466,12 @@ a {
 .auth form .select {
 	padding: 8px 30px;
 	background: #f3f3f4;
-	height: 50px;
+	height: 42px;
 	width: 100%;
 	border: none;
 	border-left: 1px solid #00e6cb;
-	/* border-right: 1px solid #00e6cb; */
-	font-size: 15px;
-	margin: 5px 0;
+	font-size: 14px;
+	margin-top: 2px;
 	border-radius: 10px;
 	color: #000000;
 	font-weight: 500;
@@ -479,7 +488,8 @@ a {
 }
 
 .auth form .labelSelect {
-	margin-bottom: 17px;
+	margin-top: 5px;
+    margin-bottom: 10px;
 }
 
 .auth form textarea {
@@ -493,7 +503,7 @@ a {
 
 .auth form .textArea {
 	padding: 8px 12px;
-	font-size: 12px;
+	font-size: 13px;
 	background: #f3f3f4;
 	width: 100%;
 	height: 70px;
@@ -502,12 +512,13 @@ a {
 	/* border-right: 1px solid #00e6cb; */
 	border-left: 1px solid #00e6cb;
 	/* margin: 10px 0; */
+	margin-top: 2px;
 }
 
 .auth form input[type="date"] {
 	height: 50px;
 	width: 100%;
-	font-size: 12px;
+	font-size: 13px;
 	padding-left: 20px;
 	padding-right: 20px;
 	border: none;
@@ -533,7 +544,8 @@ a {
 	border-radius: 20px;
 	padding: 8px 12px;
 	font-size: 14px;
-	margin: 10px 0;
+	/* margin: 10px 0; */
+	margin-top: 2px;
 }
 
 .auth form .tagsContainer ul {
@@ -555,6 +567,7 @@ a {
 }
 .auth form .tagsContainer li span {
 	margin-right: 3px;
+	font-size: 13px;
 }
 
 .auth form label .tagsContainer input {
@@ -562,7 +575,7 @@ a {
 	flex-wrap: wrap;
 	border: none;
 	height: 46px;
-	font-size: 14px;
+	font-size: 13px;
 	padding: 4px 0 0 0;
 	min-width: fit-content;
 }
@@ -616,6 +629,7 @@ a {
 	border-radius: 10px;
 	color: #242424;
 	text-align: center;
+	font-weight: bold;
 }
 
 .marker__btn:hover,
@@ -809,12 +823,12 @@ signature
 	}
 
 	.navbar_wraper div:first-of-type {
-		margin: auto 0;
+		margin: auto 0 auto 10px;
 	}
 
-	.navbar_wraper div:first-of-type h1 {
+	/* .navbar_wraper div:first-of-type h1 {
 		margin-left: 5%;
-	}
+	} */
 }
 
 /* for phones  */
@@ -957,7 +971,7 @@ signature
 	}
 
 	.navbar_wraper div:first-of-type {
-		margin: auto 0;
+		margin: auto 0 auto 10px;
 	}
 
 	.navbar_wraper div:first-of-type h1 {

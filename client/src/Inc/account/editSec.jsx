@@ -34,7 +34,7 @@ export default function EditSec() {
 			<p>Security Is Mostly A Superstition. Life Is Either A Daring Adventure Or Nothing.</p>
 			<form onSubmit={e => handlesubmit(e)} noValidate>
 				<label htmlFor='Password'>
-					Password
+					<strong>Password.</strong>
 					<input
 						className={handleClassName('password')}
 						name='oldPassword'
@@ -47,7 +47,7 @@ export default function EditSec() {
 					<h5>{errors.oldPassword && `${errors.oldPassword}`}</h5>
 				</label>
 				<label htmlFor='Password'>
-					New Password
+					<strong>New password.</strong>
 					<input
 						className={handleClassName('newPassword')}
 						name='newPassword'
@@ -60,7 +60,7 @@ export default function EditSec() {
 					<h5>{errors.newPassword && `${errors.newPassword}`}</h5>
 				</label>
 				<label htmlFor='Password'>
-					Confirm New Password
+					<strong>Confirm new password.</strong>
 					<input
 						className={handleClassName('confNewPassword')}
 						name='confNewPassword'

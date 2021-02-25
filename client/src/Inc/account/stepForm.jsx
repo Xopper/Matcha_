@@ -115,63 +115,66 @@ function StepForm(props) {
 			<p>You Don’t Have To Be Great To Start, But You Have To Start To Be Great.</p>
 			<form onSubmit={e => handlesubmit(e)} noValidate>
 				<label className='labelSelect'>
-					Choose your gender:
+					<strong>Choose your gender.</strong>
 					<select name='gender' className='select' onChange={e => handleChange(e)}>
 						<option value='male'>Male</option>
 						<option value='female'>Female</option>
 					</select>
 				</label>
 				<label className='labelSelect'>
-					Choose your interests:
+					<strong>Choose your interests.</strong>
 					<select name='interests' className='select' onChange={e => handleChange(e)}>
 						<option value='bi'>bisexual</option>
 						<option value='male'>Male</option>
 						<option value='female'>Female</option>
 					</select>
 				</label>
-				<label>
-					Biography:
+				<label className='labelSelect'>
+					<strong>Biography.</strong>
 					<textarea name='bio' className='textArea' onChange={e => handleChange(e)} />
 				</label>
-				<label>
-					Date of birth:
+				<label className='labelSelect'>
+					<strong>Date of birth.</strong>
 					<input type='date' name='birthday' onChange={e => handleChange(e)} />
 				</label>
-				<div className='tagsContainer'>
-					<ul>
-						{values.tags.map((tag, index) => (
-							<li key={index}>
-								<span>{tag} </span>
-								<FontAwesomeIcon
-									icon={faTimesCircle}
-									className='clickable'
-									onClick={() => delTag(index)}
-								/>
-							</li>
-						))}
-					</ul>
-					<input
-						type='text'
-						placeholder='Press enter to add tags'
-						onKeyPress={e => {
-							e.key === 'Enter' && e.preventDefault();
-							e.key === 'Enter' && addTag(e);
-						}}
-					/>
-				</div>
+				<label className='labelSelect'>
+					<strong>Tags.</strong>
+					<div className='tagsContainer'>
+						<ul>
+							{values.tags.map((tag, index) => (
+								<li key={index}>
+									<span>{tag} </span>
+									<FontAwesomeIcon
+										icon={faTimesCircle}
+										className='clickable'
+										onClick={() => delTag(index)}
+									/>
+								</li>
+							))}
+						</ul>
+						<input
+							type='text'
+							placeholder='Press enter to add tags'
+							onKeyPress={e => {
+								e.key === 'Enter' && e.preventDefault();
+								e.key === 'Enter' && addTag(e);
+							}}
+						/>
+					</div>
+				</label>
 				<div className='uploadPic'>
-					Profile photo :
+					<strong>Profile photo.</strong>
 					<input type='file' name='profilePic1' onChange={e => handleFileSelect(e)} />
 				</div>
 				<div className='otherPics'>
-					Other photos :
+					<strong>Other photos.</strong>
 					<input type='file' name='profilePic2' onChange={e => handleFileSelect(e)} />
 					<input type='file' name='profilePic3' onChange={e => handleFileSelect(e)} />
 					<input type='file' name='profilePic4' onChange={e => handleFileSelect(e)} />
 					<input type='file' name='profilePic' onChange={e => handleFileSelect(e)} />
 				</div>
 				<div>
-					<input className='submit__btn' type='submit' value='Login in' />
+					<input className='submit__btn' type='submit' value="Let's start!" />
 				</div>
 			</form>
 		</Fragment>

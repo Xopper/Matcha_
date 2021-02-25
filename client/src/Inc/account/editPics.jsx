@@ -48,6 +48,7 @@ export default function EditPics() {
 				return false;
 			};
 			img.src = e.target.result;
+			// todo fix it
 			setImages({ ...images, [inputName]: img.src });
 		};
 		reader.readAsDataURL(imageFile);
@@ -63,11 +64,11 @@ export default function EditPics() {
 
 	return (
 		<Fragment>
-			<h2>Be in Matcha.</h2>
-			<p>You Don’t Have To Be Great To Start, But You Have To Start To Be Great.</p>
+			<h2>Be in Pictures.</h2>
+			<p>God gave us eyes to see the beauty in nature and hearts to see the beauty in each other.</p>
 			<form onSubmit={e => handlesubmit(e)} noValidate>
 				<div className='uploadPic'>
-					Profile photo :
+					<strong>Profile photo.</strong>
 					{(avatar.avatarSrc && (
 						<div className='loaded__image'>
 							<div className='image__wrapper--btn'>
@@ -80,7 +81,7 @@ export default function EditPics() {
 					)) || <input type='file' name='avatar' onChange={e => handleFileSelect(e)} />}
 				</div>
 				<div className='otherPics'>
-					Other photos :
+					<strong>Other photos.</strong>
 					{Object.keys(images).map(
 						(img, index) =>
 							(images[img] && (

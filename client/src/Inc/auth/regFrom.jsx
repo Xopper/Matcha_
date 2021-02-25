@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react'; //rfc
-import useForm from '../useForm';
-import validate from '../validateRegister';
+import useForm from '../../helpers/useForm';
+import validate from '../../validators/validateRegister';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
@@ -57,7 +57,7 @@ function RegForm() {
 			<p>You Don’t Have To Be Great To Start, But You Have To Start To Be Great.</p>
 			<form onSubmit={handleSubmit} noValidate>
 				<label htmlFor='firstName'>
-					<strong>First name</strong>
+					<strong>First name.</strong>
 					<input
 						className={handleClassName('firstName')}
 						name='firstName'
@@ -70,7 +70,7 @@ function RegForm() {
 					<h5>{errors.firstName && `${errors.firstName}`}</h5>
 				</label>
 				<label htmlFor='lastName'>
-					Last name
+					<strong>Last name.</strong>
 					<input
 						className={handleClassName('lastName')}
 						name='lastName'
@@ -83,7 +83,7 @@ function RegForm() {
 					<h5>{errors.lastName && `${errors.lastName}`}</h5>
 				</label>
 				<label htmlFor='username'>
-					Username
+					<strong>Username.</strong>
 					<input
 						className={handleClassName('username')}
 						name='username'
@@ -96,7 +96,7 @@ function RegForm() {
 					<h5>{(errors.username && `${errors.username}`) || (errors_.username && `${errors_.username}`)}</h5>
 				</label>
 				<label htmlFor='Email'>
-					Your e-mail
+					<strong>Your e-mail.</strong>
 					<input
 						type='email'
 						className={handleClassName('email')}
@@ -109,7 +109,7 @@ function RegForm() {
 					<h5>{(errors.email && `${errors.email}`) || (errors_.email && `${errors_.email}`)}</h5>
 				</label>
 				<label htmlFor='Password'>
-					Password
+					<strong>Password.</strong>
 					<input
 						className={handleClassName('password')}
 						name='password'

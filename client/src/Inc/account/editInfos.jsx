@@ -1,5 +1,6 @@
 import React, { Fragment, useState } from 'react';
-import MapWithAMarker from '../streetMap';
+import MapWithAMarker from './extra/streetMap';
+import useForm from '../../helpers/useForm';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 
@@ -15,6 +16,7 @@ export default function EditInfos() {
 
 	const { firstName, lastName, username, email, birthDay, biography } = values;
 	const [center, setCenter] = useState({ lat: null, lng: null });
+	// const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, values);
 	const [popupIsOpen, setPopupIsOpen] = useState(false);
 	const errors = {};
 
@@ -34,7 +36,7 @@ export default function EditInfos() {
 			<p>You Are Never Too Old To Set Another Goal Or To Dream A New Dream.</p>
 			<form onSubmit={e => handlesubmit(e)} noValidate>
 				<label htmlFor='firstName'>
-					First name
+					<strong>First name.</strong>
 					<input
 						// className={handleClassName('firstName')}
 						name='firstName'
@@ -47,7 +49,7 @@ export default function EditInfos() {
 					<h5>{errors.firstName && `${errors.firstName}`}</h5>
 				</label>
 				<label htmlFor='lastName'>
-					Last name
+					<strong>Last name.</strong>
 					<input
 						// className={handleClassName('lastName')}
 						name='lastName'
@@ -60,7 +62,7 @@ export default function EditInfos() {
 					<h5>{errors.lastName && `${errors.lastName}`}</h5>
 				</label>
 				<label htmlFor='username'>
-					Username
+					<strong>Username.</strong>
 					<input
 						// className={handleClassName('username')}
 						name='username'
@@ -73,7 +75,7 @@ export default function EditInfos() {
 					<h5>{errors.username && `${errors.username}`}</h5>
 				</label>
 				<label htmlFor='Email'>
-					Your e-mail
+					<strong>Your e-mail.</strong>
 					<input
 						type='email'
 						// className={handleClassName('email')}
@@ -86,12 +88,12 @@ export default function EditInfos() {
 					<h5>{errors.email && `${errors.email}`}</h5>
 				</label>
 				<label>
-					Biography:
+					<strong>Biography.</strong>
 					<textarea name='biography' value={biography} className='textArea' onChange={e => handleChange(e)} />
 					<h5>{errors.email && `${errors.email}`}</h5>
 				</label>
 				<label>
-					Date of birth:
+					<strong>Date of birth.</strong>
 					<input type='date' value={birthDay} name='birthDay' onChange={e => handleChange(e)} />
 					<h5>{errors.email && `${errors.email}`}</h5>
 				</label>

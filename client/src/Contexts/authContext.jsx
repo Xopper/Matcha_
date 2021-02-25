@@ -9,6 +9,7 @@ function AuthProvider(props) {
 		const token = localStorage.getItem('token');
 		// TODO >> check token from backend
 		// note => i dont need spinner loader till the moment
+		// if the check from the backend takes time then i need to add a spinner
 		console.log('comes from authContext >> ', token);
 		setAuth({ token });
 	}, []);
