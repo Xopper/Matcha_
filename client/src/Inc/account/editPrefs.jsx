@@ -1,6 +1,7 @@
 import React, { Fragment, useState } from 'react'; //rfc
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+import validate from '../../validators/validatePrefs';
 
 function EditPrefs(props) {
 	const [values, setValues] = useState({
@@ -9,14 +10,28 @@ function EditPrefs(props) {
 		tags: ['tach', 'haw', 'TOTO']
 	});
 
+	const [errors, setErrors] = useState({});
+
 	function handlesubmit(e) {
 		e.preventDefault();
-		console.log(values);
+		const newErrors = validate(values);
+		setErrors(validate(values));
+		if (!Object.keys(newErrors).length) {
+			console.log('ooooh! there is no errors :)');
+		} else {
+			console.log('Daaaamn :(');
+		}
 	}
 
 	function addTag(e) {
+		e.preventDefault();
 		const { value: tag } = e.target;
-		if (tag.trim() !== '' && tag.trim().length <= 20) {
+		if (
+			tag.trim() !== '' &&
+			tag.trim().length <= 20 &&
+			!values.tags.includes(tag.trim()) &&
+			values.tags.length <= 4
+		) {
 			e.target.value = '';
 			const oldTags = [...values.tags];
 			setValues({ ...values, tags: [...oldTags, tag] });
@@ -70,15 +85,18 @@ function EditPrefs(props) {
 								</li>
 							))}
 						</ul>
-						<input
-							type='text'
-							placeholder='Press enter to add tags'
-							onKeyPress={e => {
-								e.key === 'Enter' && e.preventDefault();
-								e.key === 'Enter' && addTag(e);
-							}}
-						/>
+						{values.tags.length <= 4 && (
+							<input
+								type='text'
+								placeholder='Press enter to add tags'
+								onKeyPress={e => {
+									e.key === 'Enter' && e.preventDefault();
+									e.key === 'Enter' && addTag(e);
+								}}
+							/>
+						)}
 					</div>
+					<h5>{errors.tags && `${errors.tags}`}</h5>
 				</label>
 				<div className='editPrefs__class--input'>
 					<input className='submit__btn' type='submit' value='Save changes' />

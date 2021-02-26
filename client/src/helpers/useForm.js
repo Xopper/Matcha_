@@ -5,10 +5,6 @@ function useForm(callback, validate, formSchema) {
 	const [errors, setErrors] = useState({});
 
 	const handleChange = e => {
-		if (e.target.key) {
-			console.log('tach tach');
-			console.log(e.target.key);
-		}
 		const { name, value } = e.target;
 		setValues({
 			...values,

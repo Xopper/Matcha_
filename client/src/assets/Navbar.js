@@ -51,7 +51,7 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 											icon={faBell}
 											className='clickable'
 											size='lg'
-											style={{ color: '#fff' }}
+											style={{ color: '#f3f3f4', width: 20, height: 20 }}
 										/>
 									</div>
 								</li>
@@ -61,7 +61,7 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 											icon={faCog}
 											size='lg'
 											className='clickable'
-											style={{ color: '#fff' }}
+											style={{ color: '#f3f3f4', width: 20, height: 20 }}
 										/>
 									</div>
 								</li>
@@ -71,7 +71,7 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 											icon={faSignOutAlt}
 											size='lg'
 											className='clickable'
-											style={{ color: '#fff' }}
+											style={{ color: '#f3f3f4', width: 20, height: 20 }}
 										/>
 									</div>
 								</li>

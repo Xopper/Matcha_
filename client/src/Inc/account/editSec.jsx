@@ -1,4 +1,5 @@
 import React, { Fragment, useState } from 'react';
+import validate from '../../validators/validateEditSec';
 
 export default function EditSec() {
 	const [values, setValues] = useState({
@@ -9,11 +10,17 @@ export default function EditSec() {
 
 	const { oldPassword, newPassword, confNewPassword } = values;
 
-	const errors = {};
+	const [errors, setErrors] = useState({});
 
 	function handlesubmit(e) {
 		e.preventDefault();
-		console.log(values);
+		const newErrors = validate(values);
+		setErrors(validate(values));
+		if (Object.keys(newErrors).length === 0) {
+			console.log('goood');
+		} else {
+			console.log(':(');
+		}
 	}
 
 	function handleChange(e) {
@@ -36,11 +43,11 @@ export default function EditSec() {
 				<label htmlFor='Password'>
 					<strong>Password.</strong>
 					<input
-						className={handleClassName('password')}
+						className={handleClassName('oldPassword')}
 						name='oldPassword'
 						type='password'
 						id='oldPassword'
-						placeholder='at least 8 characters'
+						placeholder='Insert current password'
 						value={oldPassword}
 						onChange={handleChange}
 					/>

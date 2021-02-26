@@ -49,7 +49,13 @@ export default function EditPics() {
 			};
 			img.src = e.target.result;
 			// todo fix it
-			setImages({ ...images, [inputName]: img.src });
+			console.log(inputName);
+			console.log(img.src);
+			if (inputName === 'avatar') {
+				setAvatar({ avatarSrc: img.src });
+			} else if (inputName !== 'avatar') {
+				setImages({ ...images, [inputName]: img.src });
+			}
 		};
 		reader.readAsDataURL(imageFile);
 	}
