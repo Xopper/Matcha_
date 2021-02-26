@@ -3,7 +3,10 @@ import * as pubIP from 'public-ip';
 import * as ipLocation from 'iplocation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+import validate from '../../validators/validateSteps';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 
 function StepForm(props) {
 	const [values, setValues] = useState({
@@ -23,6 +26,8 @@ function StepForm(props) {
 		latitude: null,
 		longitude: null
 	});
+
+	const MySwal = withReactContent(Swal);
 
 	const showPosition = useCallback(pos => {
 		const { latitude, longitude } = pos.coords;
@@ -50,19 +55,48 @@ function StepForm(props) {
 		e.preventDefault();
 		console.log('stepForm submited');
 		console.log({ ...location, ...values });
-		axios
-			.post('http://localhost:5000/stepForm/stepFormValidator', { ...location, ...values })
-			.then(res => {
-				console.log(res.data);
-			})
-			.catch(err => {
-				console.log(err);
+		const errors = validate(values);
+		console.log(Object.keys(errors).length);
+		if (Object.keys(errors).length !== 0) {
+			const errorsContent = (
+				<ul className='popErrors'>
+					{Object.keys(errors).map((err, i) => (
+						<li key={i}>{errors[err]}</li>
+					))}
+				</ul>
+			);
+			MySwal.fire({
+				html: errorsContent,
+				icon: 'error',
+				confirmButtonText: 'close'
 			});
+		} else {
+			axios
+				.post('http://localhost:5000/stepForm/stepFormValidator', { ...location, ...values })
+				.then(res => {
+					// console.log(res.data);
+					const { status } = res.data;
+					if (status !== 0) {
+						// print the error
+						console.log(res.data);
+					}
+				})
+				.catch(err => {
+					console.log(err);
+				});
+		}
 	}
 
 	function addTag(e) {
+		e.preventDefault();
 		const { value: tag } = e.target;
-		if (tag.trim() !== '' && tag.trim().length <= 20) {
+		// console.log(values.tags.length);
+		if (
+			tag.trim() !== '' &&
+			tag.trim().length <= 20 &&
+			!values.tags.includes(tag.trim()) &&
+			values.tags.length <= 4
+		) {
 			e.target.value = '';
 			const oldTags = [...values.tags];
 			setValues({ ...values, tags: [...oldTags, tag] });
@@ -152,14 +186,16 @@ function StepForm(props) {
 								</li>
 							))}
 						</ul>
-						<input
-							type='text'
-							placeholder='Press enter to add tags'
-							onKeyPress={e => {
-								e.key === 'Enter' && e.preventDefault();
-								e.key === 'Enter' && addTag(e);
-							}}
-						/>
+						{values.tags.length <= 4 && (
+							<input
+								type='text'
+								placeholder='Press enter to add tags'
+								onKeyPress={e => {
+									e.key === 'Enter' && e.preventDefault();
+									e.key === 'Enter' && addTag(e);
+								}}
+							/>
+						)}
 					</div>
 				</label>
 				<div className='uploadPic'>

@@ -23,9 +23,7 @@ function RegForm() {
 
 	async function submit() {
 		try {
-			const res = await axios.post('http://localhost:5000/auth/validate/register', { values });
-			const { data } = res;
-			console.log(res);
+			const { data } = await axios.post('http://localhost:5000/auth/validate/register', { values });
 			if (data.status === 1) {
 				const { email, username } = data.errors;
 				setErrors_({ email, username });

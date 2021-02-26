@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContexts } from '../Contexts/authContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell, faCog } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faCog, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 
 function NavBar({ parentDisplay, SetDisplayToggle }) {
 	const [toggleClass, setToggleClass] = useState(false);
@@ -46,20 +46,34 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 						(auth.token && (
 							<>
 								<li>
-									<FontAwesomeIcon
-										icon={faBell}
-										className='clickable'
-										size='lg'
-										style={{ color: '#00e6cb' }}
-									/>
+									<div className='nav__icons'>
+										<FontAwesomeIcon
+											icon={faBell}
+											className='clickable'
+											size='lg'
+											style={{ color: '#fff' }}
+										/>
+									</div>
 								</li>
 								<li>
-									<FontAwesomeIcon
-										icon={faCog}
-										size='lg'
-										className='clickable'
-										style={{ color: '#00e6cb', marginRight: 5 }}
-									/>
+									<div className='nav__icons'>
+										<FontAwesomeIcon
+											icon={faCog}
+											size='lg'
+											className='clickable'
+											style={{ color: '#fff' }}
+										/>
+									</div>
+								</li>
+								<li>
+									<div className='nav__icons'>
+										<FontAwesomeIcon
+											icon={faSignOutAlt}
+											size='lg'
+											className='clickable'
+											style={{ color: '#fff' }}
+										/>
+									</div>
 								</li>
 							</>
 						))}

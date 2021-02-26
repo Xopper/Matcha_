@@ -1,76 +1,95 @@
 import React, { Fragment, useState } from 'react';
 import MapWithAMarker from './extra/streetMap';
 import useForm from '../../helpers/useForm';
+import validate from '../../validators/validateEdit';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 
 export default function EditInfos() {
-	const [values, setValues] = useState({
+	const formSchema = {
 		firstName: 'tach',
 		lastName: 'de Bled',
 		username: 'heus',
 		email: 'only@fans.com',
 		birthDay: '2020-02-14',
 		biography: 'allo M. constateur'
-	});
+	};
 
+	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema);
 	const { firstName, lastName, username, email, birthDay, biography } = values;
 	const [center, setCenter] = useState({ lat: null, lng: null });
-	// const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, values);
 	const [popupIsOpen, setPopupIsOpen] = useState(false);
-	const errors = {};
+	// const errors = {};
 
-	function handlesubmit(e) {
-		e.preventDefault();
+	// function handlesubmit(e) {
+	// 	e.preventDefault();
+	// 	console.log(values);
+	// }
+
+	// function handleChange(e) {
+	// 	const { name, value } = e.target;
+	// 	setValues({ ...values, [name]: value });
+	// }
+	function submit() {
 		console.log(values);
 	}
+	function handleKey(e) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+		}
+	}
 
-	function handleChange(e) {
-		const { name, value } = e.target;
-		setValues({ ...values, [name]: value });
+	function handleClassName(field, classList = null) {
+		if (errors[field]) {
+			return classList ? classList + ' danger' : 'danger';
+		}
+		return classList ? classList : '';
 	}
 
 	return (
 		<Fragment>
 			<h2>Be in Matcha.</h2>
 			<p>You Are Never Too Old To Set Another Goal Or To Dream A New Dream.</p>
-			<form onSubmit={e => handlesubmit(e)} noValidate>
+			<form onSubmit={handleSubmit} noValidate>
 				<label htmlFor='firstName'>
 					<strong>First name.</strong>
 					<input
-						// className={handleClassName('firstName')}
+						className={handleClassName('firstName')}
 						name='firstName'
 						type='text'
 						id='firstName'
 						placeholder='enter you first name'
 						value={firstName}
-						onChange={e => handleChange(e)}
+						onChange={handleChange}
+						onKeyDown={e => handleKey(e)}
 					/>
 					<h5>{errors.firstName && `${errors.firstName}`}</h5>
 				</label>
 				<label htmlFor='lastName'>
 					<strong>Last name.</strong>
 					<input
-						// className={handleClassName('lastName')}
+						className={handleClassName('lastName')}
 						name='lastName'
 						type='text'
 						id='lastName'
 						placeholder='please enter your last name'
 						value={lastName}
-						onChange={e => handleChange(e)}
+						onChange={handleChange}
+						onKeyDown={e => handleKey(e)}
 					/>
 					<h5>{errors.lastName && `${errors.lastName}`}</h5>
 				</label>
 				<label htmlFor='username'>
 					<strong>Username.</strong>
 					<input
-						// className={handleClassName('username')}
+						className={handleClassName('username')}
 						name='username'
 						type='text'
 						id='username'
 						placeholder='username to connect'
 						value={username}
-						onChange={e => handleChange(e)}
+						onChange={handleChange}
+						onKeyDown={e => handleKey(e)}
 					/>
 					<h5>{errors.username && `${errors.username}`}</h5>
 				</label>
@@ -78,28 +97,39 @@ export default function EditInfos() {
 					<strong>Your e-mail.</strong>
 					<input
 						type='email'
-						// className={handleClassName('email')}
+						className={handleClassName('email')}
 						id='Email'
 						name='email'
 						placeholder='name@e-mail.com'
 						value={email}
-						onChange={e => handleChange(e)}
+						onChange={handleChange}
+						onKeyDown={e => handleKey(e)}
 					/>
 					<h5>{errors.email && `${errors.email}`}</h5>
 				</label>
 				<label>
 					<strong>Biography.</strong>
-					<textarea name='biography' value={biography} className='textArea' onChange={e => handleChange(e)} />
-					<h5>{errors.email && `${errors.email}`}</h5>
+					<textarea
+						name='biography'
+						value={biography}
+						className={handleClassName('biography', 'textArea')}
+						onChange={handleChange}
+						onKeyDown={e => handleKey(e)}
+					/>
+					<h5>{errors.biography && `${errors.biography}`}</h5>
 				</label>
 				<label>
 					<strong>Date of birth.</strong>
-					<input type='date' value={birthDay} name='birthDay' onChange={e => handleChange(e)} />
-					<h5>{errors.email && `${errors.email}`}</h5>
+					<input
+						type='date'
+						value={birthDay}
+						name='birthDay'
+						className={handleClassName('birthDay')}
+						onChange={handleChange}
+						onKeyDown={e => handleKey(e)}
+					/>
+					<h5>{errors.birthDay && `${errors.birthDay}`}</h5>
 				</label>
-				{/* <div>
-					{center.lat} {center.lng}
-				</div> */}
 				<div className='marker__wrapper '>
 					<button
 						className='marker__btn clickable'
