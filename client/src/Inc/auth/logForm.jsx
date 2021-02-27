@@ -44,12 +44,6 @@ function LogForm(props) {
 						toast.addEventListener('mouseleave', Swal.resumeTimer);
 					}
 				});
-				// Swal.fire({
-				// 	title: 'Cool!',
-				// 	text: 'Save token and redirect to browse page',
-				// 	icon: 'success',
-				// 	confirmButtonText: 'close'
-				// });
 				localStorage.setItem('token', data.authToken);
 				authContext.setAuth({ token: data.authToken });
 				console.log(data.authToken);

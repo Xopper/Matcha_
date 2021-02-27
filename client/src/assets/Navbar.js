@@ -6,10 +6,53 @@ import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { ReactComponent as BellIcon } from '../icons/bell.svg';
 import { ReactComponent as CogIcon } from '../icons/cog.svg';
 import { ReactComponent as MessengerIcon } from '../icons/messenger.svg';
-// import { ReactComponent as BellIcon } from '../icons/bell.svg';
+// import { ReactComponent as CaretIcon } from '../icons/caret.svg';
+import { ReactComponent as BoltIcon } from '../icons/bolt.svg';
+import { ReactComponent as PlusIcon } from '../icons/plus.svg';
+import { ReactComponent as InfosIcon } from '../icons/infos.svg';
+
+function NavItem({ handleClick, icon, open, children, notifCount }) {
+	return (
+		<li style={{ position: 'relative' }}>
+			<div className='nav__icons clickable' onClick={handleClick}>
+				{icon}
+			</div>
+			{notifCount && <span className='notif__cercl'>{notifCount}</span>}
+			{open && children}
+		</li>
+	);
+}
+
+function DropDownMenu(props) {
+	function DropDownItem(props) {
+		return (
+			<div className='menu-item'>
+				<span className='sub__nav__icons'>{props.leftIcon}</span>
+				{props.children}
+			</div>
+		);
+	}
+	return (
+		<div className='drop-down'>
+			<Link to='/account' onClick={props.handleClick}>
+				<DropDownItem leftIcon={<InfosIcon className='sub_icon_btn' />}>Edit Infos</DropDownItem>
+			</Link>
+			<Link to='/account/preferences' onClick={props.handleClick}>
+				<DropDownItem leftIcon={<CogIcon className='sub_icon_btn' />}>Edit Preferences</DropDownItem>
+			</Link>
+			<Link to='/account/password' onClick={props.handleClick}>
+				<DropDownItem leftIcon={<BoltIcon className='sub_icon_btn' />}>Edit Password</DropDownItem>
+			</Link>
+			<Link to='/account/pictures' onClick={props.handleClick}>
+				<DropDownItem leftIcon={<PlusIcon className='sub_icon_btn' />}>Edit Photos</DropDownItem>
+			</Link>
+		</div>
+	);
+}
 
 function NavBar({ parentDisplay, SetDisplayToggle }) {
 	const [toggleClass, setToggleClass] = useState(false);
+	const [open, setOpen] = useState(false);
 	const handleClick = () => {
 		setToggleClass(toggleClass => !toggleClass);
 		SetDisplayToggle(parentDisplay => !parentDisplay);
@@ -49,17 +92,27 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 					)) ||
 						(auth.token && (
 							<>
-								<li style={{ position: 'relative' }}>
-									<div className='nav__icons'>
-										<MessengerIcon
+								<NavItem icon={<MessengerIcon className='icon_btn' />} notifCount='2' />
+								<NavItem icon={<BellIcon className='icon_btn' />} notifCount='9+' />
+								<NavItem
+									open={open}
+									handleClick={() => setOpen(!open)}
+									icon={<CogIcon className='icon_btn' />}
+								>
+									<DropDownMenu handleClick={() => setOpen(!open)} />
+								</NavItem>
+								<NavItem
+									icon={
+										<FontAwesomeIcon
+											icon={faSignOutAlt}
+											size='lg'
 											className='clickable'
-											style={{ fill: 'aquamarine', width: 20, height: 20 }}
+											style={{ color: 'aquamarine', width: 20, height: 20 }}
 										/>
-									</div>
-									<span className='notif__cercl'>1</span>
-								</li>
-								<li style={{ position: 'relative' }}>
-									<div className='nav__icons'>
+									}
+								/>
+								{/* <li style={{ position: 'relative' }}>
+									<div className='nav__icons clickable'>
 										<BellIcon
 											className='clickable'
 											style={{ fill: 'aquamarine', width: 20, height: 20 }}
@@ -68,7 +121,7 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 									<span className='notif__cercl'>9+</span>
 								</li>
 								<li style={{ position: 'relative' }}>
-									<div className='nav__icons'>
+									<div className='nav__icons clickable'>
 										<CogIcon
 											className='clickable'
 											style={{ fill: 'aquamarine', width: 20, height: 20 }}
@@ -76,7 +129,7 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 									</div>
 								</li>
 								<li style={{ position: 'relative' }}>
-									<div className='nav__icons'>
+									<div className='nav__icons clickable'>
 										<FontAwesomeIcon
 											icon={faSignOutAlt}
 											size='lg'
@@ -84,7 +137,7 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 											style={{ color: 'aquamarine', width: 20, height: 20 }}
 										/>
 									</div>
-								</li>
+								</li> */}
 							</>
 						))}
 				</ul>
