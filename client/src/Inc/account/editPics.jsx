@@ -20,7 +20,7 @@ export default function EditPics() {
 	});
 
 	function handlesubmit(e) {
-		// TODO [check if the avatar isn't NULL]
+		// TODO check if avatar isn't null
 		e.preventDefault();
 		console.log({ ...avatar, ...images });
 	}
@@ -48,12 +48,12 @@ export default function EditPics() {
 				return false;
 			};
 			img.src = e.target.result;
-			// todo fix it
-			console.log(inputName);
-			console.log(img.src);
+			// todo fix it [done]
+			// console.log(inputName);
+			// console.log(img.src);
 			if (inputName === 'avatar') {
 				setAvatar({ avatarSrc: img.src });
-			} else if (inputName !== 'avatar') {
+			} else {
 				setImages({ ...images, [inputName]: img.src });
 			}
 		};

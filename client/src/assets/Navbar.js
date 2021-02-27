@@ -2,7 +2,11 @@ import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContexts } from '../Contexts/authContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell, faCog, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { ReactComponent as BellIcon } from '../icons/bell.svg';
+import { ReactComponent as CogIcon } from '../icons/cog.svg';
+import { ReactComponent as MessengerIcon } from '../icons/messenger.svg';
+// import { ReactComponent as BellIcon } from '../icons/bell.svg';
 
 function NavBar({ parentDisplay, SetDisplayToggle }) {
 	const [toggleClass, setToggleClass] = useState(false);
@@ -45,33 +49,39 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 					)) ||
 						(auth.token && (
 							<>
-								<li>
+								<li style={{ position: 'relative' }}>
 									<div className='nav__icons'>
-										<FontAwesomeIcon
-											icon={faBell}
+										<MessengerIcon
 											className='clickable'
-											size='lg'
-											style={{ color: '#f3f3f4', width: 20, height: 20 }}
+											style={{ fill: 'aquamarine', width: 20, height: 20 }}
+										/>
+									</div>
+									<span className='notif__cercl'>1</span>
+								</li>
+								<li style={{ position: 'relative' }}>
+									<div className='nav__icons'>
+										<BellIcon
+											className='clickable'
+											style={{ fill: 'aquamarine', width: 20, height: 20 }}
+										/>
+									</div>
+									<span className='notif__cercl'>9+</span>
+								</li>
+								<li style={{ position: 'relative' }}>
+									<div className='nav__icons'>
+										<CogIcon
+											className='clickable'
+											style={{ fill: 'aquamarine', width: 20, height: 20 }}
 										/>
 									</div>
 								</li>
-								<li>
-									<div className='nav__icons'>
-										<FontAwesomeIcon
-											icon={faCog}
-											size='lg'
-											className='clickable'
-											style={{ color: '#f3f3f4', width: 20, height: 20 }}
-										/>
-									</div>
-								</li>
-								<li>
+								<li style={{ position: 'relative' }}>
 									<div className='nav__icons'>
 										<FontAwesomeIcon
 											icon={faSignOutAlt}
 											size='lg'
 											className='clickable'
-											style={{ color: '#f3f3f4', width: 20, height: 20 }}
+											style={{ color: 'aquamarine', width: 20, height: 20 }}
 										/>
 									</div>
 								</li>

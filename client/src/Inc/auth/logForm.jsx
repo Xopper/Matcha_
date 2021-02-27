@@ -31,11 +31,25 @@ function LogForm(props) {
 				});
 			} else {
 				Swal.fire({
-					title: 'Cool!',
-					text: 'Save token and redirect to browse page',
+					toast: true,
 					icon: 'success',
-					confirmButtonText: 'close'
+					title: 'Signed in Successfully',
+					animation: true,
+					position: 'top-right',
+					showConfirmButton: false,
+					timer: 3000,
+					timerProgressBar: true,
+					didOpen: toast => {
+						toast.addEventListener('mouseenter', Swal.stopTimer);
+						toast.addEventListener('mouseleave', Swal.resumeTimer);
+					}
 				});
+				// Swal.fire({
+				// 	title: 'Cool!',
+				// 	text: 'Save token and redirect to browse page',
+				// 	icon: 'success',
+				// 	confirmButtonText: 'close'
+				// });
 				localStorage.setItem('token', data.authToken);
 				authContext.setAuth({ token: data.authToken });
 				console.log(data.authToken);
