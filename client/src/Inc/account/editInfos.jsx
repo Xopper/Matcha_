@@ -17,7 +17,9 @@ export default function EditInfos() {
 
 	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema);
 	const { firstName, lastName, username, email, birthDay, biography } = values;
+	// get it from db :)
 	const [center, setCenter] = useState({ lat: null, lng: null });
+
 	const [popupIsOpen, setPopupIsOpen] = useState(false);
 	// const errors = {};
 
@@ -30,8 +32,9 @@ export default function EditInfos() {
 	// 	const { name, value } = e.target;
 	// 	setValues({ ...values, [name]: value });
 	// }
+
 	function submit() {
-		console.log(values);
+		console.log({ ...values, ...center });
 	}
 	function handleKey(e) {
 		if (e.key === 'Enter') {
@@ -150,6 +153,7 @@ export default function EditInfos() {
 								containerElement={<div style={{ height: `400px` }} />}
 								mapElement={<div style={{ height: `100%` }} />}
 								onClick={e => {
+									// edit country
 									setCenter({ lat: e.latLng.lat(), lng: e.latLng.lng() });
 								}}
 								center={center}

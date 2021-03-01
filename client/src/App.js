@@ -2,6 +2,7 @@ import './App.css';
 import { Switch, Route, BrowserRouter as Router } from 'react-router-dom';
 import Home from './Pages/Home';
 import NavBar from './assets/Navbar';
+import Init from './Pages/init';
 import Account from './Pages/account';
 import Auth from './Pages/auth';
 import { useState } from 'react';
@@ -16,6 +17,7 @@ function App() {
 				<NavBar parentDisplay={displayToggle} SetDisplayToggle={SetDisplayToggle} />
 				<div className={`app ${displayToggle ? 'open' : ''}`}>
 					<Switch>
+						<Route path='/init' component={Init} />
 						<Route path='/account' component={Account} />
 						<Route path='/auth' component={Auth} />
 						<Route exact path='/' component={Home} />

@@ -21,11 +21,13 @@ function LogForm(props) {
 
 	async function submit() {
 		try {
-			const { data } = await axios.post('http://localhost:5000/authLogin/validate/login', { values });
-			if (data.status === 1) {
+			const {
+				data: { status, authToken, dataProfileIsComplited, errors }
+			} = await axios.post('http://localhost:5000/authLogin/validate/login', { values });
+			if (status === 1) {
 				Swal.fire({
 					title: 'Error!',
-					text: data.errors.userNameOrPasswordError,
+					text: errors.userNameOrPasswordError,
 					icon: 'error',
 					confirmButtonText: 'close'
 				});
@@ -44,9 +46,10 @@ function LogForm(props) {
 						toast.addEventListener('mouseleave', Swal.resumeTimer);
 					}
 				});
-				localStorage.setItem('token', data.authToken);
-				authContext.setAuth({ token: data.authToken });
-				console.log(data.authToken);
+				localStorage.setItem('token', authToken);
+				localStorage.setItem('isCompleted', dataProfileIsComplited);
+				authContext.setAuth({ token: authToken, isCompleted: dataProfileIsComplited });
+				console.log('this is it:: ', authToken);
 			}
 		} catch (e) {}
 	}

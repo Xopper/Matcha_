@@ -4,7 +4,6 @@ import { Switch } from 'react-router-dom';
 import EditInfos from '../Inc/account/editInfos';
 import EditPrefs from '../Inc/account/editPrefs';
 import EditSec from '../Inc/account/editSec';
-import StepForm from '../Inc/account/stepForm';
 import EditPics from '../Inc/account/editPics';
 import PrivateRoute from '../routes/privateRoute';
 
@@ -15,7 +14,6 @@ function Account() {
 				<section className='auth__first_section'>
 					<div className='auth__first'>
 						<Switch>
-							<PrivateRoute exact path='/account/init' component={StepForm} />
 							<PrivateRoute exact path='/account/infos' component={EditInfos} />
 							<PrivateRoute exact path='/account/preferences' component={EditPrefs} />
 							<PrivateRoute exact path='/account/password' component={EditSec} />

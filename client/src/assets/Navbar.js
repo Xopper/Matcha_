@@ -58,7 +58,7 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 		SetDisplayToggle(parentDisplay => !parentDisplay);
 	};
 
-	const { auth } = useContext(AuthContexts);
+	const { auth, setAuth } = useContext(AuthContexts);
 
 	return (
 		<nav className='navbar_wraper'>
@@ -107,37 +107,14 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 											icon={faSignOutAlt}
 											size='lg'
 											className='clickable'
+											onClick={() => {
+												localStorage.clear();
+												setAuth({ token: null });
+											}}
 											style={{ color: 'aquamarine', width: 20, height: 20 }}
 										/>
 									}
 								/>
-								{/* <li style={{ position: 'relative' }}>
-									<div className='nav__icons clickable'>
-										<BellIcon
-											className='clickable'
-											style={{ fill: 'aquamarine', width: 20, height: 20 }}
-										/>
-									</div>
-									<span className='notif__cercl'>9+</span>
-								</li>
-								<li style={{ position: 'relative' }}>
-									<div className='nav__icons clickable'>
-										<CogIcon
-											className='clickable'
-											style={{ fill: 'aquamarine', width: 20, height: 20 }}
-										/>
-									</div>
-								</li>
-								<li style={{ position: 'relative' }}>
-									<div className='nav__icons clickable'>
-										<FontAwesomeIcon
-											icon={faSignOutAlt}
-											size='lg'
-											className='clickable'
-											style={{ color: 'aquamarine', width: 20, height: 20 }}
-										/>
-									</div>
-								</li> */}
 							</>
 						))}
 				</ul>

@@ -17,6 +17,7 @@ function useForm(callback, validate, formSchema) {
 		const newErrors = validate(values);
 		setErrors(newErrors);
 		if (Object.keys(newErrors).length === 0) {
+			// setValues({});
 			callback();
 		}
 	};

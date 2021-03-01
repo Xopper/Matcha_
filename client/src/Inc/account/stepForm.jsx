@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react'; //rfc
+import React, { Fragment, useState, useEffect, useCallback, useContext } from 'react'; //rfc
 import * as pubIP from 'public-ip';
 import * as ipLocation from 'iplocation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,6 +7,7 @@ import validate from '../../validators/validateSteps';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { AuthContexts } from '../../Contexts/authContext';
 
 function StepForm(props) {
 	const [values, setValues] = useState({
@@ -26,6 +27,8 @@ function StepForm(props) {
 		latitude: null,
 		longitude: null
 	});
+
+	const { auth } = useContext(AuthContexts);
 
 	const MySwal = withReactContent(Swal);
 
@@ -53,7 +56,6 @@ function StepForm(props) {
 
 	function handlesubmit(e) {
 		e.preventDefault();
-		console.log('stepForm submited');
 		console.log({ ...location, ...values });
 		const errors = validate(values);
 		console.log(Object.keys(errors).length);
@@ -71,10 +73,14 @@ function StepForm(props) {
 				confirmButtonText: 'close'
 			});
 		} else {
-			axios
+			const { token } = auth;
+			const instance = axios.create({
+				headers: { Authorization: `Bearer ${token}` }
+			});
+
+			instance
 				.post('http://localhost:5000/stepForm/stepFormValidator', { ...location, ...values })
 				.then(res => {
-					// console.log(res.data);
 					const { status } = res.data;
 					if (status !== 0) {
 						// print the error
