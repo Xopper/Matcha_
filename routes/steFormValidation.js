@@ -176,31 +176,77 @@ const stepFormValidator = (req, res, next) => {
 	console.log('errors 2: ', errors);
 	if (!isEmpty(errors)) req.errors = errors;
 	else req.values = trimedValues;
+	console.log('tach');
 	next();
 };
 
 // authentication token validation
 const authToken = (req, res, next) => {
-	const authHeader = req.headers['Authorization'];
-	const token = authHeader && authHeader.spit(' ')[1];
-	console.log('authHeader', authHeader);
-	console.log('token', token);
-	if (token === null) return res.sendStatus(401);
+	// const authHeader = req.headers['Authorization'];
+	// const token = authHeader && authHeader.spit(' ')[1];
+	// console.log('authHeader', authHeader);
+	// console.log('token', token);
+	// if (token === null) return res.sendStatus(401);
 
-	jwt.verify(token, 'thesecretshit', (err, user) => {
-		if (err) return res.sendStatus(403);
-		req.user = user;
-	});
+	// jwt.verify(token, 'thesecretshit', (err, user) => {
+	// 	if (err) return res.sendStatus(403);
+	// 	req.user = user;
+	// });
+	// console.log('headers: ', req.headers);
+	// console.log(req.headers.authorization);
+	// console.log('==================================================');
+	// console.log(req.headers.authorization.split(' ')[1]);
+
+	// jwt;
+	if (req.headers.authorization) {
+		const authKey = req.headers.authorization.split(' ')[1];
+		console.log('>>', authKey);
+		if (authKey) {
+			const authKey = req.headers.authorization.split(' ')[1];
+			jwt.verify(authKey, 'boul3al7ayat7obilanamnghirakma3ichach7obi00', (err, user) => {
+				if (err) return res.sendStatus(403);
+				req.userNameConnected = user.userName;
+			});
+		}
+	}
 	next();
 };
 
-const registerStepFormData = async values => {
-	console.log(values);
+function getUserId(userName) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute('SELECT `id` FROM `users` WHERE `user_name` = ?', [userName], (err, result) => {
+				if (err) reject(err);
+				else {
+					const queryResult = result[0].id;
+					connection.release();
+					resolve(queryResult);
+				}
+			});
+		});
+	});
+}
+
+function completeData(userName, values) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			// connection.execute('INSERT INTO `users` ())
+		});
+	});
+}
+
+const registerStepFormData = async (userName, values) => {
+	// get usr id
+	const userId = await getUserId(userName);
+
+	// register data
+
+	// register tags
 };
 
-router.post('/stepFormValidator', stepFormValidator, (req, res) => {
-	console.log('auth');
-	// console.log('headers: ', req.headers);
+router.post('/stepFormValidator', authToken, stepFormValidator, (req, res) => {
 	const backEndRespond = {};
 	// console.log("inside the post : ", req.errors);
 	if (!isEmpty(req.errors) || req.errors !== undefined) {
@@ -208,7 +254,8 @@ router.post('/stepFormValidator', stepFormValidator, (req, res) => {
 		backEndRespond.status = 1;
 	} else {
 		backEndRespond.status = 0;
-		registerStepFormData(req.values);
+		console.log(req.userNameConnected);
+		registerStepFormData(req.userNameConnected, req.values);
 	}
 	res.send(backEndRespond);
 });

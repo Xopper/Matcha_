@@ -49,7 +49,7 @@ function LogForm(props) {
 				localStorage.setItem('token', authToken);
 				localStorage.setItem('isCompleted', dataProfileIsComplited);
 				authContext.setAuth({ token: authToken, isCompleted: dataProfileIsComplited });
-				console.log('this is it:: ', authToken);
+				// console.log('this is it:: ', authToken);
 			}
 		} catch (e) {}
 	}

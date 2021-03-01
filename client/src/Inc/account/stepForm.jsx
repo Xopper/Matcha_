@@ -82,6 +82,8 @@ function StepForm(props) {
 				.post('http://localhost:5000/stepForm/stepFormValidator', { ...location, ...values })
 				.then(res => {
 					const { status } = res.data;
+					console.log('step form data');
+					console.log(res.data);
 					if (status !== 0) {
 						// print the error
 						console.log(res.data);
