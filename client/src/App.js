@@ -4,6 +4,7 @@ import Home from './Pages/Home';
 import NavBar from './assets/Navbar';
 import Init from './Pages/init';
 import Account from './Pages/account';
+import Profile from './Pages/profile';
 import Auth from './Pages/auth';
 import { useState } from 'react';
 import MyFooter from './assets/myFooter';
@@ -17,6 +18,7 @@ function App() {
 				<NavBar parentDisplay={displayToggle} SetDisplayToggle={SetDisplayToggle} />
 				<div className={`app ${displayToggle ? 'open' : ''}`}>
 					<Switch>
+						<Route path='/u/:username' component={Profile} />
 						<Route path='/init' component={Init} />
 						<Route path='/account' component={Account} />
 						<Route path='/auth' component={Auth} />

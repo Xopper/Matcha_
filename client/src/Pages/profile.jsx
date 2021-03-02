@@ -1,17 +1,16 @@
 import React from 'react';
 import matcha from '../img/matcha2.jpg';
-import StepForm from '../Inc/account/stepForm';
-// import PrivilegesRoute from '../routes/privilegesRoute';
-import { Route } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import ProtectedRoute from '../routes/protectedRoute';
 
-function Init() {
+function Profile() {
+	const { username } = useParams();
 	return (
 		<div className='auth__container'>
 			<div className='auth'>
 				<section className='auth__first_section'>
 					<div className='auth__first'>
-						{/* <PrivilegesRoute exact path='/init' component={StepForm} /> */}
-						<Route exact path='/init' component={StepForm} />
+						<div>tach {`${username}`}</div>
 					</div>
 				</section>
 				<section
@@ -34,4 +33,4 @@ function Init() {
 	);
 }
 
-export default Init;
+export default Profile;
