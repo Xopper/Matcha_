@@ -1,8 +1,8 @@
 import React from 'react';
 import matcha from '../img/matcha2.jpg';
 import StepForm from '../Inc/account/stepForm';
-// import PrivilegesRoute from '../routes/privilegesRoute';
-import { Route } from 'react-router-dom';
+import PrivilegesRoute from '../routes/privilegesRoute';
+// import { Route } from 'react-router-dom';
 
 function Init() {
 	return (
@@ -10,8 +10,9 @@ function Init() {
 			<div className='auth'>
 				<section className='auth__first_section'>
 					<div className='auth__first'>
-						{/* <PrivilegesRoute exact path='/init' component={StepForm} /> */}
-						<Route exact path='/init' component={StepForm} />
+						<PrivilegesRoute exact path='/init' component={StepForm} />
+						{/** for testing */}
+						{/* <Route exact path='/init' component={StepForm} /> */}
 					</div>
 				</section>
 				<section

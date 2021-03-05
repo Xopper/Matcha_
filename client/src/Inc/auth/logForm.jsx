@@ -36,7 +36,7 @@ function LogForm(props) {
 					toast: true,
 					icon: 'success',
 					title: 'Signed in Successfully',
-					animation: true,
+					// animation: true,
 					position: 'top-right',
 					showConfirmButton: false,
 					timer: 3000,

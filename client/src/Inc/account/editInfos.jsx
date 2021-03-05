@@ -4,6 +4,7 @@ import useForm from '../../helpers/useForm';
 import validate from '../../validators/validateEdit';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+// import { AuthContexts } from '../../Contexts/authContext';
 
 export default function EditInfos() {
 	const formSchema = {
@@ -14,6 +15,14 @@ export default function EditInfos() {
 		birthDay: '2020-02-14',
 		biography: 'allo M. constateur'
 	};
+
+	// const { auth } = useContext(AuthContexts);
+
+	// load Data from backEnd
+	// function getData() {}
+	// useEffect(() => {
+	// 	const { token } = auth;
+	// }, []);
 
 	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema);
 	const { firstName, lastName, username, email, birthDay, biography } = values;

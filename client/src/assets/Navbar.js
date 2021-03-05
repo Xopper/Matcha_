@@ -68,11 +68,11 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 				</h1>
 			</div>
 			<div>
-				<a href='#' className='toggle-button' onClick={() => handleClick()}>
+				<span href='#' className='toggle-button' onClick={() => handleClick()}>
 					<span className='bar' />
 					<span className='bar' />
 					<span className='bar' />
-				</a>
+				</span>
 			</div>
 			<div>
 				<ul className={`navbar__list ${toggleClass ? 'open' : ''}`}>
