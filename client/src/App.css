@@ -9,7 +9,7 @@
 
 html,
 body {
-	height: 100%;
+	/* height: 100%; */
 	/* background: rebeccapurple; */
 	background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
 }
@@ -946,7 +946,7 @@ a {
 	display: flex;
     width: 80%;
     height: 450px;
-    background: rebeccapurple;
+    /* background: rebeccapurple; */
 }
 
 .profile__nav {
@@ -962,10 +962,59 @@ a {
 
 }
 
-.profile__slide {
-	border: 2px solid #000000;
+.profile__slider {
+	position: relative;
+	/* background: #d84051; */
 	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	overflow: hidden;
+}
+
+.profile__slide {
+    /* border: 2px solid #000000; */
+    min-width: 100%;
 	height: 80%;
+	transition: all .3s;
+	display: flex;
+	justify-content: center;
+}
+.profile__slide img {
+	height: 100%;
+}
+
+#goLeft {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	transform: translateY(-50%);
+	width: 10%;
+	height: 80%;
+	background: transparent;
+    border: none;
+	outline: none;
+	transition: background 0.3s;
+	border-radius: 8px;
+}
+
+#goRight {
+	position: absolute;
+	top: 50%;
+	right: 0;
+	transform: translateY(-50%);
+	width: 10%;
+	height: 80%;
+	background: transparent;
+    border: none;
+	outline: none;
+	border-radius: 8px;
+	transition: background 0.3s;
+}
+
+#goLeft:hover, #goRight:hover {
+	background: rgba(204, 204, 204, 0.39);
+	cursor: pointer;
 }
 
 

@@ -103,7 +103,7 @@ function Profile() {
 						</div>
 					</section>
 					<section className='profile__footer'>
-						<SimpleSlider />
+						<SimpleSlider slides={[data.img, data.img, data.img, data.img]} />
 					</section>
 				</section>
 			</div>
