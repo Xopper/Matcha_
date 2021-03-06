@@ -23,7 +23,7 @@ function LogForm(props) {
 		try {
 			const {
 				data: { status, authToken, dataProfileIsComplited, errors }
-			} = await axios.post('http://localhost:5000/authLogin/validate/login', { values });
+			} = await axios.post('authLogin/validate/login', { values });
 			if (status === 1) {
 				Swal.fire({
 					title: 'Error!',

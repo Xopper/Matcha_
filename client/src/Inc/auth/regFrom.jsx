@@ -2,9 +2,11 @@ import React, { Fragment, useState } from 'react'; //rfc
 import useForm from '../../helpers/useForm';
 import validate from '../../validators/validateRegister';
 import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 function RegForm() {
+	const history = useHistory();
 	// you can acces an arrow function before declared but you can acces a normal function :\
 	// const submit = () => {
 	// 	console.log("Form submitted");
@@ -18,12 +20,12 @@ function RegForm() {
 		password: ''
 	};
 
-	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema);
+	const { handleSubmit, handleChange, setValues, values, errors } = useForm(submit, validate, formSchema);
 	const [errors_, setErrors_] = useState({ email: '', username: '' });
 
 	async function submit() {
 		try {
-			const { data } = await axios.post('http://localhost:5000/auth/validate/register', { values });
+			const { data } = await axios.post('auth/validate/register', { values });
 			if (data.status === 1) {
 				const { email, username } = data.errors;
 				setErrors_({ email, username });
@@ -31,11 +33,11 @@ function RegForm() {
 				setErrors_({ email: '', username: '' });
 				Swal.fire({
 					title: 'Cool!',
-					text: 'Save token and redirect to browse page',
+					text: 'Please check your e-mail to verify your account!',
 					icon: 'success',
 					confirmButtonText: 'close'
 				});
-				console.log(data);
+				history.replace('/auth');
 			}
 		} catch (e) {}
 	}
