@@ -50,26 +50,33 @@ function StepForm(props) {
 		longitude: null
 	});
 
+	const [userCountry, setUserCountry] = useState('');
+
 	const { auth } = useContext(AuthContexts);
 
 	const MySwal = withReactContent(Swal);
 
 	const showPosition = useCallback(async pos => {
-		console.log(pos);
+		// console.log(pos);
 		const { latitude, longitude } = pos.coords;
 		setLocation({ latitude, longitude });
-		const contry = await handleLocation(latitude, longitude);
-		console.log(contry);
+		const country = await handleLocation(latitude, longitude);
+		setUserCountry(country);
+		// console.log(country);
 	}, []);
 
 	const getLocation = useCallback(async err => {
 		if (err.code) {
 			try {
 				const publicLoction = await pubIP.v4();
-				const locationData = await ipLocation(publicLoction);
-				console.log(locationData);
-				const { latitude, longitude } = locationData;
+				const {
+					latitude,
+					longitude,
+					country: { name: country }
+				} = await ipLocation(publicLoction);
+				console.log(latitude, longitude, country);
 				setLocation({ latitude, longitude });
+				setUserCountry(country);
 			} catch (err) {}
 		}
 	}, []);
@@ -82,7 +89,7 @@ function StepForm(props) {
 
 	function handlesubmit(e) {
 		e.preventDefault();
-		console.log({ ...location, ...values });
+		console.log({ ...location, ...values, userCountry });
 		const errors = validate(values);
 		console.log(Object.keys(errors).length);
 		if (Object.keys(errors).length !== 0) {
