@@ -4,7 +4,6 @@ import useForm from '../../helpers/useForm';
 import validate from '../../validators/validateEdit';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
-// import { AuthContexts } from '../../Contexts/authContext';
 
 export default function EditInfos() {
 	const formSchema = {
@@ -16,8 +15,6 @@ export default function EditInfos() {
 		biography: 'allo M. constateur'
 	};
 
-	// const { auth } = useContext(AuthContexts);
-
 	// load Data from backEnd
 	// function getData() {}
 	// useEffect(() => {
@@ -27,23 +24,13 @@ export default function EditInfos() {
 	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema);
 	const { firstName, lastName, username, email, birthDay, biography } = values;
 	// get it from db :)
-	const [center, setCenter] = useState({ lat: null, lng: null });
+	const [center, setCenter] = useState({ lat: 38.712, lng: -9.187 });
+	const [contry, setContry] = useState('unknown');
 
 	const [popupIsOpen, setPopupIsOpen] = useState(false);
-	// const errors = {};
-
-	// function handlesubmit(e) {
-	// 	e.preventDefault();
-	// 	console.log(values);
-	// }
-
-	// function handleChange(e) {
-	// 	const { name, value } = e.target;
-	// 	setValues({ ...values, [name]: value });
-	// }
 
 	function submit() {
-		console.log({ ...values, ...center });
+		console.log({ ...values, ...center, contry });
 	}
 	function handleKey(e) {
 		if (e.key === 'Enter') {
@@ -161,10 +148,8 @@ export default function EditInfos() {
 							<MapWithAMarker
 								containerElement={<div style={{ height: `400px` }} />}
 								mapElement={<div style={{ height: `100%` }} />}
-								onClick={e => {
-									// edit country
-									setCenter({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-								}}
+								handlePosition={setCenter}
+								handleContry={setContry}
 								center={center}
 							/>
 							<button

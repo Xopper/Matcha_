@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react'; //rfc
+import React, { Fragment, useState } from 'react';
 import useForm from '../../helpers/useForm';
 import validate from '../../validators/validateRegister';
 import axios from 'axios';
@@ -20,7 +20,7 @@ function RegForm() {
 		password: ''
 	};
 
-	const { handleSubmit, handleChange, setValues, values, errors } = useForm(submit, validate, formSchema);
+	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema);
 	const [errors_, setErrors_] = useState({ email: '', username: '' });
 
 	async function submit() {

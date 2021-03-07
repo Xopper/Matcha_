@@ -8,6 +8,28 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { AuthContexts } from '../../Contexts/authContext';
+import * as NodeGeocoder from 'node-geocoder';
+import fetchS from 'node-fetch';
+
+const fetch = fetchS.bind();
+const options = {
+	provider: 'google',
+	fetch,
+	apiKey: 'AIzaSyB5hlCCROooAjmVavVJvlc9oyOT8IGttCI'
+};
+
+const GeoCoder = NodeGeocoder(options);
+
+async function handleLocation(lat, lng) {
+	try {
+		const res = await GeoCoder.reverse({ lat, lon: lng });
+		const { country } = res[0];
+		return country;
+	} catch (e) {
+		console.log(e);
+	}
+	return 'unknown';
+}
 
 function StepForm(props) {
 	const [values, setValues] = useState({
@@ -32,9 +54,12 @@ function StepForm(props) {
 
 	const MySwal = withReactContent(Swal);
 
-	const showPosition = useCallback(pos => {
+	const showPosition = useCallback(async pos => {
+		console.log(pos);
 		const { latitude, longitude } = pos.coords;
 		setLocation({ latitude, longitude });
+		const contry = await handleLocation(latitude, longitude);
+		console.log(contry);
 	}, []);
 
 	const getLocation = useCallback(async err => {
@@ -42,6 +67,7 @@ function StepForm(props) {
 			try {
 				const publicLoction = await pubIP.v4();
 				const locationData = await ipLocation(publicLoction);
+				console.log(locationData);
 				const { latitude, longitude } = locationData;
 				setLocation({ latitude, longitude });
 			} catch (err) {}
@@ -79,13 +105,13 @@ function StepForm(props) {
 			});
 
 			instance
-				.post('http://localhost:5000/stepForm/stepFormValidator', { ...location, ...values })
+				.post('stepForm/stepFormValidator', { ...location, ...values })
 				.then(res => {
 					const { status } = res.data;
 					console.log('step form data');
 					console.log(res.data);
 					if (status !== 0) {
-						// print the error
+						// print the errors that comes from backEnd
 						console.log(res.data);
 					}
 				})
@@ -98,7 +124,6 @@ function StepForm(props) {
 	function addTag(e) {
 		e.preventDefault();
 		const { value: tag } = e.target;
-		// console.log(values.tags.length);
 		if (
 			tag.trim() !== '' &&
 			tag.trim().length <= 20 &&
