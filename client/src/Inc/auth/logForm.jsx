@@ -1,16 +1,11 @@
-import React, { Fragment, useContext } from 'react'; //rfc
+import React, { Fragment, useContext } from 'react';
 import useForm from '../../helpers/useForm';
 import validate from '../../validators/validateLogin';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { AuthContexts } from '../../Contexts/authContext';
 
-function LogForm(props) {
-	// you can acces an arrow function before declared but you can acces a normal function :\
-	// const submit = () => {
-	// 	console.log("Form submitted");
-	// };
-
+function LogForm() {
 	const formSchema = {
 		username: '',
 		password: ''
@@ -23,7 +18,7 @@ function LogForm(props) {
 		try {
 			const {
 				data: { status, authToken, dataProfileIsComplited, errors }
-			} = await axios.post('http://localhost:5000/authLogin/validate/login', { values });
+			} = await axios.post('authLogin/validate/login', { values });
 			if (status === 1) {
 				Swal.fire({
 					title: 'Error!',
@@ -36,7 +31,7 @@ function LogForm(props) {
 					toast: true,
 					icon: 'success',
 					title: 'Signed in Successfully',
-					animation: true,
+					// animation: true,
 					position: 'top-right',
 					showConfirmButton: false,
 					timer: 3000,
@@ -49,7 +44,7 @@ function LogForm(props) {
 				localStorage.setItem('token', authToken);
 				localStorage.setItem('isCompleted', dataProfileIsComplited);
 				authContext.setAuth({ token: authToken, isCompleted: dataProfileIsComplited });
-				// console.log('this is it:: ', authToken);
+				// try to figurout something for redirecting the user
 			}
 		} catch (e) {}
 	}

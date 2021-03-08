@@ -7,48 +7,39 @@ const containerStyle = {
 	height: '400px'
 };
 
-// to Edit initial Center
-const center = {
-	lat: -3.745,
-	lng: -38.523
-};
-
-const MapWithAMarker = props => {
+const MapWithAMarker = ({ handlePosition, center, handleContry }) => {
+	// Get Loaction from lat and lng
 	const fetch = fetchS.bind();
 	const options = {
 		provider: 'google',
 		fetch: fetch,
 		apiKey: 'AIzaSyB5hlCCROooAjmVavVJvlc9oyOT8IGttCI'
 	};
-
 	const GeoCoder = NodeGeocoder(options);
 
-	async function handleLocation(event) {
+	async function handleLocation({ latLng }) {
 		try {
-			console.log(event.latLng.lat());
-			console.log(event.latLng.lng());
-			const res = await GeoCoder.reverse({ lat: event.latLng.lat(), lon: event.latLng.lng() });
-			// use only Country
-			const { country, city } = res[0];
-			console.log(country, city);
+			const res = await GeoCoder.reverse({ lat: latLng.lat(), lon: latLng.lng() });
+			handlePosition({ lat: latLng.lat(), lng: latLng.lng() });
+			const { country } = res[0];
+			handleContry(country);
 		} catch (e) {
 			console.log(e);
 		}
 	}
-
-	const centerPosition = { lat: parseFloat(props.center.lat), lng: parseFloat(props.center.lng) };
+	// getting Center Location from props
+	const centerPosition = { lat: parseFloat(center.lat), lng: parseFloat(center.lng) };
 	return (
 		<LoadScript googleMapsApiKey='AIzaSyB5hlCCROooAjmVavVJvlc9oyOT8IGttCI'>
 			<GoogleMap
 				mapContainerStyle={containerStyle}
-				center={center}
+				center={centerPosition}
 				zoom={10}
 				onClick={e => {
 					handleLocation(e);
 				}}
 			>
-				<Marker position={centerPosition.lat ? centerPosition : center} />
-				{/* {console.log(centerPosition)} */}
+				<Marker position={center} />
 			</GoogleMap>
 		</LoadScript>
 	);

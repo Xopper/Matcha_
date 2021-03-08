@@ -35,6 +35,8 @@ function EditPrefs(props) {
 			e.target.value = '';
 			const oldTags = [...values.tags];
 			setValues({ ...values, tags: [...oldTags, tag] });
+		} else {
+			e.target.value = '';
 		}
 		return;
 	}
