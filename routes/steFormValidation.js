@@ -176,31 +176,15 @@ const stepFormValidator = (req, res, next) => {
 	console.log('errors 2: ', errors);
 	if (!isEmpty(errors)) req.errors = errors;
 	else req.values = trimedValues;
-	console.log('tach');
 	next();
 };
 
 // authentication token validation
 const authToken = (req, res, next) => {
-	// const authHeader = req.headers['Authorization'];
-	// const token = authHeader && authHeader.spit(' ')[1];
-	// console.log('authHeader', authHeader);
-	// console.log('token', token);
-	// if (token === null) return res.sendStatus(401);
-
-	// jwt.verify(token, 'thesecretshit', (err, user) => {
-	// 	if (err) return res.sendStatus(403);
-	// 	req.user = user;
-	// });
-	// console.log('headers: ', req.headers);
-	// console.log(req.headers.authorization);
-	// console.log('==================================================');
-	// console.log(req.headers.authorization.split(' ')[1]);
-
 	// jwt;
 	if (req.headers.authorization) {
 		const authKey = req.headers.authorization.split(' ')[1];
-		console.log('>>', authKey);
+		// console.log('>>', authKey);
 		if (authKey) {
 			const authKey = req.headers.authorization.split(' ')[1];
 			jwt.verify(authKey, 'boul3al7ayat7obilanamnghirakma3ichach7obi00', (err, user) => {
@@ -228,31 +212,153 @@ function getUserId(userName) {
 	});
 }
 
-function completeData(userName, values) {
+function completeData(userName, values)
+{
+	return new Promise((resolve, reject) =>{
+		pool.getConnection((err, connection) => {
+			connection.execute('UPDATE `users` SET `gender`=?, `sexual_preference`=?, `birthdate`=?, `biography`=?, `latitude`=?, `longitude`=?, `profile_img`=?, `img_one`=?, `img_two`=?, `img_three`=?, `img_four`=?, `complited` = ? WHERE `user_name`=?',
+			[
+				values.gender,
+				values.interests,
+				values.birthday,
+				values.bio,
+				values.latitude,
+				values.longitude,
+				values.profilePic1,
+				values.profilePic2,
+				values.profilePic3,
+				values.profilePic4,
+				values.profilePic5,
+				1,
+				userName
+			],(err, result) =>{
+				if (err) reject(err);
+				else {
+					const queryResult = result;
+					connection.release();
+					resolve(queryResult);
+				}
+			})
+		})
+	})
+}
+
+function checkIfTagExists(tag)
+{
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
-			// connection.execute('INSERT INTO `users` ())
-		});
+			connection.execute('SELECT COUNT(`id`) AS `tag_exists` FROM `tags` WHERE `tags` = ?', [tag], (err, result) =>{
+				if (err) reject(err);
+				else{
+					const queryResult = result[0].tag_exists;
+					connection.release();
+					resolve(queryResult)
+				}
+			})
+		})
+	})
+}
+
+function getTagId(tag)
+{
+	return new Promise((resolve, reject) =>{
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute('SELECT `id` FROM `tags` WHERE `tags` = ?', [tag], (err, result) =>{
+				if (err) reject(err)
+				else{
+					const queryResult = result[0].id;
+					connection.release();
+					resolve(queryResult)
+				}
+			})
+		})
+	})
+}
+
+function insertTag(tag)
+{
+	return new Promise((resolve, reject) =>{
+		pool.getConnection((err, connection) =>{
+			if (err) reject(err)
+			connection.execute('INSERT INTO `tags`(`tags`) VALUES(?)', [tag], (err, result) =>{
+				if (err) reject(err)
+				else{
+					const queryResult = result;
+					connection.release();
+					resolve(queryResult)
+				}
+			})
+		})
 	});
+}
+
+function checkIfUserHadTheTag(userId, tagId)
+{
+	return new Promise((resolve, reject) =>{
+		pool.getConnection((err, connection) =>{
+			if (err) reject(err)
+			connection.execute('SELECT COUNT(`id`) AS `userHadTag` FROM `users_tags` WHERE `tag_id` = ? AND `user_id` = ?', [tagId, userId], (err, result) => {
+				if (err) reject(err);
+				else{
+					const queryResult = result[0].userHadTag;
+                    connection.release();
+                    resolve(queryResult);
+				}
+			})
+		})
+	})
+}
+
+function userAndTagInsertion(userId, tagId)
+{
+	return new Promise((resolve, reject) =>{
+		pool.getConnection((err, connection) =>{
+			if (err) reject(err)
+			connection.execute('INSERT INTO `users_tags`(`tag_id`, `user_id`) VALUES(?, ?)', [tagId, userId], (err, result)=>{
+				if (err) reject(err)
+				else{
+					const queryResult = result;
+                    connection.release();
+                    resolve(queryResult);
+				}
+			})
+		})
+	})
 }
 
 const registerStepFormData = async (userName, values) => {
 	// get usr id
 	const userId = await getUserId(userName);
+	const dataregistred = await completeData(userName, values)
 
-	// register data
-
-	// register tags
+	// new try
+	// console.log(values.tags)
+	values.tags.forEach(async (tag) =>{
+		const tagExists = await checkIfTagExists(tag)
+		if (tagExists === 0)
+		{
+			const tagInserted = await insertTag(tag)
+		}
+		const tagId = await getTagId(tag)
+		// check if the user already had the tag
+		const userHasTheTag = await checkIfUserHadTheTag(userId, tagId)
+		if (userHasTheTag === 0)
+		{
+			const insertUserAndTag = await userAndTagInsertion(userId, tagId);
+		}
+	})
 };
 
-router.post('/stepFormValidator', authToken, stepFormValidator, (req, res) => {
+router.post('/stepFormValidator', authToken, stepFormValidator, async (req, res) => {
 	const backEndRespond = {};
 	// console.log("inside the post : ", req.errors);
 	if (!isEmpty(req.errors) || req.errors !== undefined) {
 		backEndRespond.errors = req.errors;
 		backEndRespond.status = 1;
 	} else {
+		// check when it has to register the step form data
 		backEndRespond.status = 0;
 		console.log(req.userNameConnected);
 		registerStepFormData(req.userNameConnected, req.values);
