@@ -1,9 +1,11 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState , useContext, useEffect} from 'react';
 import MapWithAMarker from './extra/streetMap';
 import useForm from '../../helpers/useForm';
 import validate from '../../validators/validateEdit';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import {AuthContexts} from "../../Contexts/authContext"
+import axios from "axios"
 
 export default function EditInfos() {
 	const formSchema = {
@@ -21,6 +23,7 @@ export default function EditInfos() {
 	// 	const { token } = auth;
 	// }, []);
 
+	const {auth} = useContext(AuthContexts);
 	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema);
 	const { firstName, lastName, username, email, birthDay, biography } = values;
 	// get it from db :)
@@ -30,7 +33,17 @@ export default function EditInfos() {
 	const [popupIsOpen, setPopupIsOpen] = useState(false);
 
 	function submit() {
-		console.log({ ...values, ...center, contry });
+		console.log({ ...values, ...center });
+		const { token } = auth;
+		const instance = axios.create({
+			headers: { Authorization: `Bearer ${token}` }
+		});
+
+		instance.post('http://localhost:5000/editProfileInfo/infoValidator', {values, center}).then(res => {
+			console.log("hey");
+		}).catch(err => {
+			console.log(err);
+		})
 	}
 	function handleKey(e) {
 		if (e.key === 'Enter') {
