@@ -57,12 +57,10 @@ function StepForm(props) {
 	const MySwal = withReactContent(Swal);
 
 	const showPosition = useCallback(async pos => {
-		// console.log(pos);
 		const { latitude, longitude } = pos.coords;
 		setLocation({ latitude, longitude });
 		const country = await handleLocation(latitude, longitude);
 		setUserCountry(country);
-		// console.log(country);
 	}, []);
 
 	const getLocation = useCallback(async err => {

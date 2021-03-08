@@ -882,9 +882,10 @@ a {
 }
 
 .profile__heeder .img__wrapper img {
-	height: 250px;
+    height: 250px;
     width: 250px;
     border-radius: 50%;
+    object-fit: cover;
 }
 
 .profile__heeder .img__wrapper {

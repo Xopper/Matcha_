@@ -5,7 +5,7 @@ export default function validateRegister(values) {
 	if (!values.oldPassword) {
 		errors.oldPassword = 'Password is required field.';
 	} else if (
-		!/(?=.{8,32})(?=.*[A-Z])(?=.*[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])(?=.*[a-z])(?=.*\d).*$/.test(values.password)
+		!/(?=.{8,32})(?=.*[A-Z])(?=.*[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])(?=.*[a-z])(?=.*\d).*$/.test(values.oldPassword)
 	) {
 		errors.oldPassword = 'Incorrect password.';
 	} else if (values.oldPassword.length <= 8) {
@@ -17,7 +17,7 @@ export default function validateRegister(values) {
 	if (!values.newPassword) {
 		errors.newPassword = 'New password is required field.';
 	} else if (
-		!/(?=.{8,32})(?=.*[A-Z])(?=.*[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])(?=.*[a-z])(?=.*\d).*$/.test(values.password)
+		!/(?=.{8,32})(?=.*[A-Z])(?=.*[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])(?=.*[a-z])(?=.*\d).*$/.test(values.newPassword)
 	) {
 		errors.newPassword = 'Use [lower-Upper] case, special chars and numbers.';
 	} else if (values.newPassword.length <= 8) {
@@ -29,7 +29,9 @@ export default function validateRegister(values) {
 	if (!values.confNewPassword) {
 		errors.confNewPassword = 'Password confirmation is required field.';
 	} else if (
-		!/(?=.{8,32})(?=.*[A-Z])(?=.*[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])(?=.*[a-z])(?=.*\d).*$/.test(values.password)
+		!/(?=.{8,32})(?=.*[A-Z])(?=.*[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])(?=.*[a-z])(?=.*\d).*$/.test(
+			values.confNewPassword
+		)
 	) {
 		errors.confNewPassword = 'Use [lower-Upper] case, special chars and numbers.';
 	} else if (values.confNewPassword.length <= 8) {

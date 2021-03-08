@@ -22,7 +22,11 @@ export default function EditPics() {
 	function handlesubmit(e) {
 		// TODO check if avatar isn't null
 		e.preventDefault();
-		console.log({ ...avatar, ...images });
+		if (avatar.avatarSrc) {
+			console.log({ ...avatar, ...images });
+		} else {
+			console.log('error :(');
+		}
 	}
 
 	function handleFileSelect(event) {
@@ -48,9 +52,6 @@ export default function EditPics() {
 				return false;
 			};
 			img.src = e.target.result;
-			// todo fix it [done]
-			// console.log(inputName);
-			// console.log(img.src);
 			if (inputName === 'avatar') {
 				setAvatar({ avatarSrc: img.src });
 			} else {
