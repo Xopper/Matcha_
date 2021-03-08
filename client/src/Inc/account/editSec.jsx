@@ -1,5 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import validate from '../../validators/validateEditSec';
+// import axios from 'axios'
 
 export default function EditSec() {
 	const [values, setValues] = useState({
