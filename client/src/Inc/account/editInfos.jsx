@@ -12,7 +12,7 @@ async function getData(token) {
 	const instance = axios.create({
 		headers: { Authorization: `Bearer ${token}` }
 	});
-	console.log(`Bearer ${token}`);
+	// using proxy :)
 	const response = await instance.get('http://localhost:5000/getInfos/infos');
 	return response;
 }
@@ -30,14 +30,12 @@ export default function EditInfos() {
 	const { token } = auth;
 
 	useEffect(() => {
-		console.log(token);
 		const data = async () => {
 			const {
 				data: { userInfos }
 			} = await getData(token);
 			userInfos[0].birthDay = formatDate(userInfos[0].birthDay);
 			setBackData(userInfos[0]);
-			console.log(userInfos[0]);
 		};
 		data();
 	}, [token]);
@@ -58,7 +56,7 @@ export default function EditInfos() {
 		});
 
 		instance
-			.post('http://localhost:5000/editProfileInfo/infoValidator', { values, center })
+			.post('http://localhost:5000/editProfileInfo/infoValidator', { ...values, ...center })
 			.then(res => {
 				console.log('hey');
 			})

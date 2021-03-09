@@ -1,25 +1,85 @@
-import React, { Fragment, useState } from 'react'; //rfc
+import React, { Fragment, useState, useContext, useEffect } from 'react'; //rfc
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import validate from '../../validators/validatePrefs';
+import { AuthContexts } from '../../Contexts/authContext';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+
+async function getData(token) {
+	const instance = axios.create({
+		headers: { Authorization: `Bearer ${token}` }
+	});
+	// console.log(`Bearer ${token}`);
+	const response = await instance.get('http://localhost:5000/getPreferences/prefs');
+	return response;
+}
 
 function EditPrefs(props) {
 	const [values, setValues] = useState({
-		gender: 'male',
-		interests: 'bi',
-		tags: ['tach', 'haw', 'TOTO']
+		gender: '',
+		interests: '',
+		tags: []
 	});
+
+	// const [values, setValues] = useState({
+	// 	gender: 'male',
+	// 	interests: 'bi',
+	// 	tags: ['tach', 'haw', 'TOTO']
+	// });
 
 	const [errors, setErrors] = useState({});
 
-	function handlesubmit(e) {
+	const { auth } = useContext(AuthContexts);
+	const { token } = auth;
+
+	useEffect(() => {
+		const data = async () => {
+			const {
+				data: {
+					userPrefs: { gender, sexual_preference: interests },
+					userTags: tags
+				}
+			} = await getData(token);
+			setValues({
+				gender,
+				interests,
+				tags
+			});
+			console.log(gender, ' >> ', interests, ' >> ', tags);
+		};
+		data();
+	}, [token]);
+
+	async function handlesubmit(e) {
 		e.preventDefault();
 		const newErrors = validate(values);
 		setErrors(validate(values));
 		if (!Object.keys(newErrors).length) {
-			console.log('ooooh! there is no errors :)');
+			const instance = axios.create({
+				headers: { Authorization: `Bearer ${token}` }
+			});
+			console.log(`Bearer ${token}`);
+			const {
+				data: { status }
+			} = await instance.post('http://localhost:5000/editPrefs/prefsValidator', values);
+			if (status === 0) {
+				Swal.fire({
+					title: 'YAAAP!',
+					text: 'Preferences updated successfully!',
+					icon: 'success',
+					confirmButtonText: 'close'
+				});
+			} else {
+				Swal.fire({
+					title: 'NOOOPE!',
+					text: 'Something went wrong. Try Again!',
+					icon: 'error',
+					confirmButtonText: 'close'
+				});
+			}
 		} else {
-			console.log('Daaaamn :(');
+			// console.log('Daaaamn :(');
 		}
 	}
 
@@ -59,14 +119,19 @@ function EditPrefs(props) {
 			<form onSubmit={e => handlesubmit(e)} noValidate>
 				<label className='labelSelect'>
 					<strong>Choose your gender.</strong>
-					<select name='gender' className='select' onChange={e => handleChange(e)}>
+					<select value={values.gender} name='gender' className='select' onChange={e => handleChange(e)}>
 						<option value='male'>Male</option>
 						<option value='female'>Female</option>
 					</select>
 				</label>
 				<label className='labelSelect'>
 					<strong>Choose your interests.</strong>
-					<select name='interests' className='select' onChange={e => handleChange(e)}>
+					<select
+						value={values.interests}
+						name='interests'
+						className='select'
+						onChange={e => handleChange(e)}
+					>
 						<option value='bi'>bisexual</option>
 						<option value='male'>Male</option>
 						<option value='female'>Female</option>
