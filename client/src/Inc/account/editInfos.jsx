@@ -40,11 +40,11 @@ export default function EditInfos() {
 			console.log(userInfos[0]);
 		};
 		data();
-	}, []);
+	}, [token]);
 
 	const { handleSubmit, handleChange, data: values, errors } = useForm(submit, validate, backData, setBackData);
 	const { firstName, lastName, username, email, birthDay, biography } = values;
-
+	// needs to be add
 	const [center, setCenter] = useState({ lat: 38.712, lng: -9.187 });
 	const [contry, setContry] = useState('unknown');
 
@@ -58,7 +58,7 @@ export default function EditInfos() {
 		});
 
 		instance
-			.post('http://localhost:5000/editProfileInfo', { values, center })
+			.post('http://localhost:5000/editProfileInfo/infoValidator', { values, center })
 			.then(res => {
 				console.log('hey');
 			})
