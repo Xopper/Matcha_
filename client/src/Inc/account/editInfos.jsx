@@ -1,50 +1,72 @@
-import React, { Fragment, useState , useContext, useEffect} from 'react';
+import React, { Fragment, useState, useContext, useEffect } from 'react';
 import MapWithAMarker from './extra/streetMap';
+import { formatDate } from '../../helpers/helpers';
 import useForm from '../../helpers/useForm';
 import validate from '../../validators/validateEdit';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
-import {AuthContexts} from "../../Contexts/authContext"
-import axios from "axios"
+import { AuthContexts } from '../../Contexts/authContext';
+import axios from 'axios';
+
+async function getData(token) {
+	const instance = axios.create({
+		headers: { Authorization: `Bearer ${token}` }
+	});
+	console.log(`Bearer ${token}`);
+	const response = await instance.get('http://localhost:5000/getInfos/infos');
+	return response;
+}
 
 export default function EditInfos() {
-	const formSchema = {
-		firstName: 'tach',
-		lastName: 'de Bled',
-		username: 'heus',
-		email: 'only@fans.com',
-		birthDay: '2020-02-14',
-		biography: 'allo M. constateur'
-	};
+	const [backData, setBackData] = useState({
+		firstName: '',
+		lastName: '',
+		username: '',
+		email: '',
+		birthDay: '',
+		biography: ''
+	});
+	const { auth } = useContext(AuthContexts);
+	const { token } = auth;
 
-	// load Data from backEnd
-	// function getData() {}
-	// useEffect(() => {
-	// 	const { token } = auth;
-	// }, []);
+	useEffect(() => {
+		console.log(token);
+		const data = async () => {
+			const {
+				data: { userInfos }
+			} = await getData(token);
+			userInfos[0].birthDay = formatDate(userInfos[0].birthDay);
+			setBackData(userInfos[0]);
+			console.log(userInfos[0]);
+		};
+		data();
+	}, []);
 
-	const {auth} = useContext(AuthContexts);
-	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema);
+	const { handleSubmit, handleChange, data: values, errors } = useForm(submit, validate, backData, setBackData);
 	const { firstName, lastName, username, email, birthDay, biography } = values;
-	// get it from db :)
+
 	const [center, setCenter] = useState({ lat: 38.712, lng: -9.187 });
 	const [contry, setContry] = useState('unknown');
 
 	const [popupIsOpen, setPopupIsOpen] = useState(false);
 
 	function submit() {
-		console.log({ ...values, ...center });
+		console.log({ ...values, ...center, contry });
 		const { token } = auth;
 		const instance = axios.create({
 			headers: { Authorization: `Bearer ${token}` }
 		});
 
-		instance.post('http://localhost:5000/editProfileInfo/infoValidator', {values, center}).then(res => {
-			console.log("hey");
-		}).catch(err => {
-			console.log(err);
-		})
+		instance
+			.post('http://localhost:5000/editProfileInfo', { values, center })
+			.then(res => {
+				console.log('hey');
+			})
+			.catch(err => {
+				console.log(err);
+			});
 	}
+
 	function handleKey(e) {
 		if (e.key === 'Enter') {
 			e.preventDefault();
