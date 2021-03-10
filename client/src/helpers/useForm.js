@@ -1,19 +1,19 @@
 import { useState } from 'react';
 
-function useForm(callback, validate, data, setData) {
+function useForm(callback, validate, values, setValues) {
 	const [errors, setErrors] = useState({});
 
 	const handleChange = e => {
 		const { name, value } = e.target;
-		setData({
-			...data,
+		setValues({
+			...values,
 			[name]: value // using [] is a way to acces unkown property in an object :)
 		});
 	};
 
 	const handleSubmit = e => {
 		e.preventDefault();
-		const newErrors = validate(data);
+		const newErrors = validate(values);
 		setErrors(newErrors);
 		if (Object.keys(newErrors).length === 0) {
 			callback();
@@ -23,7 +23,7 @@ function useForm(callback, validate, data, setData) {
 	return {
 		handleChange,
 		handleSubmit,
-		data,
+		values,
 		errors
 	};
 }

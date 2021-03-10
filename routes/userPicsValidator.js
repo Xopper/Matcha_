@@ -19,44 +19,39 @@ const authToken = (req, res, next) => {
 			const authKey = req.headers.authorization.split(' ')[1];
 			jwt.verify(authKey, 'boul3al7ayat7obilanamnghirakma3ichach7obi00', (err, user) => {
 				if (err) return res.sendStatus(403);
-                req.userNameConnected = user.userName;
+				req.userNameConnected = user.userName;
 			});
 		}
 	}
 	next();
+};
+
+function getUserId(userName) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute('SELECT `id` FROM `users` WHERE `user_name` = ?', [userName], (err, result) => {
+				if (err) reject(err);
+				else {
+					if (result === undefined || result === [] || result.length === 0) {
+						connection.release();
+						resolve(false);
+					} else {
+						const queryResult = result[0].id;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			});
+		});
+	});
 }
 
-function getUserId(userName)
-{
-    return new Promise((resolve, reject) =>{
-        pool.getConnection((err, connection)=>{
-            if (err) reject(err);
-            connection.execute('SELECT `id` FROM `users` WHERE `user_name` = ?', [userName], (err, result) =>{
-                if (err) reject(err);
-                else{
-                    if (result === undefined || result === [] || result.length === 0)
-                    {
-                        connection.release();
-                        resolve(false);
-                    }
-                    else
-                    {
-                        const queryResult = result[0].id;
-                        connection.release();
-                        resolve(queryResult);
-                    }
-                }
-            })
-        })
-    })
-}
-
-const getActualUserId = async (req, res, next) =>
-{
-    const userId = await getUserId(req.userNameConnected);
-    req.userId = userId
-    next()
-}
+const getActualUserId = async (req, res, next) => {
+	const userId = await getUserId(req.userNameConnected);
+	req.userId = userId;
+	next();
+};
 
 const base64ImageValidation = image => {
 	let error = '';
@@ -84,35 +79,36 @@ const base64ImageValidation = image => {
 		} else error = 'not a valid base64';
 	}
 	return error;
+};
+
+function updatePics(pics) {
+	return new Promise((responde, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'UPDATE `users` SET `profile_img` = ?, `img_one` = ?, `img_two` = ?, `img_three` = ? , `img_four` = ? WHERE `id` = ?',
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
 }
 
-function updatePics(pics)
-{
-    return new Promise((responde, reject) => {
-        pool.getConnection((err, connection) =>{
-            if (err) reject(err)
-            connection.execute('UPDATE `users` SET `profile_img` = ?, `img_one` = ?, `img_two` = ?, `img_three` = ? , `img_four` = ? WHERE `id` = ?', (err, result) =>{
-                if (err) reject(err)
-                else{
-                    const queryResult = result;
-					connection.release();
-					resolve(queryResult);
-                }
-            })
-        })
-    })
-}
-
-const validatePics = (req, res, next) =>{
-    const picsErrs = {}
-    // console.log(req.body)
-    if (req.body.avatarSrc === '')
-        picsErrs.avatarPic = 'Profile Image is required'
-    else{
-        if (base64ImageValidation(req.body.avatarSrc) !== '')
-            picsErrs.avatarPic = base64ImageValidation(req.body.avatarSrc);
-    }
-    if (req.body.profilePic1)
+const validatePics = (req, res, next) => {
+	const picsErrs = {};
+	// console.log(req.body)
+	if (req.body.avatarSrc === '') picsErrs.avatarPic = 'Profile Image is required';
+	else {
+		if (base64ImageValidation(req.body.avatarSrc) !== '')
+			picsErrs.avatarPic = base64ImageValidation(req.body.avatarSrc);
+	}
+	if (req.body.profilePic1)
 		if (base64ImageValidation(req.body.profilePic1) !== '')
 			picsErrs.imgOneErr = base64ImageValidation(req.body.profilePic1);
 	if (req.body.profilePic2)
@@ -123,23 +119,22 @@ const validatePics = (req, res, next) =>{
 			picsErrs.imgThreeErr = base64ImageValidation(req.body.profilePic3);
 	if (req.body.profilePic4)
 		if (base64ImageValidation(req.body.profilePic4) !== '')
-            picsErrs.imgFourErr = base64ImageValidation(req.body.profilePic4);
-    req.picsErrs = picsErrs
-    next();
-}
+			picsErrs.imgFourErr = base64ImageValidation(req.body.profilePic4);
+	req.picsErrs = picsErrs;
+	next();
+};
 
-router.post('/editPicsValidator', authToken, getActualUserId,validatePics, async (req, res) =>{
-    const backEndRes = {}
-    if (!isEmpty(req.picsErrs))
-    {
-        backEndRes.errors = req.picsErrs
-        backEndRes.status = 1
-        res.send(backEndRes)
-    }else{
-        const picsUpdated = await updatePics(req.body)
-        backEndRes.status = 0
-        res.send(backEndRes)
-    }
-})
+router.post('/editPicsValidator', authToken, getActualUserId, validatePics, async (req, res) => {
+	const backEndRes = {};
+	if (!isEmpty(req.picsErrs)) {
+		backEndRes.errors = req.picsErrs;
+		backEndRes.status = 1;
+		res.send(backEndRes);
+	} else {
+		const picsUpdated = await updatePics(req.body);
+		backEndRes.status = 0;
+		res.send(backEndRes);
+	}
+});
 
 module.exports = router;

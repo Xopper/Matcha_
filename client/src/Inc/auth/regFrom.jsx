@@ -7,25 +7,26 @@ import Swal from 'sweetalert2';
 
 function RegForm() {
 	const history = useHistory();
+
 	// you can acces an arrow function before declared but you can acces a normal function :\
 	// const submit = () => {
 	// 	console.log("Form submitted");
 	// };
 
-	const formSchema = {
+	const [formSchema, setformSchema] = useState({
 		email: '',
 		username: '',
 		lastName: '',
 		firstName: '',
 		password: ''
-	};
+	});
 
-	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema);
+	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema, setformSchema);
 	const [errors_, setErrors_] = useState({ email: '', username: '' });
 
 	async function submit() {
 		try {
-			const { data } = await axios.post('auth/validate/register', { values });
+			const { data } = await axios.post('http://localhost:5000/auth/validate/register', { values });
 			if (data.status === 1) {
 				const { email, username } = data.errors;
 				setErrors_({ email, username });

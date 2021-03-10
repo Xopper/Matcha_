@@ -26,7 +26,7 @@ async function handleLocation(lat, lng) {
 		const { country } = res[0];
 		return country;
 	} catch (e) {
-		console.log(e);
+		// console.log(e);
 	}
 	return 'unknown';
 }
@@ -42,7 +42,7 @@ function StepForm(props) {
 		profilePic3: '',
 		profilePic4: '',
 		profilePic5: '',
-		tags: ['tach', 'haw']
+		tags: []
 	});
 
 	const [location, setLocation] = useState({
@@ -52,7 +52,7 @@ function StepForm(props) {
 
 	const [userCountry, setUserCountry] = useState('');
 
-	const { auth } = useContext(AuthContexts);
+	const { auth, setAuth } = useContext(AuthContexts);
 
 	const MySwal = withReactContent(Swal);
 
@@ -110,18 +110,32 @@ function StepForm(props) {
 			});
 
 			instance
-				.post('stepForm/stepFormValidator', { ...location, ...values })
+				.post('http://localhost:5000/stepForm/stepFormValidator', { ...location, ...values })
 				.then(res => {
-					const { status } = res.data;
-					console.log('step form data');
-					console.log(res.data);
-					if (status !== 0) {
-						// print the errors that comes from backEnd
-						console.log(res.data);
+					const { data } = res;
+					if (data.status !== 0) {
+						Swal.fire({
+							title: 'NOOOPE!',
+							text: 'Something went wrong. Try Again!',
+							icon: 'error',
+							confirmButtonText: 'close'
+						});
+					} else {
+						// update isComplated state
+						setAuth(oldState => ({
+							...oldState,
+							isCompleted: 1
+						}));
+						Swal.fire({
+							title: 'YAAAP!',
+							text: 'Your account is ready to Be in Matcha!',
+							icon: 'success',
+							confirmButtonText: 'close'
+						});
 					}
 				})
 				.catch(err => {
-					console.log(err);
+					// console.log(err);
 				});
 		}
 	}

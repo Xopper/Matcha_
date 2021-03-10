@@ -12,13 +12,12 @@ async function getData(token) {
 	const instance = axios.create({
 		headers: { Authorization: `Bearer ${token}` }
 	});
-	// using proxy :)
 	const response = await instance.get('http://localhost:5000/getInfos/infos');
 	return response;
 }
 
 export default function EditInfos() {
-	const [backData, setBackData] = useState({
+	const [formSchema, setFormSchema] = useState({
 		firstName: '',
 		lastName: '',
 		username: '',
@@ -26,6 +25,7 @@ export default function EditInfos() {
 		birthDay: '',
 		biography: ''
 	});
+
 	const { auth } = useContext(AuthContexts);
 	const { token } = auth;
 
@@ -35,12 +35,12 @@ export default function EditInfos() {
 				data: { userInfos }
 			} = await getData(token);
 			userInfos[0].birthDay = formatDate(userInfos[0].birthDay);
-			setBackData(userInfos[0]);
+			setFormSchema(userInfos[0]);
 		};
 		data();
 	}, [token]);
 
-	const { handleSubmit, handleChange, data: values, errors } = useForm(submit, validate, backData, setBackData);
+	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema, setFormSchema);
 	const { firstName, lastName, username, email, birthDay, biography } = values;
 	// needs to be add
 	const [center, setCenter] = useState({ lat: 38.712, lng: -9.187 });
@@ -56,12 +56,15 @@ export default function EditInfos() {
 		});
 
 		instance
-			.post('http://localhost:5000/editProfileInfo/infoValidator', { ...values, ...center })
+			.post('http://localhost:5000/editProfileInfo/infoValidator', { values, center })
 			.then(res => {
-				console.log('hey');
+				console.log('hahahahah');
+				const { data } = res;
+				console.log(res);
 			})
 			.catch(err => {
 				console.log(err);
+				// catch errors
 			});
 	}
 

@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import { AuthContexts } from '../../Contexts/authContext';
+import Swal from 'sweetalert2';
 
 async function getData(token) {
 	const instance = axios.create({
@@ -20,12 +21,6 @@ export default function EditPics() {
 		profilePic3: '',
 		profilePic4: ''
 	});
-
-	// const [state, changeState] = useState({});
-
-	// useEffect(() => {
-	// 	props.input.forEach(item => changeState(prevState => ({ ...prevState, [item]: '' })));
-	// }, [props.input]);
 
 	const [avatar, setAvatar] = useState({
 		avatarSrc: ''
@@ -47,7 +42,6 @@ export default function EditPics() {
 						setAvatar({ avatarSrc: el[element] });
 					} else {
 						setImages(imgs => ({ ...imgs, [element]: el[element] }));
-						console.log(el[element], ' >> ', element);
 					}
 				});
 			});
@@ -55,12 +49,43 @@ export default function EditPics() {
 		data();
 	}, [token]);
 
-	function handlesubmit(e) {
+	async function handlesubmit(e) {
 		// TODO check if avatar isn't null
 		e.preventDefault();
 		if (avatar.avatarSrc) {
+			const instance = axios.create({
+				headers: { Authorization: `Bearer ${token}` }
+			});
+			const {
+				data: { status }
+			} = await instance.post('http://localhost:5000/editPics/editPicsValidator', {
+				...avatar,
+				...images
+			});
+			console.log(status);
+			if (status === 0) {
+				Swal.fire({
+					title: 'YAAAP!',
+					text: 'Preferences updated successfully!',
+					icon: 'success',
+					confirmButtonText: 'close'
+				});
+			} else {
+				Swal.fire({
+					title: 'NOOOPE!',
+					text: 'Something went wrong. Try Again!',
+					icon: 'error',
+					confirmButtonText: 'close'
+				});
+			}
 			console.log({ ...avatar, ...images });
 		} else {
+			Swal.fire({
+				title: 'NOOOPE!',
+				text: 'Please Select an image for your Profile!',
+				icon: 'error',
+				confirmButtonText: 'close'
+			});
 			console.log('error :(');
 		}
 	}
@@ -71,12 +96,22 @@ export default function EditPics() {
 		const reader = new FileReader();
 
 		if (!imageFile) {
-			alert('please Select an image');
+			Swal.fire({
+				title: 'NOOOPE!',
+				text: 'Please Select an image. Try Again!',
+				icon: 'error',
+				confirmButtonText: 'close'
+			});
 			return false;
 		}
 
 		if (!imageFile.name.match(/\.(jpg|jpeg|png)$/)) {
-			alert('Please select valid image.');
+			Swal.fire({
+				title: 'NOOOPE!',
+				text: 'Please select valid image. Try Again!',
+				icon: 'error',
+				confirmButtonText: 'close'
+			});
 			return false;
 		}
 
@@ -84,7 +119,12 @@ export default function EditPics() {
 			const img = new Image();
 			img.onload = () => {};
 			img.onerror = () => {
-				alert('Invalid image content.');
+				Swal.fire({
+					title: 'NOOOPE!',
+					text: 'Invalid image content. Try Again!',
+					icon: 'error',
+					confirmButtonText: 'close'
+				});
 				return false;
 			};
 			img.src = e.target.result;

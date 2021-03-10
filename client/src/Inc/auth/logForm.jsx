@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useState, useContext } from 'react';
 import useForm from '../../helpers/useForm';
 import validate from '../../validators/validateLogin';
 import axios from 'axios';
@@ -6,19 +6,21 @@ import Swal from 'sweetalert2';
 import { AuthContexts } from '../../Contexts/authContext';
 
 function LogForm() {
-	const formSchema = {
+	const [formSchema, setFormSchema] = useState({
 		username: '',
 		password: ''
-	};
+	});
 
-	const { handleSubmit, handleChange, values, errors, firstHitSubmit } = useForm(submit, validate, formSchema);
+	const { handleSubmit, handleChange, errors, firstHitSubmit } = useForm(submit, validate, formSchema, setFormSchema);
 	const authContext = useContext(AuthContexts);
 
 	async function submit() {
+		console.log(formSchema);
+		const values = { ...formSchema };
 		try {
 			const {
 				data: { status, authToken, dataProfileIsComplited, errors }
-			} = await axios.post('authLogin/validate/login', { values });
+			} = await axios.post('http://localhost:5000/authLogin/validate/login', { values });
 			if (status === 1) {
 				Swal.fire({
 					title: 'Error!',
@@ -31,7 +33,6 @@ function LogForm() {
 					toast: true,
 					icon: 'success',
 					title: 'Signed in Successfully',
-					// animation: true,
 					position: 'top-right',
 					showConfirmButton: false,
 					timer: 3000,
@@ -49,7 +50,7 @@ function LogForm() {
 		} catch (e) {}
 	}
 
-	const { username, password } = values;
+	const { username, password } = formSchema;
 
 	function handleClassName(field) {
 		if (errors[field]) {

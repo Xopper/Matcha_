@@ -2,7 +2,6 @@
 // const pool = require('../model/dbConnection');
 // const jwt = require('jsonwebtoken');
 
-
 // const isEmpty = obj => {
 // 	for (let prop in obj) {
 // 		if (obj.hasOwnProperty(prop)) return false;
@@ -49,9 +48,8 @@
 // 	return ret;
 // }
 
-
 // const authToken = (req, res, next) => {
-	
+
 // 	if (req.headers.authorization) {
 // 		const authKey = req.headers.authorization.split(' ')[1];
 // 		if (authKey) {
@@ -107,7 +105,7 @@
 // 	} else if (values.lastName.length > 12) {
 // 		errors.lastName = 'Last name must be less than 13 characters.';
 //     }
-    
+
 //     //validate birthday
 //     if (!isValidDate(values.birthDay))
 //         errors.birthday = 'Not a valid birhtday';
@@ -119,13 +117,12 @@
 //         errors.biography = 'Biography is required';
 // 	else if (bio.length < 8 || bio.length > 500)
 //         errors.biography = 'Biography field length can be only between 8 and 500 characters';
-        
+
 //     // validate location
 //     if ((center.lat === null || center.lat === null) && (center.lng === null || center.lng == null))
 //         errors.locationErr = 'Not a valid location';
 //     else if ((center.lat < -90.0 || center.lat > 90.0) && (center.lng < -180.0 || center.lng > 180.0))
 // 		errors.locationErr = 'Not a valid location';
-
 
 // 	return errors;
 // }
@@ -423,8 +420,8 @@ const pool = require('../model/dbConnection');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
-// comment every thing 
-// validate token first 
+// comment every thing
+// validate token first
 // get user_name from token validation
 // second midlware gonna be for geting email and user id
 // third middle ware to validate data
@@ -482,66 +479,57 @@ const authToken = (req, res, next) => {
 			const authKey = req.headers.authorization.split(' ')[1];
 			jwt.verify(authKey, 'boul3al7ayat7obilanamnghirakma3ichach7obi00', (err, user) => {
 				if (err) return res.sendStatus(403);
-                req.userNameConnected = user.userName;
+				req.userNameConnected = user.userName;
 			});
 		}
 	}
 	next();
+};
+
+function getUserId(userName) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute('SELECT `id` FROM `users` WHERE `user_name` = ?', [userName], (err, result) => {
+				if (err) reject(err);
+				else {
+					if (result === undefined || result === [] || result.length === 0) {
+						connection.release();
+						resolve(false);
+					} else {
+						const queryResult = result[0].id;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			});
+		});
+	});
 }
 
-function getUserId(userName)
-{
-    return new Promise((resolve, reject) =>{
-        pool.getConnection((err, connection)=>{
-            if (err) reject(err);
-            connection.execute('SELECT `id` FROM `users` WHERE `user_name` = ?', [userName], (err, result) =>{
-                if (err) reject(err);
-                else{
-                    if (result === undefined || result === [] || result.length === 0)
-                    {
-                        connection.release();
-                        resolve(false);
-                    }
-                    else
-                    {
-                        const queryResult = result[0].id;
-                        connection.release();
-                        resolve(queryResult);
-                    }
-                }
-            })
-        })
-    })
+function getUserEmail(userName) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute('SELECT `email` FROM `users` WHERE `user_name` = ?', [userName], (err, result) => {
+				if (err) reject(err);
+				else {
+					if (result === undefined || result === [] || result.length === 0) {
+						connection.release();
+						resolve(false);
+					} else {
+						const queryResult = result[0].email;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			});
+		});
+	});
 }
 
-function getUserEmail(userName)
-{
-    return new Promise((resolve, reject) =>{
-        pool.getConnection((err, connection)=>{
-            if (err) reject(err);
-            connection.execute('SELECT `email` FROM `users` WHERE `user_name` = ?', [userName], (err, result) =>{
-                if (err) reject(err);
-                else{
-                    if (result === undefined || result === [] || result.length === 0)
-                    {
-                        connection.release();
-                        resolve(false);
-                    }
-                    else
-                    {
-                        const queryResult = result[0].email;
-                        connection.release();
-                        resolve(queryResult);
-                    }
-                }
-            })
-        })
-    })
-}
-
-function userNameFound(userName)
-{
-    return new Promise((res, rej) => {
+function userNameFound(userName) {
+	return new Promise((res, rej) => {
 		pool.getConnection((err, connection) => {
 			if (err) rej(err);
 			else {
@@ -562,9 +550,8 @@ function userNameFound(userName)
 	});
 }
 
-function emailFound(email)
-{
-    return new Promise((res, rej) => {
+function emailFound(email) {
+	return new Promise((res, rej) => {
 		pool.getConnection((err, connection) => {
 			if (err) rej(err);
 			else {
@@ -585,27 +572,25 @@ function emailFound(email)
 	});
 }
 
-const getActualInfos = async (req, res, next) =>{
-    const actualInfosErr = {}
-    const actualUserInfos = {}
-    const actualUserName = req.userNameConnected
-    const actualUserId = await getUserId(actualUserName)
-    const actualEmail = await getUserEmail(actualUserName)
-    if (!actualUserId)
-        actualInfosErr.id = "We can't get the user id .Highly chanses that user name has been changed"
-    if (!actualEmail)
-        actualInfosErr.email = "We can't get the user email .Highly chanses that user name has been changed"
-    
-    if (isEmpty(actualInfosErr))
-    {
-        actualUserInfos.actualUserName = actualUserName
-        actualUserInfos.actualUserId = actualUserId
-        actualUserInfos.actualEmail = actualEmail
-        req.actualUserInfos = actualUserInfos
-    }
-    req.actualInfosErr = actualInfosErr
-    next()
-}
+const getActualInfos = async (req, res, next) => {
+	const actualInfosErr = {};
+	const actualUserInfos = {};
+	const actualUserName = req.userNameConnected;
+	const actualUserId = await getUserId(actualUserName);
+	const actualEmail = await getUserEmail(actualUserName);
+	if (!actualUserId) actualInfosErr.id = "We can't get the user id .Highly chanses that user name has been changed";
+	if (!actualEmail)
+		actualInfosErr.email = "We can't get the user email .Highly chanses that user name has been changed";
+
+	if (isEmpty(actualInfosErr)) {
+		actualUserInfos.actualUserName = actualUserName;
+		actualUserInfos.actualUserId = actualUserId;
+		actualUserInfos.actualEmail = actualEmail;
+		req.actualUserInfos = actualUserInfos;
+	}
+	req.actualInfosErr = actualInfosErr;
+	next();
+};
 
 const primaryInfoDataChecker = (values, center) => {
 	const errors = {};
@@ -648,39 +633,37 @@ const primaryInfoDataChecker = (values, center) => {
 		errors.lastName = 'Last name must be at least 4 characters.';
 	} else if (values.lastName.length > 12) {
 		errors.lastName = 'Last name must be less than 13 characters.';
-    }
-    
-    //validate birthday
-    if (!isValidDate(values.birthDay))
-        errors.birthday = 'Not a valid birhtday';
+	}
 
-    //validate biography
-    const bio = values.biography.trim()
+	//validate birthday
+	if (!isValidDate(values.birthDay)) errors.birthday = 'Not a valid birhtday';
 
-    if (bio === '' || typeof bio === undefined)
-        errors.biography = 'Biography is required';
+	//validate biography
+	const bio = values.biography.trim();
+
+	if (bio === '' || typeof bio === undefined) errors.biography = 'Biography is required';
 	else if (bio.length < 8 || bio.length > 500)
-        errors.biography = 'Biography field length can be only between 8 and 500 characters';
-        
-    // validate location
-    // if ((center.lat === null || center.lat === null) && (center.lng === null || center.lng == null))
-    //     errors.locationErr = 'Not a valid location';
-    if ((center.lat < -90.0 || center.lat > 90.0) && (center.lng < -180.0 || center.lng > 180.0))
+		errors.biography = 'Biography field length can be only between 8 and 500 characters';
+
+	// validate location
+	// if ((center.lat === null || center.lat === null) && (center.lng === null || center.lng == null))
+	//     errors.locationErr = 'Not a valid location';
+	if ((center.lat < -90.0 || center.lat > 90.0) && (center.lng < -180.0 || center.lng > 180.0))
 		errors.locationErr = 'Not a valid location';
 
 	return errors;
-}
+};
 
-const trimValues = (values) =>{
-    const trimedValues = {}
-    trimedValues.email = values.email.trim()
-    trimedValues.firstName = values.firstName.trim()
-    trimedValues.lastName = values.lastName.trim()
-    trimedValues.username = values.username.trim()
-    trimedValues.birthDay = values.birthDay.trim()
-    trimedValues.biography = values.biography.trim()
-    return trimedValues
-}
+const trimValues = values => {
+	const trimedValues = {};
+	trimedValues.email = values.email.trim();
+	trimedValues.firstName = values.firstName.trim();
+	trimedValues.lastName = values.lastName.trim();
+	trimedValues.username = values.username.trim();
+	trimedValues.birthDay = values.birthDay.trim();
+	trimedValues.biography = values.biography.trim();
+	return trimedValues;
+};
 
 function sendEmail(mailSettings, mailTransporter) {
 	return new Promise((res, rej) => {
@@ -715,240 +698,227 @@ const sendEmailValidation = async (email, token) => {
 	} catch (err) {
 		console.log(err);
 	}
+};
+
+const primaryValidation = (req, res, next) => {
+	if (!isEmpty(req.actualInfosErr)) {
+		primaryErrs = req.actualInfosErr;
+		req.primaryErrs = primaryErrs;
+		next();
+	}
+	req.primaryErrs = primaryInfoDataChecker(req.body.values, req.body.center);
+	if (isEmpty(req.primaryErrs)) req.trimedValues = trimValues(req.body.values);
+	next();
+};
+
+function updateUserNameAndTokens(userId, values, valToken, authToken) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'UPDATE `users` SET `user_name` = ?, `first_name` = ?, `last_name` = ?, `email` = ?, `token` = ?, `authentication_token` = ?, `birthdate` = ?, `biography` = ? WHERE `id` = ?',
+				[
+					values.username,
+					values.firstName,
+					values.lastName,
+					values.email,
+					valToken,
+					authToken,
+					values.birthDay,
+					values.biography,
+					userId
+				],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+function UpdateAllInfos(userId, values, valToken, authToken) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'UPDATE `users` SET `user_name` = ?, `first_name` = ?, `last_name` = ?, `email` = ?, `token` = ?, `authentication_token` = ?, `verified` = ?, `birthdate` = ?, `biography` = ? WHERE `id` = ?',
+				[
+					values.username,
+					values.firstName,
+					values.lastName,
+					values.email,
+					valToken,
+					authToken,
+					0,
+					values.birthDay,
+					values.biography,
+					userId
+				],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
 }
 
-const primaryValidation = (req, res, next) =>{
-
-    if (!isEmpty(req.actualInfosErr))
-    {
-        primaryErrs = req.actualInfosErr
-        req.primaryErrs = primaryErrs
-        next()
-    }
-    req.primaryErrs = primaryInfoDataChecker(req.body.values, req.body.center)
-    if (isEmpty(req.primaryErrs))
-        req.trimedValues = trimValues(req.body.values);
-    next()
+function updateEmail(userId, values, valToken) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'UPDATE `users` SET `user_name` = ?, `first_name` = ?, `last_name` = ?, `email` = ?, `token` = ?, `verified` = ?, `birthdate` = ?, `biography` = ? WHERE `id` = ?',
+				[
+					values.username,
+					values.firstName,
+					values.lastName,
+					values.email,
+					valToken,
+					0,
+					values.birthDay,
+					values.biography,
+					userId
+				],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
 }
 
-function updateUserNameAndTokens(userId, values, valToken, authToken)
-{
-    return new Promise((resolve, reject)=>{
-        pool.getConnection((err, connection) => {
-            if (err) reject(err);
-            connection.execute('UPDATE `users` SET `user_name` = ?, `first_name` = ?, `last_name` = ?, `email` = ?, `token` = ?, `authentication_token` = ?, `birthdate` = ?, `biography` = ? WHERE `id` = ?',
-             [
-                 values.username,
-                 values.firstName, 
-                 values.lastName,
-                 values.email,
-                 valToken,
-                 authToken,
-                 values.birthDay,
-                 values.biography,
-                 userId
-             ],
-             (err, result) => {
-                if (err) reject(err)
-                else{
-                    const queryResult = result;
-					connection.release();
-					resolve(queryResult);
-                }
-            })
-        })
-    });
-}
-function UpdateAllInfos(userId, values, valToken, authToken)
-{
-    return new Promise((resolve, reject)=>{
-        pool.getConnection((err, connection) => {
-            if (err) reject(err);
-            connection.execute('UPDATE `users` SET `user_name` = ?, `first_name` = ?, `last_name` = ?, `email` = ?, `token` = ?, `authentication_token` = ?, `verified` = ?, `birthdate` = ?, `biography` = ? WHERE `id` = ?',
-             [
-                 values.username,
-                 values.firstName, 
-                 values.lastName,
-                 values.email,
-                 valToken,
-                 authToken,
-                 0,
-                 values.birthDay,
-                 values.biography,
-                 userId
-            ],
-              (err, result) => {
-                if (err) reject(err)
-                else{
-                    const queryResult = result;
-					connection.release();
-					resolve(queryResult);
-                }
-            })
-        })
-    });
+function updateAllWithNoChanges(userId, values) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'UPDATE `users` SET `user_name` = ?, `first_name` = ?, `last_name` = ?, `email` = ?, `birthdate` = ?, `biography` = ? WHERE `id` = ?',
+				[
+					values.username,
+					values.firstName,
+					values.lastName,
+					values.email,
+					values.birthDay,
+					values.biography,
+					userId
+				],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
 }
 
-function updateEmail(userId, values, valToken)
-{
-    return new Promise((resolve, reject)=>{
-        pool.getConnection((err, connection) => {
-            if (err) reject(err);
-            connection.execute('UPDATE `users` SET `user_name` = ?, `first_name` = ?, `last_name` = ?, `email` = ?, `token` = ?, `verified` = ?, `birthdate` = ?, `biography` = ? WHERE `id` = ?',
-             [
-                 values.username,
-                 values.firstName, 
-                 values.lastName,
-                 values.email,
-                 valToken,
-                 0,
-                 values.birthDay,
-                 values.biography,
-                 userId
-            ],
-              (err, result) => {
-                if (err) reject(err)
-                else{
-                    const queryResult = result;
-					connection.release();
-					resolve(queryResult);
-                }
-            })
-        })
-    });
-}
+const finalInfosValidation = async (req, res, next) => {
+	if (!isEmpty(req.primaryErrs)) {
+		req.errors = req.primaryErrs;
+		next();
+	}
+	const actualUserInfos = req.actualUserInfos;
+	const formData = req.trimedValues;
+	const errors = {};
+	let userNameChanged = 0;
+	let emailChanged = 0;
+	let newValidationToken = '';
+	let newAuthenticationToken = '';
 
-function updateAllWithNoChanges(userId, values)
-{
-    return new Promise((resolve, reject)=>{
-        pool.getConnection((err, connection) => {
-            if (err) reject(err);
-            connection.execute('UPDATE `users` SET `user_name` = ?, `first_name` = ?, `last_name` = ?, `email` = ?, `birthdate` = ?, `biography` = ? WHERE `id` = ?',
-             [
-                 values.username,
-                 values.firstName, 
-                 values.lastName,
-                 values.email,
-                 values.birthDay,
-                 values.biography,
-                 userId
-            ],
-              (err, result) => {
-                if (err) reject(err)
-                else{
-                    const queryResult = result;
-					connection.release();
-					resolve(queryResult);
-                }
-            })
-        })
-    });
-}
+	if (formData.username !== actualUserInfos.actualUserName) {
+		const userNameIsFound = await userNameFound(formData.username);
+		if (userNameIsFound === 1) errors.userName = 'User Name already exists';
+		else if (userNameIsFound === 0) {
+			userNameChanged = 1;
 
-const finalInfosValidation = async (req, res, next) =>{
-    if (!isEmpty(req.primaryErrs))
-    {
-        req.errors = req.primaryErrs
-        next()
-    }
-    const actualUserInfos = req.actualUserInfos
-    const formData = req.trimedValues
-    const errors = {}
-    let userNameChanged = 0
-    let emailChanged = 0
-    let newValidationToken = ''
-    let newAuthenticationToken = ''
+			newValidationToken = jwt.sign(
+				{ userName: formData.username },
+				'mafhamnachwalakinma3lichlhalwassaoulfanid04'
+			);
 
+			newAuthenticationToken = jwt.sign(
+				{ userName: formData.username },
+				'boul3al7ayat7obilanamnghirakma3ichach7obi00'
+			);
+			req.authenticationToken = newAuthenticationToken;
+		}
+	}
+	if (formData.email !== actualUserInfos.actualEmail) {
+		const emailIsFound = await emailFound(formData.email);
+		if (emailIsFound === 1) errors.email = 'Email already exists';
+		else if (emailIsFound === 0) {
+			emailChanged = 1;
+			if (userNameChanged === 0) {
+				newValidationToken = jwt.sign(
+					{ userName: formData.username },
+					'mafhamnachwalakinma3lichlhalwassaoulfanid04'
+				);
+			}
+		}
+	}
 
-    if (formData.username !== actualUserInfos.actualUserName)
-    {
-        const userNameIsFound = await userNameFound(formData.username)
-        if (userNameIsFound === 1)
-            errors.userName = "User Name already exists"
-        else if (userNameIsFound === 0)
-        {
-            userNameChanged = 1
+	// update data
+	if (userNameChanged === 1 && emailChanged === 1) {
+		var updateAll = await UpdateAllInfos(
+			actualUserInfos.actualUserId,
+			formData,
+			newValidationToken,
+			newAuthenticationToken
+		);
+		if (updateAll.affectedRows === 1) {
+			sendEmailValidation(formData.email, newValidationToken);
+		} else errors.updateErr = 'Update Error';
+	} else if (userNameChanged === 1 && emailChanged === 0) {
+		var updateUserName = await updateUserNameAndTokens(
+			actualUserInfos.actualUserId,
+			formData,
+			newValidationToken,
+			newAuthenticationToken
+		);
+		if (updateUserName.affectedRows === 1);
+		else errors.updateErr = 'Update Error';
+	} else if (emailChanged === 1 && userNameChanged === 0) {
+		var emailUpdated = await updateEmail(actualUserInfos.actualUserId, formData, newValidationToken);
+		if (emailUpdated.affectedRows === 1) {
+			sendEmailValidation(formData.email, newValidationToken);
+		} else errors.updateErr = 'Update Error';
+	} else {
+		var allUpdated = await updateAllWithNoChanges(actualUserInfos.actualUserId, formData);
+		if (allUpdated.affectedRows === 1);
+		else errors.updateErr = 'Update Error';
+	}
+	req.errors = errors;
+	next();
+};
 
-            newValidationToken = jwt.sign(
-                { userName: formData.username },
-                'mafhamnachwalakinma3lichlhalwassaoulfanid04'
-            );
-
-            newAuthenticationToken = jwt.sign(
-                { userName: formData.username },
-                'boul3al7ayat7obilanamnghirakma3ichach7obi00'
-            );
-            req.authenticationToken = newAuthenticationToken
-        }
-    }
-    if (formData.email !== actualUserInfos.actualEmail)
-    {
-        const emailIsFound = await emailFound(formData.email)
-        if (emailIsFound === 1)
-            errors.email = "Email already exists"
-        else if (emailIsFound === 0)
-        {
-            emailChanged = 1;
-            if (userNameChanged === 0)
-            {
-                newValidationToken = jwt.sign(
-                    { userName: formData.username },
-                    'mafhamnachwalakinma3lichlhalwassaoulfanid04'
-                );
-            }
-        }
-    }
-
-    // update data
-    if (userNameChanged === 1 && emailChanged === 1)
-    {
-        var updateAll = await UpdateAllInfos(actualUserInfos.actualUserId, formData, newValidationToken, newAuthenticationToken)
-        if (updateAll.affectedRows === 1)
-        {
-            sendEmailValidation(formData.email, newValidationToken)
-        }
-        else 
-            errors.updateErr = "Update Error"
-    }else if (userNameChanged === 1 && emailChanged === 0)
-    {
-        var updateUserName = await updateUserNameAndTokens(actualUserInfos.actualUserId, formData, newValidationToken, newAuthenticationToken)
-        if (updateUserName.affectedRows === 1)
-            ;
-        else
-            errors.updateErr = "Update Error"
-    }else if (emailChanged === 1 && userNameChanged === 0)
-    {
-        var emailUpdated = await updateEmail(actualUserInfos.actualUserId, formData, newValidationToken)
-        if (emailUpdated.affectedRows === 1)
-        {
-            sendEmailValidation(formData.email, newValidationToken)
-        }else
-            errors.updateErr = "Update Error"
-    }else
-    {
-        var allUpdated = await  updateAllWithNoChanges(actualUserInfos.actualUserId, formData)
-        if (allUpdated.affectedRows === 1)
-            ;
-        else
-            errors.updateErr = "Update Error"
-    }
-    req.errors = errors
-    next()
-}
-
-router.post('/infoValidator', authToken, getActualInfos, primaryValidation, finalInfosValidation,(req, res) =>{
-    // any time the form gonna be submited the new token has to be send to the front aand then to the back to check it
-    const backEndResponde = {}
-    if (!isEmpty(req.errors))
-    {
-        backEndResponde.errors = req.errors
-        backEndResponde.status = 1 
-    }else
-    {
-        backEndResponde.authToken = req.authenticationToken
-        backEndResponde.status = 0
-    }
-})
-
+router.post('/infoValidator', authToken, getActualInfos, primaryValidation, finalInfosValidation, (req, res) => {
+	// any time the form gonna be submited the new token has to be send to the front aand then to the back to check it
+	const backEndResponde = {};
+	if (!isEmpty(req.errors)) {
+		backEndResponde.errors = req.errors;
+		backEndResponde.status = 1;
+	} else {
+		backEndResponde.authToken = req.authenticationToken;
+		backEndResponde.status = 0;
+	}
+	res.send(backEndResponde);
+});
 
 module.exports = router;
