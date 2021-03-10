@@ -14,6 +14,7 @@ const userPrefsValidtorRouter = require('./routes/userPrefsValidator');
 const userEditSecRouter = require('./routes/userSecValidator');
 const userEditPicsRouter = require('./routes/userPicsValidator');
 const authTokenValidationRouter = require('./routes/authTokenValidation');
+const profileUserInfosRouter = require('./routes/profileInfos');
 
 app.use(bodyParser({ limit: '50mb', extended: true }));
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -37,5 +38,6 @@ app.use('/editProfileInfo', userInfoValidatorRouter);
 app.use('/editPrefs', userPrefsValidtorRouter);
 app.use('/editPwd', userEditSecRouter);
 app.use('/editPics', userEditPicsRouter);
+app.use('/profileUserInfos', profileUserInfosRouter);
 
 app.listen(5000);

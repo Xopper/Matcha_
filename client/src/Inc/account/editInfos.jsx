@@ -34,6 +34,7 @@ export default function EditInfos() {
 			const {
 				data: { userInfos }
 			} = await getData(token);
+			console.log(userInfos);
 			userInfos[0].birthDay = formatDate(userInfos[0].birthDay);
 			setFormSchema(userInfos[0]);
 		};
@@ -50,22 +51,22 @@ export default function EditInfos() {
 
 	function submit() {
 		console.log({ ...values, ...center, contry });
-		const { token } = auth;
-		const instance = axios.create({
-			headers: { Authorization: `Bearer ${token}` }
-		});
 
-		instance
-			.post('http://localhost:5000/editProfileInfo/infoValidator', { values, center })
-			.then(res => {
-				console.log('hahahahah');
-				const { data } = res;
-				console.log(res);
-			})
-			.catch(err => {
-				console.log(err);
-				// catch errors
-			});
+		// const { token } = auth;
+		// const instance = axios.create({
+		// 	headers: { Authorization: `Bearer ${token}` }
+		// });
+
+		// instance
+		// 	.post('http://localhost:5000/editProfileInfo/infoValidator', { values, center })
+		// 	.then(res => {
+		// 		console.log('hahahahah');
+		// 		const { data } = res;
+		// 		console.log(res);
+		// 	})
+		// 	.catch(err => {
+		// 		console.log(err);
+		// 	});
 	}
 
 	function handleKey(e) {

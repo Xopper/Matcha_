@@ -1229,6 +1229,7 @@ signature
 		clip-path: circle(10px at 90% -30%);
 		-webkit-clip-path: circle(10px at 90% -30%);
 		transition: all 1s ease-out;
+		z-index: 1000;
 	}
 
 	.navbar__list.open {

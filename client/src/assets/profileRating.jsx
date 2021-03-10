@@ -12,12 +12,12 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-export default function HalfRating(props) {
+export default function HalfRating({ fameRating }) {
 	const classes = useStyles();
-
+	const rate = parseFloat(fameRating);
 	return (
 		<div className={classes.rating}>
-			<Rating name='half-rating-read' defaultValue={2.5} precision={0.5} readOnly />
+			<Rating name='half-rating-read' value={rate} precision={0.1} readOnly />
 		</div>
 	);
 }

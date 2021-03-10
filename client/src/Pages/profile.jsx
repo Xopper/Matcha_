@@ -1,27 +1,83 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-// import ProtectedRoute from '../routes/protectedRoute';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
 import { capitalizeFirstLetter } from '../helpers/helpers';
 import HalfRating from '../assets/profileRating';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faFlag, faBan } from '@fortawesome/free-solid-svg-icons';
 import SimpleSlider from '../Inc/extra/Slider';
+import { AuthContexts } from '../Contexts/authContext';
+import { getAge } from '../helpers/helpers';
+import axios from 'axios';
+
+async function getData(strname, token) {
+	console.log(strname);
+	const instance = axios.create({
+		headers: { Authorization: `Bearer ${token}` }
+	});
+	const response = await instance.post('http://localhost:5000/profileUserInfos/userInfos', {
+		userNameLokingFor: strname
+	});
+	return response;
+}
 
 function Profile() {
-	const [data, setData] = useState({
-		img:
-			'https://www.hindishayaricollections.com/wp-content/uploads/2020/03/beautifull-girls-images-download-46.jpg',
-		name: '',
-		age: 29
-	});
 	const { username } = useParams();
+	const { auth } = useContext(AuthContexts);
+	const { token } = auth;
+	const history = useHistory();
+
+	const [data, setData] = useState({
+		biography: '',
+		birthday: '',
+		blocked: '',
+		fameRating: '',
+		firstName: '',
+		gender: '',
+		imgOne: '',
+		imgTwo: '',
+		imgThree: '',
+		imgFour: '',
+		lastName: '',
+		liked: '',
+		profileImg: '',
+		reported: '',
+		sexualPreference: '',
+		tags: [],
+		userName: ''
+	});
+
+	useEffect(() => {
+		const data = async () => {
+			const {
+				data: { allUserInfos, status }
+			} = await getData(username, token);
+			if (status === 0) {
+				const keys = Object.keys(allUserInfos);
+				console.log(keys);
+				keys.forEach(el => {
+					console.log(el);
+					if (el === 'birthday') {
+						const age = getAge(allUserInfos[el]);
+						setData(oldData => ({ ...oldData, [el]: age }));
+					} else {
+						setData(oldData => ({ ...oldData, [el]: allUserInfos[el] }));
+					}
+				});
+			} else {
+				history.push('/account');
+			}
+			// console.log(allUserInfos, status);
+		};
+		data();
+	}, [username, token, history]);
+	if (!data.userName) return <div></div>;
 	return (
 		<div className='profile__container'>
 			<div className='profile__wrapper'>
 				<section className='profile__content'>
 					<section className='profile__nav'>
 						<div className='profile__rating'>
-							<HalfRating />
+							<HalfRating fameRating={data.fameRating} />
 						</div>
 						<div className='profile__actions'>
 							{/**must be conditional if this is the logged user or an other user */}
@@ -47,11 +103,11 @@ function Profile() {
 					</section>
 					<section className='profile__heeder'>
 						<div className='img__wrapper'>
-							<img src={data.img} alt='tacos' />
+							<img src={data.profileImg} alt='tacos' />
 							<span className='profile__status'></span>
 						</div>
 						<div className='profile__fullname'>
-							{`${capitalizeFirstLetter(username)}, ${data.age}`}{' '}
+							{`${capitalizeFirstLetter(data.userName)}, ${data.birthday}`}{' '}
 							{/**use last seen here if hes of line */}
 							<span className='profile__lastSeen'>(last seen: 1 day ago)</span>
 						</div>
@@ -60,50 +116,50 @@ function Profile() {
 								<p>Fullname.</p>
 								<span></span>
 							</div>
-							<div className='profile__fieldset--value'>Isabel de Maria</div>
+							<div className='profile__fieldset--value'>{`${capitalizeFirstLetter(
+								data.firstName
+							)} ${capitalizeFirstLetter(data.lastName)}`}</div>
 						</div>
 						<div className='profile__fieldset'>
 							<div className='profile__fieldset--key'>
 								<p>Gender.</p>
 								<span></span>
 							</div>
-							<div className='profile__fieldset--value'>Female</div>
+							<div className='profile__fieldset--value'>{capitalizeFirstLetter(data.gender)}</div>
 						</div>
 						<div className='profile__fieldset'>
 							<div className='profile__fieldset--key'>
 								<p>Interestes.</p>
 								<span></span>
 							</div>
-							<div className='profile__fieldset--value'>Male</div>
+							<div className='profile__fieldset--value'>
+								{capitalizeFirstLetter(data.sexualPreference)}
+							</div>
 						</div>
 						<div className='profile__fieldset'>
 							<div className='profile__fieldset--key'>
 								<p>Contry.</p>
 								<span></span>
 							</div>
-							<div className='profile__fieldset--value'>Brazil</div>
+							<div className='profile__fieldset--value'>{data.country || `undefined`}</div>
 						</div>
 						<div className='profile__fieldset'>
 							<div className='profile__fieldset--key'>
 								<p>Tags.</p>
 								<span></span>
 							</div>
-							<div className='profile__fieldset--value'>Male, tach, lobe, president.</div>
+							<div className='profile__fieldset--value'>{data.tags.toString().replace(/,/g, ', ')}</div>
 						</div>
 						<div className='profile__fieldset'>
 							<div className='profile__fieldset--key'>
 								<p>Biography.</p>
 								<span></span>
 							</div>
-							<div className='profile__fieldset--value'>
-								Lorem ipsum dolor, sit amet consectetur adipisicing elit. Asperiores quae voluptate
-								magni consequuntur itaque est voluptas hic rerum unde neque ad rem modi, saepe nulla,
-								non repudiandae ipsam odio ipsum!
-							</div>
+							<div className='profile__fieldset--value'>{data.biography}</div>
 						</div>
 					</section>
 					<section className='profile__footer'>
-						<SimpleSlider slides={[data.img, data.img, data.img, data.img]} />
+						<SimpleSlider slides={[data.imgOne, data.imgTwo, data.imgThree, data.imgFour]} />
 					</section>
 				</section>
 			</div>
