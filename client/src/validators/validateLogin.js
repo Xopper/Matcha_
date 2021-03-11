@@ -14,6 +14,7 @@ export default function validateLogin(values) {
 
 	// TODO {insert valid reg expression} [Done]
 	// validate Password
+
 	if (!values.password) {
 		errors.password = 'Password is required field.';
 	} else if (

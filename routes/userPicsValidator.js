@@ -81,12 +81,14 @@ const base64ImageValidation = image => {
 	return error;
 };
 
-function updatePics(pics) {
-	return new Promise((responde, reject) => {
+function updatePics(userId, pics) {
+	console.log(pics);
+	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
 			connection.execute(
 				'UPDATE `users` SET `profile_img` = ?, `img_one` = ?, `img_two` = ?, `img_three` = ? , `img_four` = ? WHERE `id` = ?',
+				[pics.avatarSrc, pics.profilePic1, pics.profilePic2, pics.profilePic3, pics.profilePic4, userId],
 				(err, result) => {
 					if (err) reject(err);
 					else {
@@ -131,7 +133,7 @@ router.post('/editPicsValidator', authToken, getActualUserId, validatePics, asyn
 		backEndRes.status = 1;
 		res.send(backEndRes);
 	} else {
-		const picsUpdated = await updatePics(req.body);
+		const picsUpdated = await updatePics(req.userId, req.body);
 		backEndRes.status = 0;
 		res.send(backEndRes);
 	}

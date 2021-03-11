@@ -15,6 +15,8 @@ const userEditSecRouter = require('./routes/userSecValidator');
 const userEditPicsRouter = require('./routes/userPicsValidator');
 const authTokenValidationRouter = require('./routes/authTokenValidation');
 const profileUserInfosRouter = require('./routes/profileInfos');
+const forgetPwdEmailCheckerRouter = require('./routes/forgetPasswordEmailChecker');
+const PasswordTokenVerificationRouter = require('./routes/forgetPasswordTokenValidation');
 
 app.use(bodyParser({ limit: '50mb', extended: true }));
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -39,5 +41,7 @@ app.use('/editPrefs', userPrefsValidtorRouter);
 app.use('/editPwd', userEditSecRouter);
 app.use('/editPics', userEditPicsRouter);
 app.use('/profileUserInfos', profileUserInfosRouter);
+app.use('/forgetPwdEmailChecker', forgetPwdEmailCheckerRouter);
+app.use('/passwordverification', PasswordTokenVerificationRouter);
 
 app.listen(5000);

@@ -56,14 +56,14 @@ export default function EditPics() {
 			const instance = axios.create({
 				headers: { Authorization: `Bearer ${token}` }
 			});
-			const {
-				data: { status }
-			} = await instance.post('http://localhost:5000/editPics/editPicsValidator', {
+			const res = await instance.post('http://localhost:5000/editPics/editPicsValidator', {
 				...avatar,
 				...images
 			});
-			console.log(status);
-			if (status === 0) {
+			const { data } = res;
+			console.log(data);
+			// console.log(data.status);
+			if (data.status === 0) {
 				Swal.fire({
 					title: 'YAAAP!',
 					text: 'Preferences updated successfully!',

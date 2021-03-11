@@ -66,7 +66,6 @@ function Profile() {
 			} else {
 				history.push('/account');
 			}
-			// console.log(allUserInfos, status);
 		};
 		data();
 	}, [username, token, history]);

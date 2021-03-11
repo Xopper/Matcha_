@@ -2,59 +2,12 @@ const router = require('express').Router();
 const pool = require('../model/dbConnection');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-
-// comment every thing
-// validate token first
-// get user_name from token validation
-// second midlware gonna be for geting email and user id
-// third middle ware to validate data
-
 const isEmpty = obj => {
 	for (let prop in obj) {
 		if (obj.hasOwnProperty(prop)) return false;
 	}
 	return true;
 };
-
-function isValidDate(str) {
-	// STRING FORMAT yyyy-mm-dd
-	if (str == '' || str == null) {
-		return false;
-	}
-
-	// m[1] is year 'YYYY' * m[2] is month 'MM' * m[3] is day 'DD'
-	var m = str.match(/(\d{4})-(\d{2})-(\d{2})/);
-
-	// STR IS NOT FIT m IS NOT OBJECT
-	if (m === null || typeof m !== 'object') {
-		return false;
-	}
-
-	// CHECK m TYPE
-	if (typeof m !== 'object' && m !== null && m.size !== 3) {
-		return false;
-	}
-
-	var ret = true; //RETURN VALUE
-	var thisYear = new Date().getFullYear(); //YEAR NOW
-	var minYear = 1900; //MIN YEAR
-
-	// YEAR CHECK
-	if (m[1].length < 4 || m[1] < minYear || m[1] > thisYear) {
-		ret = false;
-	}
-	// MONTH CHECK
-	if (m[2].length < 2 || m[2] < 1 || m[2] > 12) {
-		ret = false;
-	}
-	// DAY CHECK
-	if (m[3].length < 2 || m[3] < 1 || m[3] > 31) {
-		ret = false;
-	}
-
-	return ret;
-}
-
 const authToken = (req, res, next) => {
 	if (req.headers.authorization) {
 		const authKey = req.headers.authorization.split(' ')[1];
@@ -63,191 +16,12 @@ const authToken = (req, res, next) => {
 			jwt.verify(authKey, 'boul3al7ayat7obilanamnghirakma3ichach7obi00', (err, user) => {
 				if (err) return res.sendStatus(403);
 				req.userNameConnected = user.userName;
+				req.authToken = authKey;
 			});
 		}
 	}
 	next();
 };
-
-function getUserId(userName) {
-	return new Promise((resolve, reject) => {
-		pool.getConnection((err, connection) => {
-			if (err) reject(err);
-			connection.execute('SELECT `id` FROM `users` WHERE `user_name` = ?', [userName], (err, result) => {
-				if (err) reject(err);
-				else {
-					if (result === undefined || result === [] || result.length === 0) {
-						connection.release();
-						resolve(false);
-					} else {
-						const queryResult = result[0].id;
-						connection.release();
-						resolve(queryResult);
-					}
-				}
-			});
-		});
-	});
-}
-
-function getUserEmail(userName) {
-	return new Promise((resolve, reject) => {
-		pool.getConnection((err, connection) => {
-			if (err) reject(err);
-			connection.execute('SELECT `email` FROM `users` WHERE `user_name` = ?', [userName], (err, result) => {
-				if (err) reject(err);
-				else {
-					if (result === undefined || result === [] || result.length === 0) {
-						connection.release();
-						resolve(false);
-					} else {
-						const queryResult = result[0].email;
-						connection.release();
-						resolve(queryResult);
-					}
-				}
-			});
-		});
-	});
-}
-
-function userNameFound(userName) {
-	return new Promise((res, rej) => {
-		pool.getConnection((err, connection) => {
-			if (err) rej(err);
-			else {
-				connection.execute(
-					'SELECT COUNT(*) as count FROM `users` WHERE `user_name` = ?',
-					[userName],
-					(err, result) => {
-						if (err) rej(err);
-						else {
-							const queryResult = result[0].count;
-							connection.release();
-							res(queryResult);
-						}
-					}
-				);
-			}
-		});
-	});
-}
-
-function emailFound(email) {
-	return new Promise((res, rej) => {
-		pool.getConnection((err, connection) => {
-			if (err) rej(err);
-			else {
-				connection.execute(
-					'SELECT COUNT(*) as count FROM `users` WHERE `email` = ?',
-					[email],
-					(err, result) => {
-						if (err) rej(err);
-						else {
-							const queryResult = result[0].count;
-							connection.release();
-							res(queryResult);
-						}
-					}
-				);
-			}
-		});
-	});
-}
-
-const getActualInfos = async (req, res, next) => {
-	const actualInfosErr = {};
-	const actualUserInfos = {};
-	const actualUserName = req.userNameConnected;
-	const actualUserId = await getUserId(actualUserName);
-	const actualEmail = await getUserEmail(actualUserName);
-	if (!actualUserId) actualInfosErr.id = "We can't get the user id .Highly chanses that user name has been changed";
-	if (!actualEmail)
-		actualInfosErr.email = "We can't get the user email .Highly chanses that user name has been changed";
-
-	if (isEmpty(actualInfosErr)) {
-		actualUserInfos.actualUserName = actualUserName;
-		actualUserInfos.actualUserId = actualUserId;
-		actualUserInfos.actualEmail = actualEmail;
-		req.actualUserInfos = actualUserInfos;
-	}
-	req.actualInfosErr = actualInfosErr;
-	next();
-};
-
-const primaryInfoDataChecker = (values, center) => {
-	const errors = {};
-
-	// validating Email
-	if (!values.email || values.email.trim() === '') {
-		errors.email = 'Email address is required field.';
-	} else if (!/^([a-zA-Z._0-9-]+)@([a-zA-Z0-9]+[.]?)*([a-zA-Z0-9])(\.[a-zA-Z]{2,4})$/.test(values.email)) {
-		errors.email = 'Email address is not valid.';
-	}
-
-	// validating username
-	if (!values.username || values.username.trim() === '') {
-		errors.username = 'Username is required field.';
-	} else if (!/^\w+$/.test(values.username)) {
-		errors.username = 'Use only Alpha numeric characters.';
-	} else if (values.username.length < 3) {
-		errors.username = 'Username must be at least 4 characters.';
-	} else if (values.username.length > 12) {
-		errors.username = 'Username must be less than 13 characters.';
-	}
-
-	// validate first Name
-	if (!values.firstName || values.firstName.trim() === '') {
-		errors.firstName = 'First name is required field.';
-	} else if (!/^([a-zA-Z ])+$/.test(values.firstName)) {
-		errors.firstName = 'Use only alphabetic characters.';
-	} else if (values.firstName.length < 3) {
-		errors.firstName = 'First name must be at least 4 characters.';
-	} else if (values.firstName.length > 12) {
-		errors.firstName = 'First name must be less than 13 characters.';
-	}
-
-	// validate Last name
-	if (!values.lastName || values.lastName.trim() === '') {
-		errors.lastName = 'Last name is required field.';
-	} else if (!/^([a-zA-Z ])+$/.test(values.lastName)) {
-		errors.lastName = 'Use only alphabetic characters.';
-	} else if (values.lastName.length < 3) {
-		errors.lastName = 'Last name must be at least 4 characters.';
-	} else if (values.lastName.length > 12) {
-		errors.lastName = 'Last name must be less than 13 characters.';
-	}
-
-	//validate birthday
-	if (!isValidDate(values.birthDay)) errors.birthday = 'Not a valid birhtday';
-
-	//validate biography
-	const bio = values.biography.trim();
-
-	if (bio === '' || typeof bio === undefined) errors.biography = 'Biography is required';
-	else if (bio.length < 8 || bio.length > 500)
-		errors.biography = 'Biography field length can be only between 8 and 500 characters';
-
-	// validate location
-	// if ((center.lat === null || center.lat === null) && (center.lng === null || center.lng == null))
-	//     errors.locationErr = 'Not a valid location';
-	if ((center.lat < -90.0 || center.lat > 90.0) && (center.lng < -180.0 || center.lng > 180.0))
-		errors.locationErr = 'Not a valid location';
-
-	return errors;
-};
-
-const trimValues = values => {
-	const trimedValues = {};
-	trimedValues.email = values.email.trim();
-	trimedValues.firstName = values.firstName.trim();
-	trimedValues.lastName = values.lastName.trim();
-	trimedValues.username = values.username.trim();
-	trimedValues.birthDay = values.birthDay.trim();
-	trimedValues.biography = values.biography.trim();
-	return trimedValues;
-};
-
 function sendEmail(mailSettings, mailTransporter) {
 	return new Promise((res, rej) => {
 		mailTransporter.sendMail(mailSettings, (err, info) => {
@@ -256,7 +30,6 @@ function sendEmail(mailSettings, mailTransporter) {
 		});
 	});
 }
-
 const sendEmailValidation = async (email, token) => {
 	const transporter = nodemailer.createTransport({
 		service: 'gmail',
@@ -265,7 +38,6 @@ const sendEmailValidation = async (email, token) => {
 			pass: 'dakchidialmatcha03'
 		}
 	});
-
 	const mailOptions = {
 		from: 'matchaproj@gmail.com',
 		to: email,
@@ -282,40 +54,112 @@ const sendEmailValidation = async (email, token) => {
 		console.log(err);
 	}
 };
-
-const primaryValidation = (req, res, next) => {
-	if (!isEmpty(req.actualInfosErr)) {
-		primaryErrs = req.actualInfosErr;
-		req.primaryErrs = primaryErrs;
-		next();
+function isValidDate(str) {
+	// STRING FORMAT yyyy-mm-dd
+	if (str == '' || str == null) {
+		return false;
 	}
-	req.primaryErrs = primaryInfoDataChecker(req.body.values, req.body.center);
-	if (isEmpty(req.primaryErrs)) req.trimedValues = trimValues(req.body.values);
+	// m[1] is year 'YYYY' * m[2] is month 'MM' * m[3] is day 'DD'
+	var m = str.match(/(\d{4})-(\d{2})-(\d{2})/);
+	// STR IS NOT FIT m IS NOT OBJECT
+	if (m === null || typeof m !== 'object') {
+		return false;
+	}
+	// CHECK m TYPE
+	if (typeof m !== 'object' && m !== null && m.size !== 3) {
+		return false;
+	}
+	var ret = true; //RETURN VALUE
+	var thisYear = new Date().getFullYear(); //YEAR NOW
+	var minYear = 1900; //MIN YEAR
+	// YEAR CHECK
+	if (m[1].length < 4 || m[1] < minYear || m[1] > thisYear) {
+		ret = false;
+	}
+	// MONTH CHECK
+	if (m[2].length < 2 || m[2] < 1 || m[2] > 12) {
+		ret = false;
+	}
+	// DAY CHECK
+	if (m[3].length < 2 || m[3] < 1 || m[3] > 31) {
+		ret = false;
+	}
+	return ret;
+}
+const trimValues = (req, res, next) => {
+	const values = {};
+	values.userName = req.body.username.trim();
+	values.firstName = req.body.firstName.trim();
+	values.lastName = req.body.lastName.trim();
+	values.email = req.body.email.trim();
+	values.biography = req.body.biography.trim();
+	values.birthDay = req.body.birthDay.trim();
+	values.country = req.body.country.trim();
+	values.lat = req.body.lat;
+	values.lng = req.body.lng;
+	req.values = values;
+	next();
+};
+const primaryValidation = (req, res, next) => {
+	const errors = {};
+	const values = req.values;
+	if (!values.email || values.email === '') {
+		errors.email = 'Email address is required field.';
+	} else if (!/^([a-zA-Z._0-9-]+)@([a-zA-Z0-9]+[.]?)*([a-zA-Z0-9])(\.[a-zA-Z]{2,4})$/.test(values.email)) {
+		errors.email = 'Email address is not valid.';
+	}
+	if (!values.userName || values.userName === '') {
+		errors.userName = 'Username is required field.';
+	} else if (!/^\w+$/.test(values.userName)) {
+		errors.userName = 'Use only Alpha numeric characters.';
+	} else if (values.userName.length < 3) {
+		errors.userName = 'Username must be at least 4 characters.';
+	} else if (values.userName.length > 12) {
+		errors.userName = 'Username must be less than 13 characters.';
+	}
+	if (!values.firstName || values.firstName === '') {
+		errors.firstName = 'First name is required field.';
+	} else if (!/^([a-zA-Z ])+$/.test(values.firstName)) {
+		errors.firstName = 'Use only alphabetic characters.';
+	} else if (values.firstName.length < 3) {
+		errors.firstName = 'First name must be at least 4 characters.';
+	} else if (values.firstName.length > 12) {
+		errors.firstName = 'First name must be less than 13 characters.';
+	}
+	if (!values.lastName || values.lastName === '') {
+		errors.lastName = 'Last name is required field.';
+	} else if (!/^([a-zA-Z ])+$/.test(values.lastName)) {
+		errors.lastName = 'Use only alphabetic characters.';
+	} else if (values.lastName.length < 3) {
+		errors.lastName = 'Last name must be at least 4 characters.';
+	} else if (values.lastName.length > 12) {
+		errors.lastName = 'Last name must be less than 13 characters.';
+	}
+	if (!isValidDate(values.birthDay)) errors.birthDay = 'Not a valid birhtday';
+
+	if (values.biography === '' || !values.biography) errors.biography = 'Biography is required';
+	else if (values.biography.length < 8 || values.biography.length > 500)
+		errors.biography = 'Biography field length can be only between 8 and 500 characters';
+
+	if ((values.lat === null || values.lat === null) && (values.lng === null || values.lng == null))
+		errors.locationErr = 'Not a valid location';
+	if ((values.lat < -90.0 || values.lat > 90.0) && (values.lng < -180.0 || values.lng > 180.0))
+		errors.locationErr = 'Not a valid location';
+	req.primaryErrors = errors;
 	next();
 };
 
-function updateUserNameAndTokens(userId, values, valToken, authToken) {
+function checkIfUserExists(userName) {
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
-			console.log('--', values.username);
 			connection.execute(
-				'UPDATE `users` SET `user_name` = ?, `first_name` = ?, `last_name` = ?, `email` = ?, `token` = ?, `authentication_token` = ?, `birthdate` = ?, `biography` = ? WHERE `id` = ?',
-				[
-					values.username,
-					values.firstName,
-					values.lastName,
-					values.email,
-					valToken,
-					authToken,
-					values.birthDay,
-					values.biography,
-					userId
-				],
+				'SELECT COUNT(*) AS `userExist` FROM `users` WHERE `user_name` = ?',
+				[userName],
 				(err, result) => {
 					if (err) reject(err);
 					else {
-						const queryResult = result;
+						const queryResult = result[0].userExist;
 						connection.release();
 						resolve(queryResult);
 					}
@@ -324,28 +168,17 @@ function updateUserNameAndTokens(userId, values, valToken, authToken) {
 		});
 	});
 }
-function UpdateAllInfos(userId, values, valToken, authToken) {
+function checkIfEmailExists(email) {
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
 			connection.execute(
-				'UPDATE `users` SET `user_name` = ?, `first_name` = ?, `last_name` = ?, `email` = ?, `token` = ?, `authentication_token` = ?, `verified` = ?, `birthdate` = ?, `biography` = ? WHERE `id` = ?',
-				[
-					values.username,
-					values.firstName,
-					values.lastName,
-					values.email,
-					valToken,
-					authToken,
-					0,
-					values.birthDay,
-					values.biography,
-					userId
-				],
+				'SELECT COUNT(*) AS `emailExists` FROM `users` WHERE `email` = ?',
+				[email],
 				(err, result) => {
 					if (err) reject(err);
 					else {
-						const queryResult = result;
+						const queryResult = result[0].emailExists;
 						connection.release();
 						resolve(queryResult);
 					}
@@ -354,29 +187,17 @@ function UpdateAllInfos(userId, values, valToken, authToken) {
 		});
 	});
 }
-
-function updateEmail(userId, values, valToken) {
+function getUserAllActualUser(userName) {
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
-			console.log('====', values.username);
 			connection.execute(
-				'UPDATE `users` SET `user_name` = ?, `first_name` = ?, `last_name` = ?, `email` = ?, `token` = ?, `verified` = ?, `birthdate` = ?, `biography` = ? WHERE `id` = ?',
-				[
-					values.username,
-					values.firstName,
-					values.lastName,
-					values.email,
-					valToken,
-					0,
-					values.birthDay,
-					values.biography,
-					userId
-				],
+				'SELECT `id`, `first_name`, `last_name`,  `email`, `token`, `authentication_token`, `birthdate`, `biography`, `latitude`, `longitude`, `country`  FROM `users` WHERE `user_name` = ?',
+				[userName],
 				(err, result) => {
 					if (err) reject(err);
 					else {
-						const queryResult = result;
+						const queryResult = result[0];
 						connection.release();
 						resolve(queryResult);
 					}
@@ -385,128 +206,184 @@ function updateEmail(userId, values, valToken) {
 		});
 	});
 }
-
-function updateAllWithNoChanges(userId, values) {
-	return new Promise((resolve, reject) => {
-		pool.getConnection((err, connection) => {
-			if (err) reject(err);
-			connection.execute(
-				'UPDATE `users` SET `user_name` = ?, `first_name` = ?, `last_name` = ?, `email` = ?, `birthdate` = ?, `biography` = ? WHERE `id` = ?',
-				[
-					values.username,
-					values.firstName,
-					values.lastName,
-					values.email,
-					values.birthDay,
-					values.biography,
-					userId
-				],
-				(err, result) => {
-					if (err) reject(err);
-					else {
-						const queryResult = result;
-						connection.release();
-						resolve(queryResult);
-					}
-				}
-			);
-		});
-	});
-}
-
-const finalInfosValidation = async (req, res, next) => {
-	if (!isEmpty(req.primaryErrs)) {
-		req.errors = req.primaryErrs;
+const getActualInfos = async (req, res, next) => {
+	const actualUserName = req.userNameConnected;
+	const actualUserInfos = {};
+	const errors = {};
+	if (!isEmpty(req.primaryErrors)) {
 		next();
 	} else {
-		const actualUserInfos = req.actualUserInfos;
-		const formData = req.trimedValues;
-		const errors = {};
-		let userNameChanged = 0;
-		let emailChanged = 0;
-		let newValidationToken = '';
-		let newAuthenticationToken = '';
-
-		if (formData.username !== actualUserInfos.actualUserName) {
-			const userNameIsFound = await userNameFound(formData.username);
-			if (userNameIsFound === 1) {
-				errors.userName = 'User Name already exists';
-				userNameChanged = 0;
-			} else if (userNameIsFound === 0) {
-				userNameChanged = 1;
-
-				newValidationToken = jwt.sign(
-					{ userName: formData.username },
-					'mafhamnachwalakinma3lichlhalwassaoulfanid04'
-				);
-
-				newAuthenticationToken = jwt.sign(
-					{ userName: formData.username },
+		const userExists = await checkIfUserExists(actualUserName);
+		if (userExists === 1) {
+			// const actualEmail = await getUserEmail(actualUserName);
+			const allActualUserInfos = await getUserAllActualUser(actualUserName);
+			// console.log('???? ', allActualUserInfos);
+			actualUserInfos.userId = allActualUserInfos.id;
+			actualUserInfos.userName = actualUserName;
+			actualUserInfos.firstName = allActualUserInfos.first_name;
+			actualUserInfos.lastName = allActualUserInfos.last_name;
+			actualUserInfos.email = allActualUserInfos.email;
+			actualUserInfos.token = allActualUserInfos.token;
+			actualUserInfos.authentication_token = allActualUserInfos.authentication_token;
+			actualUserInfos.birthdate = allActualUserInfos.birthdate;
+			actualUserInfos.biography = allActualUserInfos.biography;
+			actualUserInfos.latitude = allActualUserInfos.latitude;
+			actualUserInfos.longitude = allActualUserInfos.longitude;
+			actualUserInfos.country = allActualUserInfos.country;
+		} else {
+			errors.userExists = 'actual User has a problem';
+		}
+	}
+	req.actualUserInfosErrors = errors;
+	req.actualUserInfos = actualUserInfos;
+	next();
+};
+function updateTheData(userId, values) {
+	// console.log('userId', userId);
+	// console.log('values', values);
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'UPDATE `users` SET `user_name` = ?, `first_name`= ?,`last_name` = ?, `email`= ?, `birthdate` = ?, `biography`= ?, `token` = ?, `authentication_token`= ?, `verified` = ?, `latitude` = ? , `longitude` = ?, `country` = ? WHERE `id` = ?',
+				[
+					values.userName,
+					values.firstName,
+					values.lastName,
+					values.email,
+					values.birthDay,
+					values.biography,
+					values.token,
+					values.authentication_token,
+					values.verified,
+					values.latitude,
+					values.longitude,
+					values.country,
+					userId
+				],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(result);
+					}
+				}
+			);
+		});
+	});
+}
+function getAuthToken(userId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT `authentication_token`  FROM `users` WHERE `id` = ?',
+				[userId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result[0].authentication_token;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+const updateUserInfos = async (req, res, next) => {
+	console.log('req.primaryErrors', req.primaryErrors);
+	console.log('req.actualUserInfosErrors', req.actualUserInfosErrors);
+	console.log('req.actualUserInfos', req.actualUserInfos);
+	console.log('req.values', req.values);
+	const errors = {};
+	const dataToUpdate = {};
+	if (!isEmpty(req.primaryErrors) || !isEmpty(req.actualUserInfosErrors)) {
+		next();
+	} else {
+		dataToUpdate.userName = req.actualUserInfos.userName;
+		dataToUpdate.firstName = req.values.firstName;
+		dataToUpdate.lastName = req.values.lastName;
+		dataToUpdate.email = req.actualUserInfos.email;
+		dataToUpdate.verified = 1;
+		dataToUpdate.token = req.actualUserInfos.token;
+		dataToUpdate.authentication_token = req.actualUserInfos.authentication_token;
+		dataToUpdate.birthDay = req.values.birthDay;
+		dataToUpdate.biography = req.values.biography;
+		dataToUpdate.latitude = req.values.lat;
+		dataToUpdate.longitude = req.values.lng;
+		dataToUpdate.country = req.values.country;
+		console.log('dataToUpdate', dataToUpdate);
+		if (req.actualUserInfos.userName !== req.values.userName) {
+			const newUserNameAlreadyExists = await checkIfUserExists(req.values.userName);
+			if (newUserNameAlreadyExists === 1) {
+				errors.newUserNameAlreadyExists = 'Username already exists.';
+			} else {
+				newAuthToken = jwt.sign(
+					{ userName: req.values.userName },
 					'boul3al7ayat7obilanamnghirakma3ichach7obi00'
 				);
-				req.authenticationToken = newAuthenticationToken;
+				dataToUpdate.userName = req.values.userName;
+				dataToUpdate.authentication_token = newAuthToken;
 			}
 		}
-		if (formData.email !== actualUserInfos.actualEmail) {
-			const emailIsFound = await emailFound(formData.email);
-			if (emailIsFound === 1) errors.email = 'Email already exists';
-			else if (emailIsFound === 0) {
-				emailChanged = 1;
-				if (userNameChanged === 0) {
+		if (req.actualUserInfos.email !== req.values.email) {
+			const newEmailAlreadyExists = await checkIfEmailExists(req.values.email);
+			if (newEmailAlreadyExists === 1) {
+				errors.newEmailAlreadyExists = 'Email already exists.';
+			} else {
+				if (!isEmpty(errors)) {
 					newValidationToken = jwt.sign(
-						{ userName: formData.username },
+						{ userName: req.actualUserInfos.userName },
 						'mafhamnachwalakinma3lichlhalwassaoulfanid04'
 					);
+					dataToUpdate.email = req.values.email;
+					dataToUpdate.token = newValidationToken;
+					dataToUpdate.verified = 0;
+					sendEmailValidation(dataToUpdate.email, dataToUpdate.token);
+				} else {
+					newValidationToken = jwt.sign(
+						{ userName: req.values.userName },
+						'mafhamnachwalakinma3lichlhalwassaoulfanid04'
+					);
+					dataToUpdate.email = req.values.email;
+					dataToUpdate.token = newValidationToken;
+					dataToUpdate.verified = 0;
+					sendEmailValidation(dataToUpdate.email, dataToUpdate.token);
 				}
 			}
 		}
-
-		// update data
-		if (userNameChanged === 1 && emailChanged === 1) {
-			var updateAll = await UpdateAllInfos(
-				actualUserInfos.actualUserId,
-				formData,
-				newValidationToken,
-				newAuthenticationToken
-			);
-			if (updateAll.affectedRows === 1) {
-				sendEmailValidation(formData.email, newValidationToken);
-			} else errors.updateErr = 'Update Error';
-		} else if (userNameChanged === 1 && emailChanged === 0) {
-			var updateUserName = await updateUserNameAndTokens(
-				actualUserInfos.actualUserId,
-				formData,
-				newValidationToken,
-				newAuthenticationToken
-			);
-			if (updateUserName.affectedRows === 1);
-			else errors.updateErr = 'Update Error';
-		} else if (emailChanged === 1 && userNameChanged === 0) {
-			var emailUpdated = await updateEmail(actualUserInfos.actualUserId, formData, newValidationToken);
-			if (emailUpdated.affectedRows === 1) {
-				sendEmailValidation(formData.email, newValidationToken);
-			} else errors.updateErr = 'Update Error';
+		if (!isEmpty(errors)) {
+			req.finalErrors = errors;
+			next();
 		} else {
-			var allUpdated = await updateAllWithNoChanges(actualUserInfos.actualUserId, formData);
-			if (allUpdated.affectedRows === 1);
-			else errors.updateErr = 'Update Error';
+			const dataUpdatedResult = await updateTheData(req.actualUserInfos.userId, dataToUpdate);
+			const theAuthToken = await getAuthToken(req.actualUserInfos.userId);
+			req.theAuthToken = theAuthToken;
+			console.log('dataUpdatedResult', dataUpdatedResult);
 		}
-		req.errors = errors;
+		next();
 	}
-	next();
 };
-
-router.post('/infoValidator', authToken, getActualInfos, primaryValidation, finalInfosValidation, (req, res) => {
-	// any time the form gonna be submited the new token has to be send to the front aand then to the back to check it
-	const backEndResponde = {};
-	if (!isEmpty(req.errors)) {
-		backEndResponde.errors = req.errors;
-		backEndResponde.status = 1;
+router.post('/infoValidator', authToken, trimValues, primaryValidation, getActualInfos, updateUserInfos, (req, res) => {
+	const backEndResponse = {};
+	if (!isEmpty(req.primaryErrors)) {
+		backEndResponse.errors = req.primaryErrors;
+		backEndResponse.status = 1;
+		res.send(backEndResponse);
+	} else if (!isEmpty(req.actualUserInfosErrors)) {
+		backEndResponse.errors = req.actualUserInfosErrors;
+		backEndResponse.status = 1;
+		res.send(backEndResponse);
+	} else if (!isEmpty(req.finalErrors)) {
+		backEndResponse.errors = req.finalErrors;
+		backEndResponse.status = 1;
+		res.send(backEndResponse);
 	} else {
-		backEndResponde.authToken = req.authenticationToken;
-		backEndResponde.status = 0;
+		backEndResponse.newAuthToken = req.theAuthToken;
+		backEndResponse.status = 0;
+		res.send(backEndResponse);
 	}
-	res.send(backEndResponde);
 });
-
 module.exports = router;

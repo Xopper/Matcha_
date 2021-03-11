@@ -21,7 +21,7 @@ function getUserInformations(userName) {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
 			connection.execute(
-				'SELECT `user_name` as `username`, `first_name` as `firstName`, `last_name` as `lastName`, `email`, `birthdate` as `birthDay`, `biography` FROM `users` WHERE `user_name` = ?',
+				'SELECT `user_name` as `username`, `first_name` as `firstName`, `last_name` as `lastName`, `email`, `birthdate` as `birthDay`, `biography`, `latitude` as `lat`, `longitude` as `lng` FROM `users` WHERE `user_name` = ?',
 				[userName],
 				(err, result) => {
 					if (err) reject(err);

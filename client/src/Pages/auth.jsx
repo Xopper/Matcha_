@@ -5,6 +5,7 @@ import LogForm from '../Inc/auth/logForm';
 import RegForm from '../Inc/auth/regFrom';
 import ForgetForm from '../Inc/auth/forgetForm';
 import ProtectedRoute from '../routes/protectedRoute';
+import Confirm from '../Inc/auth/confirm';
 
 function Auth() {
 	return (
@@ -14,6 +15,7 @@ function Auth() {
 					<div className='auth__first'>
 						<Switch>
 							{/* need to add reset password page*/}
+							<ProtectedRoute path='/auth/confirm/:token' component={Confirm} />
 							<ProtectedRoute path='/auth/forgetpass' component={ForgetForm} />
 							<ProtectedRoute path='/auth/register' component={RegForm} />
 							<ProtectedRoute path='/auth/login' component={LogForm} />

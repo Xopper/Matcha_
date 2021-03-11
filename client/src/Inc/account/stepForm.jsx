@@ -50,7 +50,7 @@ function StepForm(props) {
 		longitude: null
 	});
 
-	const [userCountry, setUserCountry] = useState('');
+	const [userCountry, setUserCountry] = useState('unknown');
 
 	const { auth, setAuth } = useContext(AuthContexts);
 
@@ -104,13 +104,14 @@ function StepForm(props) {
 				confirmButtonText: 'close'
 			});
 		} else {
+			const country = userCountry;
+			console.log({ ...location, ...values, country });
 			const { token } = auth;
 			const instance = axios.create({
 				headers: { Authorization: `Bearer ${token}` }
 			});
-
 			instance
-				.post('http://localhost:5000/stepForm/stepFormValidator', { ...location, ...values })
+				.post('http://localhost:5000/stepForm/stepFormValidator', { ...location, ...values, country })
 				.then(res => {
 					const { data } = res;
 					if (data.status !== 0) {
@@ -134,9 +135,7 @@ function StepForm(props) {
 						});
 					}
 				})
-				.catch(err => {
-					// console.log(err);
-				});
+				.catch(err => {});
 		}
 	}
 

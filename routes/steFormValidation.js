@@ -75,6 +75,7 @@ const stepFormTrimedValues = values => {
 	valuesTrimed.profilePic3 = values.profilePic3.trim();
 	valuesTrimed.profilePic4 = values.profilePic4.trim();
 	valuesTrimed.profilePic5 = values.profilePic5.trim();
+	valuesTrimed.country = values.country.trim();
 	valuesTrimed.latitude = values.latitude;
 	valuesTrimed.longitude = values.longitude;
 	valuesTrimed.tags = [];
@@ -115,6 +116,12 @@ const primaryValidation = values => {
 		});
 		if (errlentag.length !== 0) errors.tags = 'Tags length must be between 1 and 20 characters';
 	}
+	if (!values.country || values.country.trim() === '') {
+		errors.country = 'Country is required field.';
+	} else if (!/^[a-zA-Z]+$/.test(values.username)) {
+		errors.country = 'Invalid country.';
+	}
+
 	return errors;
 };
 
@@ -212,143 +219,151 @@ function getUserId(userName) {
 	});
 }
 
-function completeData(userName, values)
-{
-	return new Promise((resolve, reject) =>{
+function completeData(userName, values) {
+	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
-			connection.execute('UPDATE `users` SET `gender`=?, `sexual_preference`=?, `birthdate`=?, `biography`=?, `latitude`=?, `longitude`=?, `profile_img`=?, `img_one`=?, `img_two`=?, `img_three`=?, `img_four`=?, `complited` = ? WHERE `user_name`=?',
-			[
-				values.gender,
-				values.interests,
-				values.birthday,
-				values.bio,
-				values.latitude,
-				values.longitude,
-				values.profilePic1,
-				values.profilePic2,
-				values.profilePic3,
-				values.profilePic4,
-				values.profilePic5,
-				1,
-				userName
-			],(err, result) =>{
+			connection.execute(
+				'UPDATE `users` SET `gender`=?, `sexual_preference`=?, `birthdate`=?, `biography`=?, `latitude`=?, `longitude`=?, `profile_img`=?, `img_one`=?, `img_two`=?, `img_three`=?, `img_four`=?, `country` = ?,  `complited` = ? WHERE `user_name`=?',
+				[
+					values.gender,
+					values.interests,
+					values.birthday,
+					values.bio,
+					values.latitude,
+					values.longitude,
+					values.profilePic1,
+					values.profilePic2,
+					values.profilePic3,
+					values.profilePic4,
+					values.profilePic5,
+					values.country,
+					1,
+					userName
+				],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+
+function checkIfTagExists(tag) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT COUNT(`id`) AS `tag_exists` FROM `tags` WHERE `tags` = ?',
+				[tag],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result[0].tag_exists;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+
+function getTagId(tag) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute('SELECT `id` FROM `tags` WHERE `tags` = ?', [tag], (err, result) => {
+				if (err) reject(err);
+				else {
+					const queryResult = result[0].id;
+					connection.release();
+					resolve(queryResult);
+				}
+			});
+		});
+	});
+}
+
+function insertTag(tag) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute('INSERT INTO `tags`(`tags`) VALUES(?)', [tag], (err, result) => {
 				if (err) reject(err);
 				else {
 					const queryResult = result;
 					connection.release();
 					resolve(queryResult);
 				}
-			})
-		})
-	})
-}
-
-function checkIfTagExists(tag)
-{
-	return new Promise((resolve, reject) => {
-		pool.getConnection((err, connection) => {
-			if (err) reject(err);
-			connection.execute('SELECT COUNT(`id`) AS `tag_exists` FROM `tags` WHERE `tags` = ?', [tag], (err, result) =>{
-				if (err) reject(err);
-				else{
-					const queryResult = result[0].tag_exists;
-					connection.release();
-					resolve(queryResult)
-				}
-			})
-		})
-	})
-}
-
-function getTagId(tag)
-{
-	return new Promise((resolve, reject) =>{
-		pool.getConnection((err, connection) => {
-			if (err) reject(err);
-			connection.execute('SELECT `id` FROM `tags` WHERE `tags` = ?', [tag], (err, result) =>{
-				if (err) reject(err)
-				else{
-					const queryResult = result[0].id;
-					connection.release();
-					resolve(queryResult)
-				}
-			})
-		})
-	})
-}
-
-function insertTag(tag)
-{
-	return new Promise((resolve, reject) =>{
-		pool.getConnection((err, connection) =>{
-			if (err) reject(err)
-			connection.execute('INSERT INTO `tags`(`tags`) VALUES(?)', [tag], (err, result) =>{
-				if (err) reject(err)
-				else{
-					const queryResult = result;
-					connection.release();
-					resolve(queryResult)
-				}
-			})
-		})
+			});
+		});
 	});
 }
 
-function checkIfUserHadTheTag(userId, tagId)
-{
-	return new Promise((resolve, reject) =>{
-		pool.getConnection((err, connection) =>{
-			if (err) reject(err)
-			connection.execute('SELECT COUNT(`id`) AS `userHadTag` FROM `users_tags` WHERE `tag_id` = ? AND `user_id` = ?', [tagId, userId], (err, result) => {
-				if (err) reject(err);
-				else{
-					const queryResult = result[0].userHadTag;
-                    connection.release();
-                    resolve(queryResult);
+function checkIfUserHadTheTag(userId, tagId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT COUNT(`id`) AS `userHadTag` FROM `users_tags` WHERE `tag_id` = ? AND `user_id` = ?',
+				[tagId, userId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result[0].userHadTag;
+						connection.release();
+						resolve(queryResult);
+					}
 				}
-			})
-		})
-	})
+			);
+		});
+	});
 }
 
-function userAndTagInsertion(userId, tagId)
-{
-	return new Promise((resolve, reject) =>{
-		pool.getConnection((err, connection) =>{
-			if (err) reject(err)
-			connection.execute('INSERT INTO `users_tags`(`tag_id`, `user_id`) VALUES(?, ?)', [tagId, userId], (err, result)=>{
-				if (err) reject(err)
-				else{
-					const queryResult = result;
-                    connection.release();
-                    resolve(queryResult);
+function userAndTagInsertion(userId, tagId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'INSERT INTO `users_tags`(`tag_id`, `user_id`) VALUES(?, ?)',
+				[tagId, userId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
 				}
-			})
-		})
-	})
+			);
+		});
+	});
 }
 
 const registerStepFormData = async (userName, values) => {
 	// get usr id
 	const userId = await getUserId(userName);
-	const dataregistred = await completeData(userName, values)
+	const dataregistred = await completeData(userName, values);
 
 	// new try
 	// console.log(values.tags)
-	values.tags.forEach(async (tag) =>{
-		const tagExists = await checkIfTagExists(tag)
-		if (tagExists === 0)
-		{
-			const tagInserted = await insertTag(tag)
+	values.tags.forEach(async tag => {
+		const tagExists = await checkIfTagExists(tag);
+		if (tagExists === 0) {
+			const tagInserted = await insertTag(tag);
 		}
-		const tagId = await getTagId(tag)
+		const tagId = await getTagId(tag);
 		// check if the user already had the tag
-		const userHasTheTag = await checkIfUserHadTheTag(userId, tagId)
-		if (userHasTheTag === 0)
-		{
+		const userHasTheTag = await checkIfUserHadTheTag(userId, tagId);
+		if (userHasTheTag === 0) {
 			const insertUserAndTag = await userAndTagInsertion(userId, tagId);
 		}
-	})
+	});
 };
 
 router.post('/stepFormValidator', authToken, stepFormValidator, async (req, res) => {

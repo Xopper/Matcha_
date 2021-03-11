@@ -7,7 +7,7 @@ const containerStyle = {
 	height: '400px'
 };
 
-const MapWithAMarker = ({ handlePosition, center, handleContry }) => {
+const MapWithAMarker = ({ handlePosition, center, handleCountry }) => {
 	// Get Loaction from lat and lng
 	const fetch = fetchS.bind();
 	const options = {
@@ -22,7 +22,7 @@ const MapWithAMarker = ({ handlePosition, center, handleContry }) => {
 			const res = await GeoCoder.reverse({ lat: latLng.lat(), lon: latLng.lng() });
 			handlePosition({ lat: latLng.lat(), lng: latLng.lng() });
 			const { country } = res[0];
-			handleContry(country);
+			handleCountry(country);
 		} catch (e) {
 			console.log(e);
 		}

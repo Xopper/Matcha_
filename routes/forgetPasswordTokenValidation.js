@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const pool = require('../model/dbconnection');
 const jwt = require('jsonwebtoken');
-
 function getToken(token) {
 	return new Promise((resolved, rejected) => {
 		jwt.verify(token, 'mafhamnachwalakinma3lichlhalwassaoulfanid04', (err, decoded) => {
@@ -21,7 +20,6 @@ function checkUserAndValidateAccount(userName) {
 		});
 	});
 }
-
 const tokenVerification = async (req, res, next) => {
 	try {
 		console.log('>>the token before <<: ', req.params.token);
@@ -37,21 +35,20 @@ const tokenVerification = async (req, res, next) => {
 		next();
 	}
 };
-
-router.get('/tokenverification/:token', tokenVerification, async (req, res) => {
+router.get('/passwordtokenverification/:token', tokenVerification, async (req, res) => {
 	const backEndResponse = {};
 	if (!req.decoded) {
 		console.log('sad9a??', req.decoded);
-		backEndResponse.errors = 'Verification token went wrong';
+		backEndResponse.error = 'password Token validation went wrong';
 		backEndResponse.status = 1;
 		res.send(backEndResponse);
 	} else {
 		const result = await checkUserAndValidateAccount(req.decoded.userName);
 		console.log('>>Verified ?? << ', result);
 		if (result.affectedRows === 1) console.log('the token has been verified succesfully');
+		backEndResponse.userName = req.decoded.userName;
 		backEndResponse.status = 0;
 		res.send(backEndResponse);
 	}
 });
-
 module.exports = router;

@@ -194,7 +194,7 @@ const sendEmailValidation = async (email, token) => {
 		text: 'Easy Work',
 		html: `<h1>Email confirmattion</h1>
         <p>Confrim your email by clicking the link bellow</p>
-        <a href="http://localhost:5000/emailverification/tokenverification/${token}">Click to validate your registration</a>`
+        <a href="https://localhost:3000/auth/confirm/${token}">Click to validate your registration</a>`
 	};
 	try {
 		const emailSent = await sendEmail(mailOptions, transporter);

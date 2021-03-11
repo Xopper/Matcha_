@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 import { AuthContexts } from '../../Contexts/authContext';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 async function getData(token) {
 	const instance = axios.create({
@@ -26,8 +27,16 @@ export default function EditInfos() {
 		biography: ''
 	});
 
-	const { auth } = useContext(AuthContexts);
+	const { auth, setAuth } = useContext(AuthContexts);
 	const { token } = auth;
+	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema, setFormSchema);
+	const { firstName, lastName, username, email, birthDay, biography } = values;
+	const [errors_, setErrors_] = useState({ email: '', username: '' });
+	// needs to be add
+	const [center, setCenter] = useState({ lat: 3.2, lng: 3.6 });
+	const [country, setCountry] = useState('unknown');
+
+	const [popupIsOpen, setPopupIsOpen] = useState(false);
 
 	useEffect(() => {
 		const data = async () => {
@@ -35,38 +44,51 @@ export default function EditInfos() {
 				data: { userInfos }
 			} = await getData(token);
 			console.log(userInfos);
+			const { lat, lng } = userInfos[0];
+			// console.log(' >> ', lat, ' >> ', lng);
 			userInfos[0].birthDay = formatDate(userInfos[0].birthDay);
 			setFormSchema(userInfos[0]);
+			setCenter({ lat, lng });
 		};
 		data();
 	}, [token]);
 
-	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema, setFormSchema);
-	const { firstName, lastName, username, email, birthDay, biography } = values;
-	// needs to be add
-	const [center, setCenter] = useState({ lat: 38.712, lng: -9.187 });
-	const [contry, setContry] = useState('unknown');
-
-	const [popupIsOpen, setPopupIsOpen] = useState(false);
-
 	function submit() {
-		console.log({ ...values, ...center, contry });
+		console.log({ ...values, ...center, country });
+		// console.log({ ...values, ...center });
 
-		// const { token } = auth;
-		// const instance = axios.create({
-		// 	headers: { Authorization: `Bearer ${token}` }
-		// });
+		const { token } = auth;
+		const instance = axios.create({
+			headers: { Authorization: `Bearer ${token}` }
+		});
 
-		// instance
-		// 	.post('http://localhost:5000/editProfileInfo/infoValidator', { values, center })
-		// 	.then(res => {
-		// 		console.log('hahahahah');
-		// 		const { data } = res;
-		// 		console.log(res);
-		// 	})
-		// 	.catch(err => {
-		// 		console.log(err);
-		// 	});
+		instance
+			.post('http://localhost:5000/editProfileInfo/infoValidator', { ...values, ...center, country })
+			.then(res => {
+				console.log('hahahahah');
+				const { data } = res;
+				console.log(res);
+				if (data.status === 0) {
+					const { newAuthToken } = data;
+					localStorage.removeItem('token');
+					localStorage.setItem('token', newAuthToken);
+					setAuth(oldContext => ({
+						...oldContext,
+						token: newAuthToken
+					}));
+					setErrors_({ email: '', username: '' });
+					Swal.fire({
+						title: 'YAAAP!',
+						text: 'Your profile updated successfully!',
+						icon: 'success',
+						confirmButtonText: 'close'
+					});
+				} else {
+					const { newEmailAlreadyExists: email, newUserNameAlreadyExists: username } = data.errors;
+					setErrors_({ email, username });
+				}
+			})
+			.catch(err => {});
 	}
 
 	function handleKey(e) {
@@ -76,7 +98,7 @@ export default function EditInfos() {
 	}
 
 	function handleClassName(field, classList = null) {
-		if (errors[field]) {
+		if (errors[field] || errors_[field]) {
 			return classList ? classList + ' danger' : 'danger';
 		}
 		return classList ? classList : '';
@@ -127,7 +149,7 @@ export default function EditInfos() {
 						onChange={handleChange}
 						onKeyDown={e => handleKey(e)}
 					/>
-					<h5>{errors.username && `${errors.username}`}</h5>
+					<h5>{(errors.username && `${errors.username}`) || (errors_.username && `${errors_.username}`)}</h5>
 				</label>
 				<label htmlFor='Email'>
 					<strong>Your e-mail.</strong>
@@ -141,7 +163,7 @@ export default function EditInfos() {
 						onChange={handleChange}
 						onKeyDown={e => handleKey(e)}
 					/>
-					<h5>{errors.email && `${errors.email}`}</h5>
+					<h5>{(errors.email && `${errors.email}`) || (errors_.email && `${errors_.email}`)}</h5>
 				</label>
 				<label>
 					<strong>Biography.</strong>
@@ -186,7 +208,7 @@ export default function EditInfos() {
 								containerElement={<div style={{ height: `400px` }} />}
 								mapElement={<div style={{ height: `100%` }} />}
 								handlePosition={setCenter}
-								handleContry={setContry}
+								handleCountry={setCountry}
 								center={center}
 							/>
 							<button
