@@ -11,7 +11,7 @@ function LogForm() {
 		password: ''
 	});
 
-	const { handleSubmit, handleChange, errors, firstHitSubmit } = useForm(submit, validate, formSchema, setFormSchema);
+	const { handleSubmit, handleChange, errors } = useForm(submit, validate, formSchema, setFormSchema);
 	const authContext = useContext(AuthContexts);
 
 	async function submit() {
@@ -43,7 +43,6 @@ function LogForm() {
 					}
 				});
 				localStorage.setItem('token', authToken);
-				localStorage.setItem('isCompleted', dataProfileIsComplited);
 				authContext.setAuth({ token: authToken, isCompleted: dataProfileIsComplited });
 				// try to figurout something for redirecting the user
 			}
@@ -55,7 +54,7 @@ function LogForm() {
 	function handleClassName(field) {
 		if (errors[field]) {
 			return 'danger';
-		} else if (!errors[field] && firstHitSubmit) {
+		} else if (!errors[field]) {
 			return '';
 		}
 		return '';
@@ -97,6 +96,7 @@ function LogForm() {
 					<span>keep me logged in</span>
 				</label> */}
 				<div>
+					<span className='forget__pass--text'>{`froget password`}</span>
 					<input className='submit__btn' type='submit' value='Login in' />
 				</div>
 			</form>

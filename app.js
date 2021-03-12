@@ -15,8 +15,15 @@ const userEditSecRouter = require('./routes/userSecValidator');
 const userEditPicsRouter = require('./routes/userPicsValidator');
 const authTokenValidationRouter = require('./routes/authTokenValidation');
 const profileUserInfosRouter = require('./routes/profileInfos');
+// 11-03-2021
 const forgetPwdEmailCheckerRouter = require('./routes/forgetPasswordEmailChecker');
 const PasswordTokenVerificationRouter = require('./routes/forgetPasswordTokenValidation');
+// 12-03-2021
+const getBockedProfilesRouter = require('./routes/getBlockedProfiles');
+const reportEndPointRouter = require('./routes/reportEndPoint');
+const blockEndPointRouter = require('./routes/blockEndPoint');
+const likeEndPointRouter = require('./routes/likeEndPoint');
+const resetPasswordRouter = require('./routes/resetPasswordEndPoint');
 
 app.use(bodyParser({ limit: '50mb', extended: true }));
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -41,7 +48,17 @@ app.use('/editPrefs', userPrefsValidtorRouter);
 app.use('/editPwd', userEditSecRouter);
 app.use('/editPics', userEditPicsRouter);
 app.use('/profileUserInfos', profileUserInfosRouter);
+
+// 11-03-2021
 app.use('/forgetPwdEmailChecker', forgetPwdEmailCheckerRouter);
 app.use('/passwordverification', PasswordTokenVerificationRouter);
+
+// today 12-03-2021
+app.use('/getBlockedProfiles', getBockedProfilesRouter);
+app.use('/resetPassword', resetPasswordRouter);
+// actions
+app.use('/reportEndPoint', reportEndPointRouter);
+app.use('/blockEndPoint', blockEndPointRouter);
+app.use('/likeEndPoint', likeEndPointRouter);
 
 app.listen(5000);

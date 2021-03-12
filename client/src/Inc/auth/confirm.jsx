@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 async function getResponse(token) {
 	const response = await axios.get(`http://localhost:5000/emailverification/tokenverification/${token}`);
@@ -9,35 +10,47 @@ async function getResponse(token) {
 
 function Confirm() {
 	const { token } = useParams();
-	// const history = useHistory();
+	const history = useHistory();
 
 	useEffect(() => {
 		if (/^[a-zA-Z0-9._-]+$/.test(token)) {
 			const data = async () => {
-				const { status } = await getResponse(token);
+				const {
+					data: { status }
+				} = await getResponse(token);
 				console.log(status);
 				if (status === 0) {
-					// kolchi zaz
+					Swal.fire({
+						title: 'YAAAP!',
+						text: 'Your account has been verified successfully!',
+						icon: 'success',
+						confirmButtonText: 'close'
+					});
 				} else {
 					// umm machi zaz
+					Swal.fire({
+						title: 'NOOOPE!',
+						text: 'Something went wrong. Try Again!',
+						icon: 'error',
+						confirmButtonText: 'close'
+					});
 				}
 			};
 			data();
+			history.replace('/auth');
 		} else {
-			// swal pop-up
 			// invalid token
-			// replace to /auth
-			// history.replace();
-			console.log('Invalid Token');
+			Swal.fire({
+				title: 'NOOOPE!',
+				text: 'Something went wrong. Try Again!',
+				icon: 'error',
+				confirmButtonText: 'close'
+			});
+			history.replace('/auth');
 		}
-	}, [token]);
+	}, [token, history]);
 
-	// ^[a-zA-Z0-9._]+$
-	// if (!/^[a-zA-Z0-9._]+$/.test(token)) {
-	// 	history.replace();
-	// }
-	// redirect to login any ways
-	return <div />;
+	return null;
 }
 
 export default Confirm;

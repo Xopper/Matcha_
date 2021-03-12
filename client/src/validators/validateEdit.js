@@ -1,5 +1,5 @@
 export default function validateEdit(values) {
-	let errors = {};
+	const errors = {};
 
 	if (!values.firstName || values.firstName.trim() === '') {
 		errors.firstName = 'First name is required field.';

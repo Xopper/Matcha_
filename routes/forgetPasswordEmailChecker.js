@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const pool = require('../model/dbConnection');
 const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
 const isEmpty = obj => {
 	for (let prop in obj) {
 		if (obj.hasOwnProperty(prop)) return false;
@@ -30,7 +31,7 @@ const sendEmailValidation = async (email, token) => {
 		text: 'Easy Work',
 		html: `<h1>Reset your password</h1>
         <p>Reset your password by clicking the link bellow</p>
-        <a href="http://localhost:5000/passwordverification/passwordtokenverification/${token}">Click to reset your password</a>`
+        <a href="http://localhost:3000/auth/reset/${token}">Click to reset your password</a>`
 	};
 	try {
 		const emailSent = await sendEmail(mailOptions, transporter);
@@ -93,7 +94,7 @@ function updateToken(email, token) {
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
-			connection.execute('UPDATE `users` SET `token` = ?, WHERE `email` = ?', [token, email], (err, result) => {
+			connection.execute('UPDATE `users` SET `token` = ? WHERE `email` = ?', [token, email], (err, result) => {
 				if (err) reject(err);
 				else {
 					const queryResult = result;
@@ -135,7 +136,7 @@ const sendResetPwdEmail = async (req, res, next) => {
 		next();
 	} else {
 		const validationToken = jwt.sign({ userName: req.userName }, 'mafhamnachwalakinma3lichlhalwassaoulfanid04');
-		const tokenUpdated = await updateToken(userEmail, validationToken);
+		const tokenUpdated = await updateToken(req.body.email, validationToken);
 		sendEmailValidation(req.body.email, validationToken);
 	}
 	next();

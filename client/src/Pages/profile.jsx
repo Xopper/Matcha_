@@ -10,7 +10,7 @@ import { getAge } from '../helpers/helpers';
 import axios from 'axios';
 
 async function getData(strname, token) {
-	console.log(strname);
+	// console.log(strname);
 	const instance = axios.create({
 		headers: { Authorization: `Bearer ${token}` }
 	});
@@ -43,7 +43,8 @@ function Profile() {
 		reported: '',
 		sexualPreference: '',
 		tags: [],
-		userName: ''
+		userName: '',
+		country: ''
 	});
 
 	useEffect(() => {
@@ -52,13 +53,14 @@ function Profile() {
 				data: { allUserInfos, status }
 			} = await getData(username, token);
 			if (status === 0) {
+				console.log(allUserInfos);
 				const keys = Object.keys(allUserInfos);
-				console.log(keys);
 				keys.forEach(el => {
-					console.log(el);
 					if (el === 'birthday') {
 						const age = getAge(allUserInfos[el]);
 						setData(oldData => ({ ...oldData, [el]: age }));
+					} else if (el === 'sexualPreference' && allUserInfos[el] === 'bi') {
+						setData(oldData => ({ ...oldData, [el]: 'bisexual' }));
 					} else {
 						setData(oldData => ({ ...oldData, [el]: allUserInfos[el] }));
 					}
@@ -69,7 +71,18 @@ function Profile() {
 		};
 		data();
 	}, [username, token, history]);
-	if (!data.userName) return <div></div>;
+
+	async function handleLike() {
+		const instance = axios.create({
+			headers: { Authorization: `Bearer ${token}` }
+		});
+		const res = await instance.post('http://localhost:5000/likeEndPoint/like', {
+			userName: data.userName
+		});
+		console.log(res);
+	}
+
+	if (!data.userName) return <div />;
 	return (
 		<div className='profile__container'>
 			<div className='profile__wrapper'>
@@ -84,6 +97,7 @@ function Profile() {
 								icon={faHeart}
 								size='lg'
 								className='clickable'
+								onClick={() => handleLike()}
 								style={{ color: 'aquamarine', width: 20, height: 20 }}
 							/>
 							<FontAwesomeIcon
@@ -140,7 +154,7 @@ function Profile() {
 								<p>Contry.</p>
 								<span></span>
 							</div>
-							<div className='profile__fieldset--value'>{data.country || `undefined`}</div>
+							<div className='profile__fieldset--value'>{data.country}</div>
 						</div>
 						<div className='profile__fieldset'>
 							<div className='profile__fieldset--key'>
@@ -158,7 +172,9 @@ function Profile() {
 						</div>
 					</section>
 					<section className='profile__footer'>
-						<SimpleSlider slides={[data.imgOne, data.imgTwo, data.imgThree, data.imgFour]} />
+						<SimpleSlider
+							slides={[data.profileImg, data.imgOne, data.imgTwo, data.imgThree, data.imgFour]}
+						/>
 					</section>
 				</section>
 			</div>

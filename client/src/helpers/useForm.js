@@ -5,10 +5,10 @@ function useForm(callback, validate, values, setValues) {
 
 	const handleChange = e => {
 		const { name, value } = e.target;
-		setValues({
-			...values,
-			[name]: value // using [] is a way to acces unkown property in an object :)
-		});
+		setValues(oldValues => ({
+			...oldValues,
+			[name]: value
+		}));
 	};
 
 	const handleSubmit = e => {

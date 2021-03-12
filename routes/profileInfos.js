@@ -51,7 +51,7 @@ function getUserInfos(userName) {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
 			connection.execute(
-				'SELECT `user_name`, `first_name`, `last_name`, `gender`, `sexual_preference`, `birthdate`, `biography`, `public_famerating`, `profile_img`, `img_one`, `img_two`, `img_three`, `img_four` From `users` WHERE `user_name` = ?',
+				'SELECT `user_name`, `first_name`, `last_name`, `gender`, `sexual_preference`, `birthdate`, `biography`, `public_famerating`, `profile_img`, `img_one`, `img_two`, `img_three`, `img_four`, `country` From `users` WHERE `user_name` = ?',
 				[userName],
 				(err, result) => {
 					if (err) reject(err);
@@ -185,6 +185,8 @@ const getUserData = async (req, res, next) => {
 		allUserInfos.imgTwo = userInfos[0].img_two;
 		allUserInfos.imgThree = userInfos[0].img_three;
 		allUserInfos.imgFour = userInfos[0].img_four;
+		// allUserInfos.imgFour = userInfos[0].img_four;
+		allUserInfos.country = userInfos[0].country;
 		// get current user id
 		console.log('actualuser', req.userNameConnected);
 		console.log('req.body.userNameLokingFor', req.body.userNameLokingFor);

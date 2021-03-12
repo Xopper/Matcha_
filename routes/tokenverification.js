@@ -14,9 +14,35 @@ function checkUserAndValidateAccount(userName) {
 	return new Promise((res, rej) => {
 		pool.getConnection((err, connection) => {
 			if (err) rej(err);
-			connection.execute('UPDATE `users` SET `verified`=? WHERE `user_name`=?', [1, userName], (err, result) => {
+			// added by ahaloua
+			connection.execute(
+				'UPDATE `users` SET `verified` = ? WHERE `user_name`=?',
+				[1, userName],
+				(err, result) => {
+					if (err) rej(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						res(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+
+function checkIfTokenAlredyVerified(userName) {
+	return new Promise((res, rej) => {
+		pool.getConnection((err, connection) => {
+			if (err) rej(err);
+			// added by ahaloua
+			connection.execute('SELECT `verified` FROM `users` WHERE `user_name` = ?', [userName], (err, result) => {
 				if (err) rej(err);
-				res(result);
+				else {
+					const queryResult = result[0].verified;
+					connection.release();
+					res(queryResult);
+				}
 			});
 		});
 	});
@@ -46,10 +72,16 @@ router.get('/tokenverification/:token', tokenVerification, async (req, res) => {
 		backEndResponse.status = 1;
 		res.send(backEndResponse);
 	} else {
-		const result = await checkUserAndValidateAccount(req.decoded.userName);
-		console.log('>>Verified ?? << ', result);
-		if (result.affectedRows === 1) console.log('the token has been verified succesfully');
-		backEndResponse.status = 0;
+		const tokenAlredyVerified = await checkIfTokenAlredyVerified(req.decoded.userName);
+		if (tokenAlredyVerified === 0) {
+			const result = await checkUserAndValidateAccount(req.decoded.userName);
+			console.log('>>Verified ?? << ', result);
+			if (result.affectedRows === 1) console.log('the token has been verified succesfully');
+			backEndResponse.status = 0;
+		} else if (tokenAlredyVerified === 1) {
+			backEndResponse.errors = 'The accout is already verified';
+			backEndResponse.status = 1;
+		}
 		res.send(backEndResponse);
 	}
 });

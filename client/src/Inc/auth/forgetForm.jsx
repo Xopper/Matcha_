@@ -1,37 +1,44 @@
 import React, { Fragment, useState } from 'react';
+import useForm from '../../helpers/useForm';
+import validate from '../../validators/validateForget';
+import axios from 'axios';
+import { useHistory } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export default function ForgetForm() {
 	const [values, setValues] = useState({
 		email: ''
 	});
 
-	// TODO  => email verification
+	const history = useHistory();
+
+	const { handleSubmit, handleChange, errors } = useForm(submit, validate, values, setValues);
 	const { email } = values;
 
-	const errors = {};
+	const [errors_, setErrors_] = useState({ email: '' });
 
-	function handlesubmit(e) {
-		e.preventDefault();
-		alert(JSON.stringify(values));
-	}
-
-	function handleChange(e) {
-		const { name, value } = e.target;
-		setValues({ ...values, [name]: value });
+	async function submit() {
+		console.log(values);
+		try {
+			const { data } = await axios.post('http://localhost:5000/forgetPwdEmailChecker/emailchecker', values);
+			console.log(data);
+		} catch (e) {}
 	}
 
 	function handleClassName(field) {
-		if (errors[field]) return 'danger';
+		if (errors[field] || errors_[field]) {
+			return 'danger';
+		}
 		return '';
 	}
 
 	return (
 		<Fragment>
-			<h2>Be in Matcha.</h2>
-			<p>Please fill all data before start matching.</p>
-			<form onSubmit={e => handlesubmit(e)} noValidate>
+			<h2>Reset Your Account.</h2>
+			<p>Please fill the input with your email to reset your account.</p>
+			<form onSubmit={e => handleSubmit(e)} noValidate>
 				<label htmlFor='Email'>
-					Your e-mail
+					<strong>email.</strong>
 					<input
 						type='email'
 						className={handleClassName('email')}
@@ -41,7 +48,7 @@ export default function ForgetForm() {
 						value={email}
 						onChange={handleChange}
 					/>
-					<h5>{errors.email && `${errors.email}`}</h5>
+					<h5>{(errors.email && `${errors.email}`) || (errors_.email && `${errors_.email}`)}</h5>
 				</label>
 				<div>
 					<input className='submit__btn' type='submit' value='Send' />

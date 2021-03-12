@@ -1,19 +1,41 @@
 import React, { useState, createContext, useEffect, useContext } from 'react';
+import { useHistory } from 'react-router-dom';
+import axios from 'axios';
 
 export const AuthContexts = createContext();
 
 function AuthProvider(props) {
+	const history = useHistory();
 	const [auth, setAuth] = useState({});
 
 	useEffect(() => {
 		const token = localStorage.getItem('token');
-		const isCompleted = localStorage.getItem('isCompleted');
-		// TODO >> check token from backend
-		// note => i dont need spinner loader till the moment
-		// if the check from the backend takes time then i need to add a spinner
-		console.log('comes from authContext >> ', token);
-		setAuth({ token, isCompleted });
-	}, []);
+		if (token) {
+			const isValid = async () => {
+				const {
+					data: { status, complited }
+				} = await axios.post('http://localhost:5000/authToken/authTokenValidation', {
+					authToken: token
+				});
+				console.log(status);
+				if (status === 0) {
+					console.log('tach');
+					setAuth({ token, isCompleted: complited });
+				} else {
+					console.log(':(');
+					setAuth(oldValue => {
+						return { ...oldValue, token: null };
+					});
+					localStorage.clear();
+				}
+			};
+			isValid();
+		} else {
+			setAuth(oldValue => {
+				return { ...oldValue, token: null };
+			});
+		}
+	}, [history]);
 	return <AuthContexts.Provider value={{ auth, setAuth }}>{props.children}</AuthContexts.Provider>;
 }
 
