@@ -66,7 +66,7 @@ export default function EditPics() {
 			if (data.status === 0) {
 				Swal.fire({
 					title: 'YAAAP!',
-					text: 'Preferences updated successfully!',
+					text: 'Pictures updated successfully!',
 					icon: 'success',
 					confirmButtonText: 'close'
 				});

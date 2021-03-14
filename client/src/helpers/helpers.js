@@ -30,3 +30,10 @@ export function getAge(date) {
 	let age = Math.abs(year - 1970);
 	return age;
 }
+
+export function toTimeStamp(time) {
+	// var myDate = '26-02-2012';
+	time = time.split('-');
+	const newDate = new Date(time[2], time[1] - 1, time[0]);
+	return newDate.getTime();
+}

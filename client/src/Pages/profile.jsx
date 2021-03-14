@@ -77,7 +77,7 @@ function Profile() {
 	}, [username, token, history]);
 
 	async function handleLike() {
-		console.log('like clicked');
+		console.log('like Clicked');
 		const instance = axios.create({
 			headers: { Authorization: `Bearer ${token}` }
 		});
@@ -112,9 +112,32 @@ function Profile() {
 			icon: 'question',
 			showCancelButton: true,
 			confirmButtonText: `Report`
-		}).then(({ isConfirmed }) => {
+		}).then(async ({ isConfirmed }) => {
 			if (isConfirmed) {
-				Swal.fire('Account has been reported!', '', 'success');
+				const instance = axios.create({
+					headers: { Authorization: `Bearer ${token}` }
+				});
+				const res = await instance.post('http://localhost:5000/reportEndPoint/report', {
+					userName: data.userName
+				});
+				if (res.data.status) {
+					console.log(res.data);
+					Swal.fire({
+						title: 'OUUUUUUCH!',
+						text: res.data.errors,
+						icon: 'warning',
+						confirmButtonText: 'close'
+					});
+					// Swal.fire(res.data.errors, '', 'warning');
+				} else {
+					Swal.fire({
+						title: 'YAAAAAP!',
+						text: `Account has been reported!`,
+						icon: 'success',
+						confirmButtonText: 'close'
+					});
+				}
+
 				// if response is 0 {no errors}
 				// swal succes
 				// if response is1 {error}
@@ -126,25 +149,39 @@ function Profile() {
 	function handleBlock() {
 		console.log('block cicked');
 		Swal.fire({
-			title: 'Deleted!',
-			text: 'Your row has been deleted.',
-			button: 'Close', // Text on button
-			icon: 'success', //built in icons: success, warning, error, info
-			timer: 3000, //timeOut for auto-close
-			buttons: {
-				confirm: {
-					text: 'OK',
-					value: true,
-					visible: true,
-					className: '',
-					closeModal: true
-				},
-				cancel: {
-					text: 'Cancel',
-					value: false,
-					visible: true,
-					className: '',
-					closeModal: true
+			title: 'Are you sure?',
+			text: 'Block this account ?',
+			icon: 'question',
+			showCancelButton: true,
+			confirmButtonText: `Block`
+		}).then(async ({ isConfirmed }) => {
+			if (isConfirmed) {
+				const instance = axios.create({
+					headers: { Authorization: `Bearer ${token}` }
+				});
+				const res = await instance.post('http://localhost:5000/blockEndPoint/block', {
+					userName: data.userName
+				});
+				// normaly if the user is blocke we are not gonna be generating this page
+				// but we gonna treat it like the "Like" action
+				if (res.data.status) {
+					console.log(res.data);
+					Swal.fire({
+						title: 'OUUUUUUCH!',
+						text: res.data.errors,
+						icon: 'warning',
+						confirmButtonText: 'close'
+					});
+					// Swal.fire(res.data.errors, '', 'warning');
+				} else {
+					Swal.fire({
+						title: 'YAAAAAP!',
+						text: `Account has been reported!`,
+						icon: 'success',
+						confirmButtonText: 'close'
+					});
+					// a way to refresh the page
+					// history.go(0);
 				}
 			}
 		});

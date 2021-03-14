@@ -8,6 +8,7 @@ import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 import { AuthContexts } from '../../Contexts/authContext';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import dayJs from 'dayjs';
 
 async function getData(token) {
 	const instance = axios.create({
@@ -56,6 +57,8 @@ export default function EditInfos() {
 	function submit() {
 		console.log({ ...values, ...center, country });
 		// console.log({ ...values, ...center });
+
+		console.log(dayJs(values.birthDay));
 
 		const { token } = auth;
 		const instance = axios.create({

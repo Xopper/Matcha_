@@ -10,6 +10,7 @@ import withReactContent from 'sweetalert2-react-content';
 import { AuthContexts } from '../../Contexts/authContext';
 import * as NodeGeocoder from 'node-geocoder';
 import fetchS from 'node-fetch';
+// import dayJs from 'dayjs';
 
 const fetch = fetchS.bind();
 const options = {
@@ -25,9 +26,7 @@ async function handleLocation(lat, lng) {
 		const res = await GeoCoder.reverse({ lat, lon: lng });
 		const { country } = res[0];
 		return country;
-	} catch (e) {
-		// console.log(e);
-	}
+	} catch (e) {}
 	return 'unknown';
 }
 
@@ -88,6 +87,7 @@ function StepForm(props) {
 	function handlesubmit(e) {
 		e.preventDefault();
 		console.log({ ...location, ...values, userCountry });
+
 		const errors = validate(values);
 		console.log(Object.keys(errors).length);
 		if (Object.keys(errors).length !== 0) {
@@ -174,12 +174,22 @@ function StepForm(props) {
 		const reader = new FileReader();
 
 		if (!imageFile) {
-			alert('please Select an image');
+			Swal.fire({
+				title: 'OUUUUUUCH!',
+				text: `Please Select an image`,
+				icon: 'warning',
+				confirmButtonText: 'close'
+			});
 			return false;
 		}
 
 		if (!imageFile.name.match(/\.(jpg|jpeg|png)$/)) {
-			alert('Please select valid image.');
+			Swal.fire({
+				title: 'OUUUUUUCH!',
+				text: `Please select valid image.`,
+				icon: 'warning',
+				confirmButtonText: 'close'
+			});
 			return false;
 		}
 
@@ -187,7 +197,12 @@ function StepForm(props) {
 			const img = new Image();
 			img.onload = () => {};
 			img.onerror = () => {
-				alert('Invalid image content.');
+				Swal.fire({
+					title: 'OUUUUUUCH!',
+					text: `Invalid image content.`,
+					icon: 'warning',
+					confirmButtonText: 'close'
+				});
 				return false;
 			};
 			img.src = e.target.result;
@@ -222,7 +237,7 @@ function StepForm(props) {
 				</label>
 				<label className='labelSelect'>
 					<strong>Date of birth.</strong>
-					<input type='date' name='birthday' onChange={e => handleChange(e)} />
+					<input type='date' name='birthday' max={Date().now().to('Y-m-d')} onChange={e => handleChange(e)} />
 				</label>
 				<label className='labelSelect'>
 					<strong>Tags.</strong>
@@ -260,7 +275,7 @@ function StepForm(props) {
 					<input type='file' name='profilePic2' onChange={e => handleFileSelect(e)} />
 					<input type='file' name='profilePic3' onChange={e => handleFileSelect(e)} />
 					<input type='file' name='profilePic4' onChange={e => handleFileSelect(e)} />
-					<input type='file' name='profilePic' onChange={e => handleFileSelect(e)} />
+					<input type='file' name='profilePic5' onChange={e => handleFileSelect(e)} />
 				</div>
 				<div>
 					<input className='submit__btn' type='submit' value="Let's start!" />

@@ -1,3 +1,5 @@
+import { toTimeStamp, getAge } from '../helpers/helpers';
+
 export default function validateEdit(values) {
 	const errors = {};
 
@@ -42,6 +44,8 @@ export default function validateEdit(values) {
 	// validating birthDay
 	if (!values.birthDay || values.birthDay.trim() === '') {
 		errors.birthDay = 'Date of birth is required field.';
+	} else if (Date.now() > toTimeStamp(new Date(values.birthday))) {
+		errors.birthDay = '7ssalty.';
 	} else if (getAge(values.birthDay) < 18) {
 		errors.birthDay = 'You must have 18 YO to be with us.';
 	}
@@ -55,20 +59,4 @@ export default function validateEdit(values) {
 	}
 
 	return errors;
-}
-
-export function getAge(date) {
-	let dob = new Date(date);
-	//calculate month difference from current date in time
-	let month_diff = Date.now() - dob.getTime();
-
-	//convert the calculated difference in date format
-	let age_dt = new Date(month_diff);
-
-	//extract year from date
-	let year = age_dt.getUTCFullYear();
-
-	//now calculate the age of the user
-	let age = Math.abs(year - 1970);
-	return age;
 }

@@ -112,13 +112,13 @@ function unreportTheProfile(currentUserId, userLookingForId) {
 	});
 }
 const userChecker = async (req, res, next) => {
-	const userErrors = {};
+	let userErrors = '';
 	const currentUserName = req.userNameConnected;
 	const userNameToBeReported = req.body.userName;
 	// check if user exists
 	const userExists = await searchUser(userNameToBeReported);
 	if (userExists === 0) {
-		userErrors.userNotFound = 'user does not exist';
+		userErrors = 'User does not exist.';
 		req.userErrors = userErrors;
 		next();
 	} else {
@@ -126,7 +126,10 @@ const userChecker = async (req, res, next) => {
 		const currentUserId = await getUserId(currentUserName);
 		const userIsReported = await checkIfUserIsReported(currentUserId, userToBeReportedId);
 		if (userIsReported !== 0) {
-			const unreportProfile = await unreportTheProfile(currentUserId, userToBeReportedId);
+			userErrors = 'User already reported.';
+			req.userErrors = userErrors;
+			// i chenged the logic of reporting :)
+			// const unreportProfile = await unreportTheProfile(currentUserId, userToBeReportedId);
 		} else {
 			const reportProfile = await reportTheProfile(currentUserId, userToBeReportedId);
 		}

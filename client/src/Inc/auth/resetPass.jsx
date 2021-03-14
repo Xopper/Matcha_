@@ -18,6 +18,7 @@ export default function ResetPass() {
 			const { data } = await axios.get(
 				`http://localhost:5000/passwordverification/passwordtokenverification/${params.token}`
 			);
+			console.log(data);
 			if (data.status === 0) {
 				setUserName(data.userName);
 			} else {

@@ -47,7 +47,6 @@ const tokenVerification = async (req, res, next) => {
 		console.log('<<the token decoded>>: ', tokenDecoded);
 		next();
 	} catch (err) {
-		// console.log(err)
 		console.log('the token is invalid !!');
 		req.decoded = '';
 		next();

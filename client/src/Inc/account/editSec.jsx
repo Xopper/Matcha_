@@ -67,7 +67,7 @@ export default function EditSec() {
 
 	return (
 		<Fragment>
-			<h2>Be in Matcha.</h2>
+			<h2>Editing Password.</h2>
 			<p>Security Is Mostly A Superstition. Life Is Either A Daring Adventure Or Nothing.</p>
 			<form onSubmit={e => handlesubmit(e)} noValidate>
 				<label htmlFor='Password'>
