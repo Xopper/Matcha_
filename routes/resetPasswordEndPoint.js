@@ -79,6 +79,23 @@ function updatePwd(userName, newPwd) {
 		});
 	});
 }
+
+function tokenDestruction(userName) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute('UPDATE `users` SET `token` = NULL WHERE `user_name` = ?', [userName], (err, result) => {
+				if (err) reject(err);
+				else {
+					const queryResult = result;
+					connection.release();
+					resolve(queryResult);
+				}
+			});
+		});
+	});
+}
+
 const resetPassword = async (req, res, next) => {
 	if (!isEmpty(req.userError)) {
 		next();
@@ -88,6 +105,7 @@ const resetPassword = async (req, res, next) => {
 		const salt = bcrypt.genSaltSync();
 		req.body.newPassword = bcrypt.hashSync(req.body.newPassword, salt);
 		const pwdUpdated = await updatePwd(req.body.userName, req.body.newPassword);
+		const destroyToken = await tokenDestruction(req.body.userName);
 		next();
 	}
 };

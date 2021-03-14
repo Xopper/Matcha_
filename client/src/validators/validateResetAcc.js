@@ -1,19 +1,6 @@
 export default function validate(values) {
 	let errors = {};
 
-	// validate Passw
-	if (!values.oldPassword) {
-		errors.oldPassword = 'Password is required field.';
-	} else if (
-		!/(?=.{8,32})(?=.*[A-Z])(?=.*[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])(?=.*[a-z])(?=.*\d).*$/.test(values.oldPassword)
-	) {
-		errors.oldPassword = 'Incorrect password.';
-	} else if (values.oldPassword.length <= 8) {
-		errors.oldPassword = 'Incorrect password.';
-	} else if (values.oldPassword.length > 32) {
-		errors.oldPassword = 'Incorrect password.';
-	}
-
 	if (!values.newPassword) {
 		errors.newPassword = 'New password is required field.';
 	} else if (

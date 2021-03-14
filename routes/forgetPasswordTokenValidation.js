@@ -20,11 +20,29 @@ function checkUserAndValidateAccount(userName) {
 		});
 	});
 }
+
+function checkIfTokenIsNull(userName) {
+	return new Promise((res, rej) => {
+		pool.getConnection((err, connection) => {
+			if (err) rej(err);
+			connection.execute('SELECT `token` FROM `users` WHERE `user_name`=?', [userName], (err, result) => {
+				if (err) rej(err);
+				res(result[0].token);
+			});
+		});
+	});
+}
 const tokenVerification = async (req, res, next) => {
 	try {
 		console.log('>>the token before <<: ', req.params.token);
 		const tokenDecoded = await getToken(req.params.token);
 		req.decoded = tokenDecoded;
+		const tokenIsNull = await checkIfTokenIsNull(req.decoded.userName);
+		console.log('tokenIsNull', tokenIsNull);
+		if (tokenIsNull === NULL) {
+			req.error = 'Invalid token.';
+			next();
+		}
 		console.log('>>the token after  <<: ', req.params.token);
 		console.log('<<the token decoded>>: ', tokenDecoded);
 		next();
@@ -37,7 +55,11 @@ const tokenVerification = async (req, res, next) => {
 };
 router.get('/passwordtokenverification/:token', tokenVerification, async (req, res) => {
 	const backEndResponse = {};
-	if (!req.decoded) {
+	if (req.error !== '') {
+		backEndResponse.error = req.error;
+		backEndResponse.status = 1;
+		res.send(backEndResponse);
+	} else if (!req.decoded) {
 		console.log('sad9a??', req.decoded);
 		backEndResponse.error = 'password Token validation went wrong';
 		backEndResponse.status = 1;

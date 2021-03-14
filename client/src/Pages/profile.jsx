@@ -8,9 +8,9 @@ import SimpleSlider from '../Inc/extra/Slider';
 import { AuthContexts } from '../Contexts/authContext';
 import { getAge } from '../helpers/helpers';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 async function getData(strname, token) {
-	// console.log(strname);
 	const instance = axios.create({
 		headers: { Authorization: `Bearer ${token}` }
 	});
@@ -21,6 +21,7 @@ async function getData(strname, token) {
 }
 
 function Profile() {
+	const [isLiked, setIsLiked] = useState(0);
 	const { username } = useParams();
 	const { auth } = useContext(AuthContexts);
 	const { token } = auth;
@@ -61,6 +62,9 @@ function Profile() {
 						setData(oldData => ({ ...oldData, [el]: age }));
 					} else if (el === 'sexualPreference' && allUserInfos[el] === 'bi') {
 						setData(oldData => ({ ...oldData, [el]: 'bisexual' }));
+					} else if (el === 'liked') {
+						console.log('mebenz >> ', allUserInfos[el]);
+						setIsLiked(allUserInfos[el]);
 					} else {
 						setData(oldData => ({ ...oldData, [el]: allUserInfos[el] }));
 					}
@@ -73,13 +77,77 @@ function Profile() {
 	}, [username, token, history]);
 
 	async function handleLike() {
+		console.log('like clicked');
 		const instance = axios.create({
 			headers: { Authorization: `Bearer ${token}` }
 		});
 		const res = await instance.post('http://localhost:5000/likeEndPoint/like', {
 			userName: data.userName
 		});
-		console.log(res);
+		if (res.data.status === 0) {
+			setIsLiked(oldStatus => !oldStatus);
+			if (!!!isLiked) {
+				Swal.fire({
+					title: 'YAAAAAP!',
+					text: `You liked this profile!`,
+					icon: 'success',
+					confirmButtonText: 'close'
+				});
+			} else {
+				Swal.fire({
+					title: 'OUUUUUUCH!',
+					text: `You Dislike this profile!`,
+					icon: 'warning',
+					confirmButtonText: 'close'
+				});
+			}
+		}
+	}
+
+	function handleReport() {
+		console.log('report clicked');
+		Swal.fire({
+			title: 'Are you sure?',
+			text: 'Report as Fake account ?',
+			icon: 'question',
+			showCancelButton: true,
+			confirmButtonText: `Report`
+		}).then(({ isConfirmed }) => {
+			if (isConfirmed) {
+				Swal.fire('Account has been reported!', '', 'success');
+				// if response is 0 {no errors}
+				// swal succes
+				// if response is1 {error}
+				// show the error and 1005 it gonna be that you are already reported this account before :)
+			}
+		});
+	}
+
+	function handleBlock() {
+		console.log('block cicked');
+		Swal.fire({
+			title: 'Deleted!',
+			text: 'Your row has been deleted.',
+			button: 'Close', // Text on button
+			icon: 'success', //built in icons: success, warning, error, info
+			timer: 3000, //timeOut for auto-close
+			buttons: {
+				confirm: {
+					text: 'OK',
+					value: true,
+					visible: true,
+					className: '',
+					closeModal: true
+				},
+				cancel: {
+					text: 'Cancel',
+					value: false,
+					visible: true,
+					className: '',
+					closeModal: true
+				}
+			}
+		});
 	}
 
 	if (!data.userName) return <div />;
@@ -89,27 +157,29 @@ function Profile() {
 				<section className='profile__content'>
 					<section className='profile__nav'>
 						<div className='profile__rating'>
-							<HalfRating fameRating={data.fameRating} />
+							<HalfRating fameRating={data.fameRating && data.fameRating.toFixed(1)} />
 						</div>
 						<div className='profile__actions'>
 							{/**must be conditional if this is the logged user or an other user */}
 							<FontAwesomeIcon
 								icon={faHeart}
 								size='lg'
-								className='clickable'
-								onClick={() => handleLike()}
-								style={{ color: 'aquamarine', width: 20, height: 20 }}
+								className={isLiked ? 'clickable isLiked' : 'clickable'}
+								onClick={handleLike}
+								style={{ color: '#ccc', width: 20, height: 20 }}
 							/>
 							<FontAwesomeIcon
 								icon={faFlag}
 								size='lg'
 								className='clickable'
+								onClick={handleReport}
 								style={{ color: '#ccc', width: 20, height: 20 }}
 							/>
 							<FontAwesomeIcon
 								icon={faBan}
 								size='lg'
 								className='clickable'
+								onClick={handleBlock}
 								style={{ color: 'crimson', width: 20, height: 20 }}
 							/>
 						</div>

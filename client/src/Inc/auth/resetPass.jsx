@@ -1,54 +1,64 @@
-import React, { Fragment, useState, useContext } from 'react';
-import validate from '../../validators/validateEditSec';
+import React, { Fragment, useState, useEffect } from 'react';
+import validate from '../../validators/validateResetAcc';
 import axios from 'axios';
-import { AuthContexts } from '../../Contexts/authContext';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 export default function ResetPass() {
 	const history = useHistory();
+	const params = useParams();
+	const [userName, setUserName] = useState('');
 	const [values, setValues] = useState({
-		oldPassword: '',
 		newPassword: '',
 		confNewPassword: ''
 	});
 
-	const { oldPassword, newPassword, confNewPassword } = values;
+	useEffect(() => {
+		const isValid = async () => {
+			const { data } = await axios.get(
+				`http://localhost:5000/passwordverification/passwordtokenverification/${params.token}`
+			);
+			if (data.status === 0) {
+				setUserName(data.userName);
+			} else {
+				Swal.fire({
+					title: 'Error!',
+					text: 'Something went wrong!',
+					icon: 'error',
+					confirmButtonText: 'close'
+				});
+				history.replace('/auth');
+			}
+		};
+		isValid();
+	}, [params.token, history]);
+
+	const { newPassword, confNewPassword } = values;
 
 	const [errors, setErrors] = useState({});
-	const [errors_, setErrors_] = useState({ oldPassword: '' });
-
-	const { auth } = useContext(AuthContexts);
-	const { token } = auth;
 
 	async function handlesubmit(e) {
 		e.preventDefault();
 		const newErrors = validate(values);
 		setErrors(validate(values));
-		// if (Object.keys(newErrors).length === 0) {
-		// 	const instance = axios.create({
-		// 		headers: { Authorization: `Bearer ${token}` }
-		// 	});
-		// 	console.log(`Bearer ${token}`);
-		// 	const { data } = await instance.post('http://localhost:5000/editPwd/editPwdValidator', values);
-		// 	if (data.status === 1) {
-		// 		const {
-		// 			errors: { oldPassword }
-		// 		} = data;
-		// 		setErrors_({ oldPassword });
-		// 	} else {
-		// 		setErrors_({ oldPassword: '' });
-		// 		Swal.fire({
-		// 			title: 'YAAAP!',
-		// 			text: 'Password updated successfully!',
-		// 			icon: 'success',
-		// 			confirmButtonText: 'close'
-		// 		});
-		// 		history.replace('/account/');
-		// 	}
-		// } else {
-		// 	console.log(':(');
-		// }
+		if (Object.keys(newErrors).length === 0) {
+			const { data } = await axios.post('http://localhost:5000/resetPassword/resetPasswordValidation', {
+				userName,
+				newPassword,
+				confNewPassword
+			});
+			if (data.status === 0) {
+				Swal.fire({
+					title: 'YAAAP!',
+					text: 'Password updated successfully!',
+					icon: 'success',
+					confirmButtonText: 'close'
+				});
+				history.replace('/auth');
+			} else {
+				// swal something went wrong
+			}
+		}
 	}
 
 	function handleChange(e) {
@@ -57,7 +67,7 @@ export default function ResetPass() {
 	}
 
 	function handleClassName(field) {
-		if (errors[field] || errors_[field]) {
+		if (errors[field]) {
 			return 'danger';
 		}
 		return '';
@@ -65,7 +75,7 @@ export default function ResetPass() {
 
 	return (
 		<Fragment>
-			<h2>Be in Matcha.</h2>
+			<h2>Reset Account.</h2>
 			<p>Security Is Mostly A Superstition. Life Is Either A Daring Adventure Or Nothing.</p>
 			<form onSubmit={e => handlesubmit(e)} noValidate>
 				<label htmlFor='Password'>

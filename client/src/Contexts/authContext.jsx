@@ -17,9 +17,7 @@ function AuthProvider(props) {
 				} = await axios.post('http://localhost:5000/authToken/authTokenValidation', {
 					authToken: token
 				});
-				console.log(status);
 				if (status === 0) {
-					console.log('tach');
 					setAuth({ token, isCompleted: complited });
 				} else {
 					console.log(':(');

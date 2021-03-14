@@ -1277,3 +1277,7 @@ signature
     flex-direction: column;
     color: crimson;
 }
+
+.isLiked {
+	color: crimson!important;
+}

@@ -31,7 +31,7 @@ const sendEmailValidation = async (email, token) => {
 		text: 'Easy Work',
 		html: `<h1>Reset your password</h1>
         <p>Reset your password by clicking the link bellow</p>
-        <a href="http://localhost:3000/auth/reset/${token}">Click to reset your password</a>`
+        <a href="https://localhost:3000/auth/reset/${token}">Click to reset your password</a>`
 	};
 	try {
 		const emailSent = await sendEmail(mailOptions, transporter);
@@ -108,19 +108,19 @@ function updateToken(email, token) {
 const checkIfUserExists = async (req, res, next) => {
 	const errors = {};
 	if (req.body.email === '' || req.body.email === undefined || req.body.email.trim() == '') {
-		errors.email = 'Enter a valid email';
+		errors.email = 'Enter a valid email.';
 		req.primaryErr = errors;
 		next();
 	}
 	const userExits = await checkIfEmailExists(req.body.email);
 	if (userExits === 0) {
-		errors.email = 'Email does not exist';
+		errors.email = 'Email does not exist.';
 		req.primaryErr = errors;
 		next();
 	} else if (userExits === 1) {
 		const validated = await checkifValidated(req.body.email);
 		if (validated === 0) {
-			errors.email = 'Validate your account first';
+			errors.email = 'Validate your account first.';
 			req.primaryErr = errors;
 			next();
 		} else {

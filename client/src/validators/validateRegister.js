@@ -1,5 +1,5 @@
 export default function validateRegister(values) {
-	let errors = {};
+	const errors = {};
 
 	// validating Email
 	if (!values.email || values.email.trim() === '') {

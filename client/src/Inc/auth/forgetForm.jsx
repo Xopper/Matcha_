@@ -18,10 +18,24 @@ export default function ForgetForm() {
 	const [errors_, setErrors_] = useState({ email: '' });
 
 	async function submit() {
-		console.log(values);
 		try {
 			const { data } = await axios.post('http://localhost:5000/forgetPwdEmailChecker/emailchecker', values);
 			console.log(data);
+			if (data.status === 1) {
+				const {
+					errors: { email }
+				} = data;
+				setErrors_(oldErrs => ({ ...oldErrs, email }));
+			} else {
+				setErrors_(oldErrs => ({ ...oldErrs, email: '' }));
+				Swal.fire({
+					title: 'Cool!',
+					text: 'Please check your e-mail to reset your account!',
+					icon: 'success',
+					confirmButtonText: 'close'
+				});
+				history.replace('/auth');
+			}
 		} catch (e) {}
 	}
 
