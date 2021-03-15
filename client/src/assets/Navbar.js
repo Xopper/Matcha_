@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContexts } from '../Contexts/authContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faSignOutAlt, faHistory } from '@fortawesome/free-solid-svg-icons';
 import { ReactComponent as BellIcon } from '../icons/bell.svg';
 import { ReactComponent as CogIcon } from '../icons/cog.svg';
 import { ReactComponent as MessengerIcon } from '../icons/messenger.svg';
@@ -92,6 +92,16 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 					)) ||
 						(auth.token && (
 							<>
+								<NavItem
+									icon={
+										<FontAwesomeIcon
+											icon={faHistory}
+											size='lg'
+											className='clickable'
+											style={{ color: 'aquamarine', width: 20, height: 20 }}
+										/>
+									}
+								/>
 								<NavItem icon={<MessengerIcon className='icon_btn' />} notifCount='2' />
 								<NavItem icon={<BellIcon className='icon_btn' />} notifCount='9+' />
 								<NavItem

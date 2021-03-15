@@ -237,7 +237,7 @@ function StepForm(props) {
 				</label>
 				<label className='labelSelect'>
 					<strong>Date of birth.</strong>
-					<input type='date' name='birthday' max={Date().now().to('Y-m-d')} onChange={e => handleChange(e)} />
+					<input type='date' name='birthday' onChange={e => handleChange(e)} />
 				</label>
 				<label className='labelSelect'>
 					<strong>Tags.</strong>

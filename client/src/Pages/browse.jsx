@@ -1,8 +1,7 @@
 import React from 'react';
 import RangeSlider from '../assets/rangSlider';
 import Rate from '../assets/controlledRating';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faMale, faFemale, faUsers } from '@fortawesome/free-solid-svg-icons';
+import HalfRating from '../assets/profileRating';
 
 function Browse() {
 	const fakeDate = {
@@ -57,30 +56,73 @@ function Browse() {
 							</label>
 						</div>
 					</div>
-					<div className='profiles'>
-						<div className='profile__card'>
+				</div>
+				<div className='profiles'>
+					<div className='profile__card'>
+						<div className='profile__img'>
 							<img src={fakeDate.img} alt='pic' />
-							<span>
-								<strong>Ahaloua, 23</strong>
-							</span>
 						</div>
-						<div className='profile__card'>
-							<FontAwesomeIcon icon={faUser} size='3x' color='#30e3ca' />
-							<h3>9</h3>
-							<h3>User Online</h3>
+						<div className='profile__info'>
+							<div>
+								<span className='first__profile--info'>Ali Haloua, 23</span>
+							</div>
+							{/* <div> */}
+							<HalfRating fameRating='3.6' />
+							{/* </div> */}
+							<div>
+								<span className='last__profile--info'>27 (KM)</span>
+							</div>
 						</div>
-						<div className='profile__card'>
-							<FontAwesomeIcon icon={faMale} size='3x' color='#30e3ca' />
-							<h3>51</h3>
-							<h3> Men Online</h3>
-						</div>
-						<div className='profile__card'>
-							<FontAwesomeIcon icon={faFemale} size='3x' color='#30e3ca' />
-							<h3>152</h3>
-							<h3>Woman Online</h3>
-						</div>
-						<div className='profile__card'></div>
 					</div>
+					<div className='profile__card'>
+						<div className='profile__img'>
+							<img src={fakeDate.img} alt='pic' />
+						</div>
+						<div className='profile__info'>
+							<div>
+								<span className='first__profile--info'>Ali Haloua, 23</span>
+							</div>
+							{/* <div> */}
+							<HalfRating fameRating='3.6' />
+							{/* </div> */}
+							<div>
+								<span className='last__profile--info'>27 (KM)</span>
+							</div>
+						</div>
+					</div>
+					<div className='profile__card'>
+						<div className='profile__img'>
+							<img src={fakeDate.img} alt='pic' />
+						</div>
+						<div className='profile__info'>
+							<div>
+								<span className='first__profile--info'>Ali Haloua, 23</span>
+							</div>
+							{/* <div> */}
+							<HalfRating fameRating='3.6' />
+							{/* </div> */}
+							<div>
+								<span className='last__profile--info'>27 (KM)</span>
+							</div>
+						</div>
+					</div>
+					<div className='profile__card'>
+						<div className='profile__img'>
+							<img src={fakeDate.img} alt='pic' />
+						</div>
+						<div className='profile__info'>
+							<div>
+								<span className='first__profile--info'>Ali Haloua, 23</span>
+							</div>
+							{/* <div> */}
+							<HalfRating fameRating='3.6' />
+							{/* </div> */}
+							<div>
+								<span className='last__profile--info'>27 (KM)</span>
+							</div>
+						</div>
+					</div>
+					<div className='profile__card'></div>
 				</div>
 			</div>
 		</div>
