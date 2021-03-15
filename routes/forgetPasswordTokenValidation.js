@@ -1,6 +1,14 @@
 const router = require('express').Router();
 const pool = require('../model/dbconnection');
 const jwt = require('jsonwebtoken');
+
+const isEmpty = obj => {
+	for (let prop in obj) {
+		if (obj.hasOwnProperty(prop)) return false;
+	}
+	return true;
+};
+
 function getToken(token) {
 	return new Promise((resolved, rejected) => {
 		jwt.verify(token, 'mafhamnachwalakinma3lichlhalwassaoulfanid04', (err, decoded) => {
@@ -13,10 +21,14 @@ function checkUserAndValidateAccount(userName) {
 	return new Promise((res, rej) => {
 		pool.getConnection((err, connection) => {
 			if (err) rej(err);
-			connection.execute('UPDATE `users` SET `verified`=? WHERE `user_name`=?', [1, userName], (err, result) => {
-				if (err) rej(err);
-				res(result);
-			});
+			connection.execute(
+				'UPDATE `users` SET `verified`=?, `token` = NULL  WHERE `user_name`=?',
+				[1, userName],
+				(err, result) => {
+					if (err) rej(err);
+					res(result);
+				}
+			);
 		});
 	});
 }
@@ -36,10 +48,11 @@ const tokenVerification = async (req, res, next) => {
 	try {
 		console.log('>>the token before <<: ', req.params.token);
 		const tokenDecoded = await getToken(req.params.token);
+		console.log('tokenDecoded ====: ', tokenDecoded);
 		req.decoded = tokenDecoded;
 		const tokenIsNull = await checkIfTokenIsNull(req.decoded.userName);
-		console.log('tokenIsNull', tokenIsNull);
-		if (tokenIsNull === NULL) {
+		console.log('tokenIsNull =====: ', tokenIsNull);
+		if (tokenIsNull === null) {
 			req.error = 'Invalid token.';
 			next();
 		}
@@ -48,19 +61,22 @@ const tokenVerification = async (req, res, next) => {
 		next();
 	} catch (err) {
 		console.log('the token is invalid !!');
+		console.log('ERROR PAUSE :: ', err);
 		req.decoded = '';
 		next();
 	}
 };
 router.get('/passwordtokenverification/:token', tokenVerification, async (req, res) => {
 	const backEndResponse = {};
-	if (req.error !== '') {
+	console.log('dandan', req.error);
+	if (!isEmpty(req.error)) {
+		console.log('Boss');
 		backEndResponse.error = req.error;
 		backEndResponse.status = 1;
 		res.send(backEndResponse);
 	} else if (!req.decoded) {
 		console.log('sad9a??', req.decoded);
-		backEndResponse.error = 'password Token validation went wrong';
+		backEndResponse.error = 'password Token validation went wrong.';
 		backEndResponse.status = 1;
 		res.send(backEndResponse);
 	} else {

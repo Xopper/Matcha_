@@ -1,4 +1,4 @@
-import { toTimeStamp, getAge } from '../helpers/helpers';
+import { getAge } from '../helpers/helpers';
 
 export default function validateEdit(values) {
 	const errors = {};
@@ -39,15 +39,6 @@ export default function validateEdit(values) {
 		errors.email = 'Email address is required field.';
 	} else if (!/^([a-zA-Z._0-9-]+)@([a-zA-Z0-9]+[.]?)*([a-zA-Z0-9])(\.[a-zA-Z]{2,4})$/.test(values.email)) {
 		errors.email = 'Email address is not valid.';
-	}
-
-	// validating birthDay
-	if (!values.birthDay || values.birthDay.trim() === '') {
-		errors.birthDay = 'Date of birth is required field.';
-	} else if (Date.now() > toTimeStamp(new Date(values.birthday))) {
-		errors.birthDay = '7ssalty.';
-	} else if (getAge(values.birthDay) < 18) {
-		errors.birthDay = 'You must have 18 YO to be with us.';
 	}
 
 	if (!values.biography || values.biography.trim() === '') {

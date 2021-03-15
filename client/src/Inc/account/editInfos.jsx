@@ -8,7 +8,6 @@ import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 import { AuthContexts } from '../../Contexts/authContext';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import dayJs from 'dayjs';
 
 async function getData(token) {
 	const instance = axios.create({
@@ -32,7 +31,7 @@ export default function EditInfos() {
 	const { token } = auth;
 	const { handleSubmit, handleChange, values, errors } = useForm(submit, validate, formSchema, setFormSchema);
 	const { firstName, lastName, username, email, birthDay, biography } = values;
-	const [errors_, setErrors_] = useState({ email: '', username: '' });
+	const [errors_, setErrors_] = useState({ email: '', username: '', birthDay: '' });
 	// needs to be add
 	const [center, setCenter] = useState({ lat: 3.2, lng: 3.6 });
 	const [country, setCountry] = useState('unknown');
@@ -46,7 +45,6 @@ export default function EditInfos() {
 			} = await getData(token);
 			console.log(userInfos);
 			const { lat, lng } = userInfos[0];
-			// console.log(' >> ', lat, ' >> ', lng);
 			userInfos[0].birthDay = formatDate(userInfos[0].birthDay);
 			setFormSchema(userInfos[0]);
 			setCenter({ lat, lng });
@@ -56,10 +54,6 @@ export default function EditInfos() {
 
 	function submit() {
 		console.log({ ...values, ...center, country });
-		// console.log({ ...values, ...center });
-
-		console.log(dayJs(values.birthDay));
-
 		const { token } = auth;
 		const instance = axios.create({
 			headers: { Authorization: `Bearer ${token}` }
@@ -68,7 +62,6 @@ export default function EditInfos() {
 		instance
 			.post('http://localhost:5000/editProfileInfo/infoValidator', { ...values, ...center, country })
 			.then(res => {
-				console.log('hahahahah');
 				const { data } = res;
 				console.log(res);
 				if (data.status === 0) {
@@ -79,7 +72,7 @@ export default function EditInfos() {
 						...oldContext,
 						token: newAuthToken
 					}));
-					setErrors_({ email: '', username: '' });
+					setErrors_({ email: '', username: '', birthDay: '' });
 					Swal.fire({
 						title: 'YAAAP!',
 						text: 'Your profile updated successfully!',
@@ -87,8 +80,8 @@ export default function EditInfos() {
 						confirmButtonText: 'close'
 					});
 				} else {
-					const { newEmailAlreadyExists: email, newUserNameAlreadyExists: username } = data.errors;
-					setErrors_({ email, username });
+					const { newEmailAlreadyExists: email, newUserNameAlreadyExists: username, birthDay } = data.errors;
+					setErrors_({ email, username, birthDay });
 				}
 			})
 			.catch(err => {});
@@ -189,7 +182,7 @@ export default function EditInfos() {
 						onChange={handleChange}
 						onKeyDown={e => handleKey(e)}
 					/>
-					<h5>{errors.birthDay && `${errors.birthDay}`}</h5>
+					<h5>{(errors.birthDay && `${errors.birthDay}`) || (errors_.birthDay && `${errors_.birthDay}`)}</h5>
 				</label>
 				<div className='marker__wrapper '>
 					<button

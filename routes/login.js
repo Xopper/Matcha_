@@ -165,6 +165,8 @@ const validateLoginData = async (req, res, next) => {
 					// get the auth token from the database
 					const authenticationToken = await getUserAuthenticationToken(loginInputData.username);
 					req.authenticationToken = authenticationToken;
+					const userName = loginInputData.username;
+					req.userName = userName;
 					//get if the profile data is complited
 					const dataProfileComplited = await dataProfileIsComplited(loginInputData.username);
 					req.dataprofileIsComplited = dataProfileComplited;
@@ -185,6 +187,7 @@ router.post('/validate/login', validateLoginData, (req, res) => {
 		res.send(msgFromBackEnd);
 	} else {
 		msgFromBackEnd.authToken = req.authenticationToken;
+		msgFromBackEnd.userName = req.userName;
 		// send if the dataProfile is complited or not
 		msgFromBackEnd.dataProfileIsComplited = req.dataprofileIsComplited;
 		msgFromBackEnd.status = 0;

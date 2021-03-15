@@ -17,7 +17,7 @@ html
 
 
 body {
-	/* height: 100%; */
+	height: 100%;
 	/* background: rebeccapurple; */
 	/* background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%); */
 }
@@ -1300,7 +1300,6 @@ signature
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
     width: 100%;
     background-color: #fff;
     padding: 30px 0;
@@ -1314,10 +1313,101 @@ signature
     justify-content: space-between;
     flex-wrap: wrap;
     align-items: center;
-    margin: 80px 0 0 0;
+    height: 90px;
 }
 
 .browse__search .search__specs{
-	flex-basis: 10%;
-    margin: 10px;
+    flex-basis: 10%;
+    margin: 10px 0;
+    height: 30px;
+}
+
+.browse__search .search__specs p {
+    font-size: 14px;
+    font-weight: 900;
+    padding-bottom: 10px;
+}
+
+
+.sort__specs {
+	display: flex;
+    width: 45%;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-top: 37px;
+}
+
+.sort__specs input[type="radio"] {
+	height: 20px;
+	width: 20px;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	-o-appearance: none;
+	appearance: none;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	outline: none;
+	transition-duration: 0.3s;
+	background: #f3f3f4;
+	cursor: pointer;
+}
+
+.sort__specs input[type="radio"]:checked {
+	background-color: #00e6cb;
+	border: 1px solid #41b883;
+}
+
+.sort__specs input[type="radio"]:active {
+	border: 2px solid #34495e;
+}
+
+.sort__specs .sort__box {
+	display: flex;
+	flex-direction: row;
+	margin-bottom: 15px;
+	align-items: center;
+}
+
+.sort__specs .sort__box input {
+	margin-right: 10px;
+}
+/* .sort__specs .sort__box {
+	display: flex;
+} */
+
+.browse__content .profiles {
+	background: rebeccapurple;
+	width: 100%;
+	height: 100%;
+	display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 50px 0 0;
+    padding: 10px 20px 0 20px;
+}
+.browse__content .profiles .profile__card {
+	background-color: #f3f3f4;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	-o-appearance: none;
+	appearance: none;
+	border: 1px solid #ccc;
+	width: calc(90% / 4);
+	outline: none;
+	transition-duration: 0.3s;
+    /* padding: 50px; */
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* justify-content: center; */
+    height: 300px;
+}
+
+.browse__content .profiles .profile__card img {
+	width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 30px 30px 0 0;
 }

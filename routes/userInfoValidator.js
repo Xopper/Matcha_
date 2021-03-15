@@ -135,7 +135,7 @@ const primaryValidation = (req, res, next) => {
 	} else if (values.lastName.length > 12) {
 		errors.lastName = 'Last name must be less than 13 characters.';
 	}
-	if (!isValidDate(values.birthDay)) errors.birthDay = 'Not a valid birhtday';
+	if (!isValidDate(values.birthDay)) errors.birthDay = 'Invalid Date of birth, you should have 18 YO.';
 
 	if (values.biography === '' || !values.biography) errors.biography = 'Biography is required';
 	else if (values.biography.length < 8 || values.biography.length > 500)
@@ -239,8 +239,6 @@ const getActualInfos = async (req, res, next) => {
 	next();
 };
 function updateTheData(userId, values) {
-	// console.log('userId', userId);
-	// console.log('values', values);
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
@@ -358,6 +356,7 @@ const updateUserInfos = async (req, res, next) => {
 			req.finalErrors = errors;
 			next();
 		} else {
+			req.userName = dataToUpdate.userName;
 			const dataUpdatedResult = await updateTheData(req.actualUserInfos.userId, dataToUpdate);
 			const theAuthToken = await getAuthToken(req.actualUserInfos.userId);
 			req.theAuthToken = theAuthToken;
@@ -382,6 +381,7 @@ router.post('/infoValidator', authToken, trimValues, primaryValidation, getActua
 		res.send(backEndResponse);
 	} else {
 		backEndResponse.newAuthToken = req.theAuthToken;
+		backEndResponse.userName = req.userName;
 		backEndResponse.status = 0;
 		res.send(backEndResponse);
 	}
