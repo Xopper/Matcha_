@@ -20,7 +20,6 @@ export default function ForgetForm() {
 	async function submit() {
 		try {
 			const { data } = await axios.post('http://localhost:5000/forgetPwdEmailChecker/emailchecker', values);
-			console.log(data);
 			if (data.status === 1) {
 				const {
 					errors: { email }

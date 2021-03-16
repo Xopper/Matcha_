@@ -29,7 +29,7 @@ export default function EditSec() {
 			const instance = axios.create({
 				headers: { Authorization: `Bearer ${token}` }
 			});
-			console.log(`Bearer ${token}`);
+			// console.log(`Bearer ${token}`);
 			const { data } = await instance.post('http://localhost:5000/editPwd/editPwdValidator', values);
 			if (data.status === 1) {
 				const {
@@ -46,11 +46,10 @@ export default function EditSec() {
 				});
 				history.replace('/account/');
 			}
-		} else {
-			console.log(':(');
-			// something went wrong
-			// alredy set under inputs
 		}
+		// console.log(':(');
+		// something went wrong
+		// alredy set under inputs
 	}
 
 	function handleChange(e) {

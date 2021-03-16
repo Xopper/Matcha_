@@ -46,7 +46,7 @@ function EditPrefs(props) {
 				interests,
 				tags
 			});
-			console.log(gender, ' >> ', interests, ' >> ', tags);
+			// console.log(gender, ' >> ', interests, ' >> ', tags);
 		};
 		data();
 	}, [token]);
@@ -59,7 +59,7 @@ function EditPrefs(props) {
 			const instance = axios.create({
 				headers: { Authorization: `Bearer ${token}` }
 			});
-			console.log(`Bearer ${token}`);
+			// console.log(`Bearer ${token}`);
 			const {
 				data: { status }
 			} = await instance.post('http://localhost:5000/editPrefs/prefsValidator', values);

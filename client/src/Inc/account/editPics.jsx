@@ -9,7 +9,7 @@ async function getData(token) {
 	const instance = axios.create({
 		headers: { Authorization: `Bearer ${token}` }
 	});
-	console.log(`Bearer ${token}`);
+	// console.log(`Bearer ${token}`);
 	const response = await instance.get('http://localhost:5000/getPictures/pics');
 	return response;
 }
@@ -30,7 +30,7 @@ export default function EditPics() {
 	const { token } = auth;
 
 	useEffect(() => {
-		console.log(token);
+		// console.log(token);
 		const data = async () => {
 			const {
 				data: { userPics }
@@ -61,7 +61,7 @@ export default function EditPics() {
 				...images
 			});
 			const { data } = res;
-			console.log(data);
+			// console.log(data);
 			// console.log(data.status);
 			if (data.status === 0) {
 				Swal.fire({
@@ -78,7 +78,7 @@ export default function EditPics() {
 					confirmButtonText: 'close'
 				});
 			}
-			console.log({ ...avatar, ...images });
+			// console.log({ ...avatar, ...images });
 		} else {
 			Swal.fire({
 				title: 'NOOOPE!',
@@ -86,7 +86,7 @@ export default function EditPics() {
 				icon: 'error',
 				confirmButtonText: 'close'
 			});
-			console.log('error :(');
+			// console.log('error :(');
 		}
 	}
 
@@ -140,10 +140,10 @@ export default function EditPics() {
 
 	function handleDelete(e, imgSrc) {
 		e.preventDefault();
-		console.log('Delete btn hitted', imgSrc);
+		// console.log('Delete btn hitted', imgSrc);
 		if (imgSrc !== `avatarSrc` && typeof images[imgSrc] !== 'undefined') setImages({ ...images, [imgSrc]: '' });
 		else setAvatar({ ...avatar, [imgSrc]: '' });
-		console.log({ ...avatar, ...images });
+		// console.log({ ...avatar, ...images });
 	}
 
 	return (

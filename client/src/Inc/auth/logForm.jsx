@@ -4,6 +4,7 @@ import validate from '../../validators/validateLogin';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { AuthContexts } from '../../Contexts/authContext';
+import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 
 function LogForm() {
 	const [formSchema, setFormSchema] = useState({
@@ -15,7 +16,6 @@ function LogForm() {
 	const authContext = useContext(AuthContexts);
 
 	async function submit() {
-		console.log(formSchema);
 		const values = { ...formSchema };
 		try {
 			const {
@@ -44,7 +44,6 @@ function LogForm() {
 				});
 				localStorage.setItem('token', authToken);
 				authContext.setAuth({ token: authToken, isCompleted: dataProfileIsComplited });
-				// try to figurout something for redirecting the user
 			}
 		} catch (e) {}
 	}
@@ -91,12 +90,10 @@ function LogForm() {
 					/>
 					<h5>{errors.password && `${errors.password}`}</h5>
 				</label>
-				{/* <label className="checkbox">
-					<input type="checkbox" />
-					<span>keep me logged in</span>
-				</label> */}
 				<div>
-					<span className='forget__pass--text'>{`froget password`}</span>
+					<div className='forget__pass--text'>
+						<Link to='/auth/forgetpass'>{`froget password ?`}</Link>
+					</div>
 					<input className='submit__btn' type='submit' value='Login in' />
 				</div>
 			</form>

@@ -18,7 +18,6 @@ function Confirm() {
 				const {
 					data: { status }
 				} = await getResponse(token);
-				console.log(status);
 				if (status === 0) {
 					Swal.fire({
 						title: 'YAAAP!',
@@ -27,7 +26,6 @@ function Confirm() {
 						confirmButtonText: 'close'
 					});
 				} else {
-					// umm machi zaz
 					Swal.fire({
 						title: 'NOOOPE!',
 						text: 'Something went wrong. Try Again!',

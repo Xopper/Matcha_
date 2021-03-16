@@ -3,8 +3,10 @@ import * as NodeGeocoder from 'node-geocoder';
 import fetchS from 'node-fetch';
 
 const containerStyle = {
-	width: '400px',
-	height: '400px'
+	width: '80%',
+	minWidth: '320px',
+	minHeight: '80%',
+	height: '320px'
 };
 
 const MapWithAMarker = ({ handlePosition, center, handleCountry }) => {

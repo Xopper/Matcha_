@@ -43,7 +43,7 @@ export default function EditInfos() {
 			const {
 				data: { userInfos }
 			} = await getData(token);
-			console.log(userInfos);
+			// console.log(userInfos);
 			const { lat, lng } = userInfos[0];
 			userInfos[0].birthDay = formatDate(userInfos[0].birthDay);
 			setFormSchema(userInfos[0]);
@@ -53,7 +53,7 @@ export default function EditInfos() {
 	}, [token]);
 
 	function submit() {
-		console.log({ ...values, ...center, country });
+		// console.log({ ...values, ...center, country });
 		const { token } = auth;
 		const instance = axios.create({
 			headers: { Authorization: `Bearer ${token}` }
@@ -63,7 +63,7 @@ export default function EditInfos() {
 			.post('http://localhost:5000/editProfileInfo/infoValidator', { ...values, ...center, country })
 			.then(res => {
 				const { data } = res;
-				console.log(res);
+				// console.log(res);
 				if (data.status === 0) {
 					const { newAuthToken } = data;
 					localStorage.removeItem('token');

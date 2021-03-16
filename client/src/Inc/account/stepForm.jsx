@@ -71,7 +71,7 @@ function StepForm(props) {
 					longitude,
 					country: { name: country }
 				} = await ipLocation(publicLoction);
-				console.log(latitude, longitude, country);
+				// console.log(latitude, longitude, country);
 				setLocation({ latitude, longitude });
 				setUserCountry(country);
 			} catch (err) {}
@@ -86,10 +86,10 @@ function StepForm(props) {
 
 	function handlesubmit(e) {
 		e.preventDefault();
-		console.log({ ...location, ...values, userCountry });
+		// console.log({ ...location, ...values, userCountry });
 
 		const errors = validate(values);
-		console.log(Object.keys(errors).length);
+		// console.log(Object.keys(errors).length);
 		if (Object.keys(errors).length !== 0) {
 			const errorsContent = (
 				<ul className='popErrors'>
@@ -105,7 +105,7 @@ function StepForm(props) {
 			});
 		} else {
 			const country = userCountry;
-			console.log({ ...location, ...values, country });
+			// console.log({ ...location, ...values, country });
 			const { token } = auth;
 			const instance = axios.create({
 				headers: { Authorization: `Bearer ${token}` }

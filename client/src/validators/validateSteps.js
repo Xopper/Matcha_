@@ -1,4 +1,4 @@
-import { toTimeStamp, getAge } from '../helpers/helpers';
+import { isValidDate, getAge } from '../helpers/helpers';
 
 export default function validateSteps(values) {
 	let errors = {};
@@ -15,7 +15,7 @@ export default function validateSteps(values) {
 	// validate date of birth
 	if (!values.birthday || values.birthday.trim() === '') {
 		errors.birthday = 'Date of birth is required field.';
-	} else if (Date.now() > toTimeStamp(new Date(values.birthday))) {
+	} else if (!isValidDate(values.birthday)) {
 		errors.birthday = 'Invalid Date.';
 	} else if (getAge(values.birthday) < 18) {
 		errors.birthday = 'You must have 18 YO to be with us.';

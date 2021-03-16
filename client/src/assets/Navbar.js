@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContexts } from '../Contexts/authContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -6,10 +6,30 @@ import { faSignOutAlt, faHistory } from '@fortawesome/free-solid-svg-icons';
 import { ReactComponent as BellIcon } from '../icons/bell.svg';
 import { ReactComponent as CogIcon } from '../icons/cog.svg';
 import { ReactComponent as MessengerIcon } from '../icons/messenger.svg';
-// import { ReactComponent as CaretIcon } from '../icons/caret.svg';
 import { ReactComponent as BoltIcon } from '../icons/bolt.svg';
 import { ReactComponent as PlusIcon } from '../icons/plus.svg';
 import { ReactComponent as InfosIcon } from '../icons/infos.svg';
+
+/**
+ * @link https://stackoverflow.com/questions/32553158/detect-click-outside-react-component
+ * @param {*} ref
+ * @param {*} handleClick
+ */
+function useOutsideHandler(ref, handleClick) {
+	useEffect(() => {
+		function handleClickOutside(event) {
+			if (ref.current && !ref.current.contains(event.target)) {
+				handleClick();
+			}
+		}
+		// Bind the event listener
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => {
+			// Unbind the event listener on clean up
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [ref, handleClick]);
+}
 
 function NavItem({ handleClick, icon, open, children, notifCount }) {
 	return (
@@ -24,6 +44,8 @@ function NavItem({ handleClick, icon, open, children, notifCount }) {
 }
 
 function DropDownMenu(props) {
+	const dropDown = useRef(null);
+	useOutsideHandler(dropDown, props.handleClick);
 	function DropDownItem(props) {
 		return (
 			<div className='menu-item'>
@@ -33,7 +55,7 @@ function DropDownMenu(props) {
 		);
 	}
 	return (
-		<div className='drop-down'>
+		<div className='drop-down' ref={dropDown}>
 			<Link to='/account' onClick={props.handleClick}>
 				<DropDownItem leftIcon={<InfosIcon className='sub_icon_btn' />}>Edit Infos</DropDownItem>
 			</Link>
