@@ -10,7 +10,6 @@ import withReactContent from 'sweetalert2-react-content';
 import { AuthContexts } from '../../Contexts/authContext';
 import * as NodeGeocoder from 'node-geocoder';
 import fetchS from 'node-fetch';
-// import dayJs from 'dayjs';
 
 const fetch = fetchS.bind();
 const options = {

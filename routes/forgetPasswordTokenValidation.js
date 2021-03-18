@@ -10,10 +10,10 @@ const isEmpty = obj => {
 };
 
 function getToken(token) {
-	return new Promise((resolved, rejected) => {
+	return new Promise((resolve, reject) => {
 		jwt.verify(token, 'mafhamnachwalakinma3lichlhalwassaoulfanid04', (err, decoded) => {
-			if (err) rejected(err);
-			resolved(decoded);
+			if (err) reject('err: ', err);
+			resolve('decoded: ', decoded);
 		});
 	});
 }
@@ -48,6 +48,7 @@ const tokenVerification = async (req, res, next) => {
 	try {
 		console.log('>>the token before <<: ', req.params.token);
 		const tokenDecoded = await getToken(req.params.token);
+		console.log(tokenDecoded);
 		console.log('tokenDecoded ====: ', tokenDecoded);
 		req.decoded = tokenDecoded;
 		const tokenIsNull = await checkIfTokenIsNull(req.decoded.userName);

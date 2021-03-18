@@ -28,33 +28,40 @@ function checkIfUserExists(userName) {
 }
 const userValidation = async (req, res, next) => {
 	const errors = {};
-	const userToResetPwd = req.body.userName;
-	const userExists = await checkIfUserExists(userToResetPwd);
-	if (userExists === 1) {
-		req.userToResetPwd = userToResetPwd;
-	} else {
-		errors.userError = 'User does not exist';
+	const { userName: userToResetPwd } = req.body;
+	// console.log(req.body);
+	// console.log(userToResetPwd);
+	if (isEmpty(userToResetPwd)) {
+		errors.userError = 'Wa nta a khouia mrid fkarak li mseft lina hada f lparams';
 		req.userError = errors;
+	} else {
+		console.log('hada houa : : ', userToResetPwd);
+		const userExists = await checkIfUserExists(userToResetPwd);
+		if (userExists === 1) {
+			req.userToResetPwd = userToResetPwd;
+		} else {
+			errors.userError = 'User does not exist';
+			req.userError = errors;
+		}
 	}
 	next();
 };
 const validatePassword = (req, res, next) => {
 	const changedPwdErr = {};
-	if (!req.body.newPassword) {
+	const { newPassword, confNewPassword } = req.body;
+	if (!newPassword) {
 		changedPwdErr.newPassword = 'Password is required field.';
 	} else if (
-		!/(?=.{8,32})(?=.*[A-Z])(?=.*[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])(?=.*[a-z])(?=.*\d).*$/.test(
-			req.body.newPassword
-		)
+		!/(?=.{8,32})(?=.*[A-Z])(?=.*[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])(?=.*[a-z])(?=.*\d).*$/.test(newPassword)
 	) {
 		changedPwdErr.newPassword = 'Use [lower-Upper] case, special chars and numbers.';
-	} else if (req.body.newPassword.length <= 8) {
+	} else if (newPassword.length <= 8) {
 		changedPwdErr.newPassword = 'Password must be at least 8 characters.';
-	} else if (req.body.newPassword.length > 32) {
+	} else if (newPassword.length > 32) {
 		changedPwdErr.newPassword = 'Password must be less than 32 characters.';
 	}
 	if (isEmpty(changedPwdErr)) {
-		if (req.body.newPassword !== req.body.confNewPassword)
+		if (newPassword !== confNewPassword)
 			changedPwdErr.confPwdErr = 'Confirm password does not match with the new password';
 	}
 	req.changedPwdErr = changedPwdErr;
@@ -116,7 +123,7 @@ router.post('/resetPasswordValidation', userValidation, validatePassword, resetP
 		backEndResponse.status = 1;
 		res.send(backEndResponse);
 	} else if (!isEmpty(req.changedPwdErr)) {
-		backEndResponse.errors = req.userError;
+		backEndResponse.errors = req.changedPwdErr;
 		backEndResponse.status = 1;
 		res.send(backEndResponse);
 	} else {

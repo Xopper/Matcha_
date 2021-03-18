@@ -17,6 +17,7 @@ function LogForm() {
 
 	async function submit() {
 		const values = { ...formSchema };
+		console.log({ values });
 		try {
 			const {
 				data: { status, authToken, dataProfileIsComplited, errors }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Slider from '@material-ui/core/Slider';
 
@@ -11,20 +11,20 @@ const useStyles = makeStyles({
 	}
 });
 
-export default function RangeSlider() {
+export default function RangeSlider({ minRange, maxRange, value, setValue }) {
 	const classes = useStyles();
-	const [value, setValue] = React.useState([20, 37]);
+	// const [value, setValue] = useState([minValue, maxValue]);
 
-	const handleChange = (e, value) => {
-		setValue(value);
+	const handleChange = (e, val) => {
+		setValue(val);
 	};
 
 	return (
 		<div className={classes.root}>
 			<Slider
 				value={value}
-				min={10}
-				max={40}
+				min={minRange}
+				max={maxRange}
 				className={classes.slider}
 				onChange={handleChange}
 				valueLabelDisplay='auto'

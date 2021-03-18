@@ -133,54 +133,63 @@ const checkLoginInputs = values => {
 };
 
 const validateLoginData = async (req, res, next) => {
-	const loginInputData = req.body.values;
-	loginInputData.username = loginInputData.username.trim();
+	try {
+		const loginInputData = req.body.values;
+		loginInputData.username = loginInputData.username.trim();
 
-	const loginErrors = {};
-	const userNameExists = await userNameFound(loginInputData.username);
-	const checkerResult = checkLoginInputs(loginInputData);
-	if (!isEmpty(checkerResult)) {
-		req.loginErrors = checkerResult;
-		next();
-	} else {
-		if (userNameExists === 0) {
-			loginErrors.userNameOrPasswordError = 'User Name or Password is wrong';
-			req.loginErrors = loginErrors;
+		const loginErrors = {};
+		const userNameExists = await userNameFound(loginInputData.username);
+		const checkerResult = checkLoginInputs(loginInputData);
+		if (!isEmpty(checkerResult)) {
+			req.loginErrors = checkerResult;
 			next();
-		} else if (userNameExists === 1) {
-			const userpassword = await getUserPassword(loginInputData.username);
-			const validPassword = await bcrypt.compare(loginInputData.password, userpassword);
-			if (!validPassword) {
+		} else {
+			if (userNameExists === 0) {
 				loginErrors.userNameOrPasswordError = 'User Name or Password is wrong';
 				req.loginErrors = loginErrors;
 				next();
-			} else if (validPassword) {
-				const verifiedAccount = await checkIfVerifiedAccount(loginInputData.username);
-				if (verifiedAccount === 0) {
-					loginErrors.userNameOrPasswordError =
-						'Verify your account via the link sent to your registration email';
+			} else if (userNameExists === 1) {
+				const userpassword = await getUserPassword(loginInputData.username);
+				const validPassword = await bcrypt.compare(loginInputData.password, userpassword);
+				if (!validPassword) {
+					loginErrors.userNameOrPasswordError = 'User Name or Password is wrong';
 					req.loginErrors = loginErrors;
 					next();
-				} else if (verifiedAccount === 1) {
-					// get the auth token from the database
-					const authenticationToken = await getUserAuthenticationToken(loginInputData.username);
-					req.authenticationToken = authenticationToken;
-					const userName = loginInputData.username;
-					req.userName = userName;
-					//get if the profile data is complited
-					const dataProfileComplited = await dataProfileIsComplited(loginInputData.username);
-					req.dataprofileIsComplited = dataProfileComplited;
-					next();
+				} else if (validPassword) {
+					const verifiedAccount = await checkIfVerifiedAccount(loginInputData.username);
+					if (verifiedAccount === 0) {
+						loginErrors.userNameOrPasswordError =
+							'Verify your account via the link sent to your registration email';
+						req.loginErrors = loginErrors;
+						next();
+					} else if (verifiedAccount === 1) {
+						// get the auth token from the database
+						const authenticationToken = await getUserAuthenticationToken(loginInputData.username);
+						req.authenticationToken = authenticationToken;
+						const userName = loginInputData.username;
+						req.userName = userName;
+						//get if the profile data is complited
+						const dataProfileComplited = await dataProfileIsComplited(loginInputData.username);
+						req.dataprofileIsComplited = dataProfileComplited;
+						next();
+					}
 				}
 			}
 		}
+	} catch (e) {
+		const zabi = 'Nice Try';
+		res.send(zabi);
 	}
 };
 
 router.post('/validate/login', validateLoginData, (req, res) => {
 	const msgFromBackEnd = {};
 
-	if (!isEmpty(req.loginErrors)) {
+	if (!isEmpty(req.checkError)) {
+		msgFromBackEnd.errors = req.checkError;
+		msgFromBackEnd.status = 1;
+		res.send(msgFromBackEnd);
+	} else if (!isEmpty(req.loginErrors)) {
 		console.log(req.loginErrors);
 		msgFromBackEnd.errors = req.loginErrors;
 		msgFromBackEnd.status = 1;

@@ -14,14 +14,17 @@ const authToken = (req, res, next) => {
 		if (authKey) {
 			const authKey = req.headers.authorization.split(' ')[1];
 			jwt.verify(authKey, 'boul3al7ayat7obilanamnghirakma3ichach7obi00', (err, user) => {
-				if (err) return res.sendStatus(403);
-				req.userNameConnected = user.userName;
-				req.authToken = authKey;
+				if (err) return res.status(403).send('Token Error !');
+				else {
+					req.userNameConnected = user.userName;
+					req.authToken = authKey;
+					next();
+				}
 			});
 		}
 	}
-	next();
 };
+
 function sendEmail(mailSettings, mailTransporter) {
 	return new Promise((res, rej) => {
 		mailTransporter.sendMail(mailSettings, (err, info) => {
@@ -38,6 +41,7 @@ const sendEmailValidation = async (email, token) => {
 			pass: 'dakchidialmatcha03'
 		}
 	});
+
 	const mailOptions = {
 		from: 'matchaproj@gmail.com',
 		to: email,
@@ -54,6 +58,7 @@ const sendEmailValidation = async (email, token) => {
 		console.log(err);
 	}
 };
+
 function isValidDate(str) {
 	// STRING FORMAT yyyy-mm-dd
 	if (str == '' || str == null) {
@@ -138,12 +143,20 @@ const primaryValidation = (req, res, next) => {
 	if (!isValidDate(values.birthDay)) errors.birthDay = 'Invalid Date of birth, you should have 18 YO.';
 
 	if (values.biography === '' || !values.biography) errors.biography = 'Biography is required';
+	else if (!/^[a-zA-Z\s.]+$/.test(values.biography)) errors.biography = 'Use only Alpha numeric characters.';
 	else if (values.biography.length < 8 || values.biography.length > 500)
 		errors.biography = 'Biography field length can be only between 8 and 500 characters';
 
-	if ((values.lat === null || values.lat === null) && (values.lng === null || values.lng == null))
+	if (
+		typeof values.lat === 'string' ||
+		typeof values.lng === 'string' ||
+		values.lat === null ||
+		values.lat === null ||
+		values.lng === null ||
+		values.lng === null
+	)
 		errors.locationErr = 'Not a valid location';
-	if ((values.lat < -90.0 || values.lat > 90.0) && (values.lng < -180.0 || values.lng > 180.0))
+	else if (values.lat < -90.0 || values.lat > 90.0 || values.lng < -180.0 || values.lng > 180.0)
 		errors.locationErr = 'Not a valid location';
 	req.primaryErrors = errors;
 	next();
@@ -365,25 +378,70 @@ const updateUserInfos = async (req, res, next) => {
 		next();
 	}
 };
-router.post('/infoValidator', authToken, trimValues, primaryValidation, getActualInfos, updateUserInfos, (req, res) => {
-	const backEndResponse = {};
-	if (!isEmpty(req.primaryErrors)) {
-		backEndResponse.errors = req.primaryErrors;
-		backEndResponse.status = 1;
-		res.send(backEndResponse);
-	} else if (!isEmpty(req.actualUserInfosErrors)) {
-		backEndResponse.errors = req.actualUserInfosErrors;
-		backEndResponse.status = 1;
-		res.send(backEndResponse);
-	} else if (!isEmpty(req.finalErrors)) {
-		backEndResponse.errors = req.finalErrors;
-		backEndResponse.status = 1;
-		res.send(backEndResponse);
+
+const bridge = (req, res, next) => {
+	const { firstName, lastName, username, email, birthDay, biography, lat, lng, country } = req.body;
+	const errors = {};
+
+	if (
+		typeof firstName === 'undefined' ||
+		!firstName ||
+		typeof lastName === 'undefined' ||
+		!lastName ||
+		typeof username === 'undefined' ||
+		!username ||
+		typeof email === 'undefined' ||
+		!email ||
+		typeof birthDay === 'undefined' ||
+		!birthDay ||
+		typeof biography === 'undefined' ||
+		!biography ||
+		typeof lat === 'undefined' ||
+		!lat ||
+		typeof lng === 'undefined' ||
+		!lng ||
+		typeof country === 'undefined' ||
+		!country
+	) {
+		errors.bridge = 'Something is missing';
+		return res.status(404).send(errors.bridge);
 	} else {
-		backEndResponse.newAuthToken = req.theAuthToken;
-		backEndResponse.userName = req.userName;
-		backEndResponse.status = 0;
-		res.send(backEndResponse);
+		next();
 	}
-});
+};
+
+router.post(
+	'/infoValidator',
+	authToken,
+	bridge,
+	trimValues,
+	primaryValidation,
+	getActualInfos,
+	updateUserInfos,
+	(req, res) => {
+		const backEndResponse = {};
+		if (!isEmpty(req.bridgeErr)) {
+			backEndResponse.errors = req.bridgeErr;
+			backEndResponse.status = 1;
+			res.send(backEndResponse);
+		} else if (!isEmpty(req.primaryErrors)) {
+			backEndResponse.errors = req.primaryErrors;
+			backEndResponse.status = 1;
+			res.send(backEndResponse);
+		} else if (!isEmpty(req.actualUserInfosErrors)) {
+			backEndResponse.errors = req.actualUserInfosErrors;
+			backEndResponse.status = 1;
+			res.send(backEndResponse);
+		} else if (!isEmpty(req.finalErrors)) {
+			backEndResponse.errors = req.finalErrors;
+			backEndResponse.status = 1;
+			res.send(backEndResponse);
+		} else {
+			backEndResponse.newAuthToken = req.theAuthToken;
+			backEndResponse.userName = req.userName;
+			backEndResponse.status = 0;
+			res.send(backEndResponse);
+		}
+	}
+);
 module.exports = router;

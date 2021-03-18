@@ -12,12 +12,15 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-export default function ControlledRate() {
+export default function ControlledRate({ value, setValue }) {
+	const handleChange = (e, val) => {
+		setValue(val);
+	};
 	const classes = useStyles();
-
+	// const [value, setValue] = useState(initValue);
 	return (
 		<div className={classes.root}>
-			<Rating name='half-rating' defaultValue={2.5} precision={0.5} />
+			<Rating name='half-rating' value={value} precision={0.1} onChange={handleChange} />
 		</div>
 	);
 }

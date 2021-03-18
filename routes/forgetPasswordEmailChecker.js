@@ -107,26 +107,28 @@ function updateToken(email, token) {
 }
 const checkIfUserExists = async (req, res, next) => {
 	const errors = {};
-	if (req.body.email === '' || req.body.email === undefined || req.body.email.trim() == '') {
+	const { email } = req.body;
+	if (email === '' || email === undefined || email.trim() == '') {
 		errors.email = 'Enter a valid email.';
 		req.primaryErr = errors;
 		next();
-	}
-	const userExits = await checkIfEmailExists(req.body.email);
-	if (userExits === 0) {
-		errors.email = 'Email does not exist.';
-		req.primaryErr = errors;
-		next();
-	} else if (userExits === 1) {
-		const validated = await checkifValidated(req.body.email);
-		if (validated === 0) {
-			errors.email = 'Validate your account first.';
+	} else {
+		const userExits = await checkIfEmailExists(email);
+		if (userExits === 0) {
+			errors.email = 'Email does not exist.';
 			req.primaryErr = errors;
 			next();
-		} else {
-			const userName = await getUserName(req.body.email);
-			req.userName = userName;
-			next();
+		} else if (userExits === 1) {
+			const validated = await checkifValidated(email);
+			if (validated === 0) {
+				errors.email = 'Validate your account first.';
+				req.primaryErr = errors;
+				next();
+			} else {
+				const userName = await getUserName(email);
+				req.userName = userName;
+				next();
+			}
 		}
 	}
 	next();

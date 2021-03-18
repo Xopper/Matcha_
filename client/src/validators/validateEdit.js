@@ -45,8 +45,8 @@ export default function validateEdit(values) {
 		errors.biography = 'Biography is required field.';
 	} else if (!/^[a-zA-Z\s.]+$/.test(values.biography)) {
 		errors.biography = 'Use only Alpha numeric characters.';
-	} else if (values.biography.length > 250) {
-		errors.biography = 'Biography must be less than 250 characters.';
+	} else if (values.biography.length > 450) {
+		errors.biography = 'Biography must be less than 450 characters.';
 	}
 
 	return errors;

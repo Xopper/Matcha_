@@ -25,6 +25,9 @@ const blockEndPointRouter = require('./routes/blockEndPoint');
 const likeEndPointRouter = require('./routes/likeEndPoint');
 const resetPasswordRouter = require('./routes/resetPasswordEndPoint');
 
+// 17-03-2021
+const filterBysexPrefRouter = require('./routes/filterBySexPreferences');
+
 app.use(bodyParser({ limit: '50mb', extended: true }));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }));
@@ -60,5 +63,8 @@ app.use('/resetPassword', resetPasswordRouter);
 app.use('/reportEndPoint', reportEndPointRouter);
 app.use('/blockEndPoint', blockEndPointRouter);
 app.use('/likeEndPoint', likeEndPointRouter);
+
+// 17-03-2021
+app.use('/filter', filterBysexPrefRouter);
 
 app.listen(5000);

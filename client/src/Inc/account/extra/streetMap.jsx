@@ -4,7 +4,7 @@ import fetchS from 'node-fetch';
 
 const containerStyle = {
 	width: '80%',
-	minWidth: '320px',
+	minWidth: '100%',
 	minHeight: '80%',
 	height: '320px'
 };

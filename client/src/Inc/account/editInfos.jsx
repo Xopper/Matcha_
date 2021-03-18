@@ -53,7 +53,7 @@ export default function EditInfos() {
 	}, [token]);
 
 	function submit() {
-		// console.log({ ...values, ...center, country });
+		console.log({ ...values, ...center, country });
 		const { token } = auth;
 		const instance = axios.create({
 			headers: { Authorization: `Bearer ${token}` }

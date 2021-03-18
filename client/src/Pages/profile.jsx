@@ -63,7 +63,7 @@ function Profile() {
 					} else if (el === 'sexualPreference' && allUserInfos[el] === 'bi') {
 						setData(oldData => ({ ...oldData, [el]: 'bisexual' }));
 					} else if (el === 'liked') {
-						console.log('mebenz >> ', allUserInfos[el]);
+						// console.log('mebenz >> ', allUserInfos[el]);
 						setIsLiked(allUserInfos[el]);
 					} else {
 						setData(oldData => ({ ...oldData, [el]: allUserInfos[el] }));

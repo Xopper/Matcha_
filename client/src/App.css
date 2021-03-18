@@ -1217,6 +1217,7 @@ signature
 	margin: 15px 0;
 	transition: background 300ms;
 	max-width: 230px;
+	margin: 20px auto;
 }
 
 .profiles .profile__card:hover {

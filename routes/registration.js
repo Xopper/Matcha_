@@ -205,58 +205,65 @@ const sendEmailValidation = async (email, token) => {
 };
 
 const checkRegistrationData = async (req, res, next) => {
-	const registerInputData = req.body.values;
-	const regErrors = {};
+	try {
+		const registerInputData = req.body.values;
+		const regErrors = {};
 
-	// check for the email and userName if exist
-	const resultEmail = await emailFound(registerInputData.email);
-	const resultUserName = await userNameFound(registerInputData.username);
+		// check for the email and userName if exist
+		const checkerResult = checkRegistrationInputs(registerInputData);
+		// const resultEmail = await emailFound(registerInputData.email);
+		// const resultUserName = await userNameFound(registerInputData.username);
 
-	// send data to be checked
-	const checkerResult = checkRegistrationInputs(registerInputData);
-	if (isEmpty(checkerResult) && resultEmail === 0 && resultUserName === 0) {
-		// send the valid data
-		// trim all values
-		registerInputData.username = registerInputData.username.trim();
-		registerInputData.firstName = registerInputData.firstName.trim();
-		registerInputData.lastName = registerInputData.lastName.trim();
-		registerInputData.email = registerInputData.email.trim();
-		// hash password
-		const salt = bcrypt.genSaltSync();
-		registerInputData.password = bcrypt.hashSync(registerInputData.password, salt);
-		// registerInputData.password = validatedData.passwordHashed
-		// generate a jwt token for email validation
-		const validationToken = jwt.sign(
-			{ userName: registerInputData.username },
-			'mafhamnachwalakinma3lichlhalwassaoulfanid04'
-		);
-		registerInputData.token = validationToken;
-		//generate authentication jwt token
-		const authenticationToken = jwt.sign(
-			{ userName: registerInputData.username },
-			'boul3al7ayat7obilanamnghirakma3ichach7obi00'
-		);
-		registerInputData.authToken = authenticationToken;
+		// send data to be checked
 
-		// register user
-		const registerUserResult = await registerUser(registerInputData);
-		console.log(registerUserResult);
-		if (registerUserResult.insertId) {
-			//send email
-			sendEmailValidation(registerInputData.email, registerInputData.token);
-		}
-		req.registrationErrors = regErrors;
-		next();
-	} else {
 		if (isEmpty(checkerResult)) {
-			if (resultEmail === 1) regErrors.email = 'Email already exists';
-			if (resultUserName === 1) regErrors.username = 'User Name already exists';
-			req.registrationErrors = regErrors;
-			next();
+			// send the valid data
+			// trim all values
+			const resultEmail = await emailFound(registerInputData.email);
+			const resultUserName = await userNameFound(registerInputData.username);
+			if (resultEmail === 0 && resultUserName === 0) {
+				registerInputData.username = registerInputData.username.trim();
+				registerInputData.firstName = registerInputData.firstName.trim();
+				registerInputData.lastName = registerInputData.lastName.trim();
+				registerInputData.email = registerInputData.email.trim();
+				// hash password
+				const salt = bcrypt.genSaltSync();
+				registerInputData.password = bcrypt.hashSync(registerInputData.password, salt);
+				// registerInputData.password = validatedData.passwordHashed
+				// generate a jwt token for email validation
+				const validationToken = jwt.sign(
+					{ userName: registerInputData.username },
+					'mafhamnachwalakinma3lichlhalwassaoulfanid04'
+				);
+				registerInputData.token = validationToken;
+				//generate authentication jwt token
+				const authenticationToken = jwt.sign(
+					{ userName: registerInputData.username },
+					'boul3al7ayat7obilanamnghirakma3ichach7obi00'
+				);
+				registerInputData.authToken = authenticationToken;
+
+				// register user
+				const registerUserResult = await registerUser(registerInputData);
+				console.log(registerUserResult);
+				if (registerUserResult.insertId) {
+					//send email
+					sendEmailValidation(registerInputData.email, registerInputData.token);
+				}
+				req.registrationErrors = regErrors;
+				next();
+			} else {
+				if (resultEmail === 1) regErrors.email = 'Email already exists';
+				if (resultUserName === 1) regErrors.username = 'User Name already exists';
+				req.registrationErrors = regErrors;
+				next();
+			}
 		} else {
 			req.registrationErrors = checkerResult;
 			next();
 		}
+	} catch (e) {
+		res.send('Idkom fih');
 	}
 };
 

@@ -7,13 +7,16 @@ const authToken = (req, res, next) => {
 		const authKey = req.headers.authorization.split(' ')[1];
 		if (authKey) {
 			const authKey = req.headers.authorization.split(' ')[1];
+			// console.log('wa l3adaab : ', authKey);
 			jwt.verify(authKey, 'boul3al7ayat7obilanamnghirakma3ichach7obi00', (err, user) => {
-				if (err) return res.sendStatus(403);
-				req.userNameConnected = user.userName;
+				if (err) return res.status(403).send('Token Error');
+				else {
+					req.userNameConnected = user.userName;
+					next();
+				}
 			});
 		}
 	}
-	next();
 };
 
 function getUserInformations(userName) {
@@ -38,6 +41,7 @@ function getUserInformations(userName) {
 
 getUserData = async (req, res, next) => {
 	const userNameConnected = req.userNameConnected;
+	console.log('>> :: ', userNameConnected);
 	const userInfo = await getUserInformations(userNameConnected);
 	req.userInfos = userInfo;
 	next();
