@@ -53,6 +53,23 @@ function checkAccountIfComplited(userName) {
 		});
 	});
 }
+
+function getUserId(userName) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute('SELECT `id` FROM `users` WHERE `user_name` = ?', [userName], (err, result) => {
+				if (err) reject(err);
+				else {
+					const queryResult = result[0].id;
+					connection.release();
+					resolve(queryResult);
+				}
+			});
+		});
+	});
+}
+
 const checkIfComplited = async (req, res, next) => {
 	const errors = {};
 	if (!isEmpty(req.authKeyError)) {
@@ -60,6 +77,8 @@ const checkIfComplited = async (req, res, next) => {
 	} else {
 		const userExists = await checkIfUserExists(req.userName);
 		if (userExists === 1) {
+			const userId = await getUserId(req.userName);
+			req.userId = userId;
 			const complited = await checkAccountIfComplited(req.userName);
 			req.complited = complited;
 		} else {
@@ -80,6 +99,8 @@ router.post('/authTokenValidation', validateAuthToken, checkIfComplited, (req, r
 		backEndResponde.status = 1;
 	} else {
 		backEndResponde.complited = req.complited;
+		backEndResponde.userName = req.userName;
+		backEndResponde.userId = req.userId;
 		backEndResponde.status = 0;
 	}
 	res.send(backEndResponde);

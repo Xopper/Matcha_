@@ -30,23 +30,39 @@ function getUserId(userName) {
 			connection.execute('SELECT `id` FROM `users` WHERE `user_name` = ?', [userName], (err, result) => {
 				if (err) reject(err);
 				else {
-					if (result === undefined || result === [] || result.length === 0) {
-						connection.release();
-						resolve(false);
-					} else {
-						const queryResult = result[0].id;
-						connection.release();
-						resolve(queryResult);
-					}
+					const queryResult = result[0].id;
+					connection.release();
+					resolve(queryResult);
 				}
 			});
 		});
 	});
 }
-
+function checkIfUserExists(userName) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT COUNT(*) AS `exists` FROM `users` WHERE `user_name` = ?',
+				[userName],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result[0].exists;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
 const getActualUserId = async (req, res, next) => {
 	console.log('user name : ', req.userNameConnected);
+	const exists = await checkIfUserExists(req.userNameConnected);
+	console.log('exists :: ', exists);
 	const userId = await getUserId(req.userNameConnected);
+	console.log(userId);
 	req.userId = userId;
 	next();
 };
@@ -214,6 +230,8 @@ const updatePrefs = async (req, res, next) => {
 	} else {
 		const genderInterestUpdated = await updateGenderInterest(req.userId, values);
 		const usersTagsDeleted = await deleteUsersTags(req.userId);
+		console.log('wewwe :: ', values.tags);
+		req.updatedTags = values.tags;
 		values.tags.forEach(async tag => {
 			const tagExists = await checkIfTagExists(tag);
 			if (tagExists === 0) {
@@ -226,17 +244,43 @@ const updatePrefs = async (req, res, next) => {
 				const insertUserAndTag = await userAndTagInsertion(req.userId, tagId);
 			}
 		});
+		next();
 	}
 	req.errors = errors;
 	next();
 };
 
-router.post('/prefsValidator', authToken, getActualUserId, primaryValidation, updatePrefs, (req, res) => {
+function getUserTagsId(userId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT tags.tags FROM users_tags JOIN tags ON users_tags.tag_id = tags.id WHERE users_tags.user_id = ?',
+				[userId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						console.log('bamboucha : ', result);
+						const queryResult = result.map(tag => {
+							return tag.tags;
+						});
+						resolve(queryResult);
+						connection.release();
+					}
+				}
+			);
+		});
+	});
+}
+
+router.post('/prefsValidator', authToken, getActualUserId, primaryValidation, updatePrefs, async (req, res) => {
 	const backEndResponse = {};
 	if (!isEmpty(req.errors)) {
 		backEndResponse.errors = req.errors;
 		backEndResponse.status = 1;
 	} else {
+		console.log(req.updatedTags);
+		backEndResponse.tags = req.updatedTags;
 		backEndResponse.status = 0;
 	}
 	res.send(backEndResponse);

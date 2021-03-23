@@ -49,7 +49,7 @@ const sendEmailValidation = async (email, token) => {
 		text: 'Easy Work',
 		html: `<h1>Email confirmattion</h1>
         <p>Confrim your email by clicking the link bellow</p>
-        <a href="http://localhost:5000/emailverification/tokenverification/${token}">Click to validate your registration</a>`
+        <a href="https://localhost:3000/auth/confirm/${token}">Click to validate your New Email</a>`
 	};
 	try {
 		const emailSent = await sendEmail(mailOptions, transporter);
@@ -409,6 +409,42 @@ const bridge = (req, res, next) => {
 		next();
 	}
 };
+function getUpdatedUserLocation(userName) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT `latitude`, `longitude` FROM `users` WHERE `user_name` = ?',
+				[userName],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = {};
+						queryResult.latitude = result[0].latitude;
+						queryResult.longitude = result[0].longitude;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+const getUserLocation = async (req, res, next) => {
+	if (!isEmpty(req.bridgeErr)) {
+		next();
+	} else if (!isEmpty(req.primaryErrors)) {
+		next();
+	} else if (!isEmpty(req.actualUserInfosErrors)) {
+		next();
+	} else if (!isEmpty(req.finalErrors)) {
+		next();
+	} else {
+		const localisation = await getUpdatedUserLocation(req.userName);
+		req.localisation = localisation;
+		next();
+	}
+};
 
 router.post(
 	'/infoValidator',
@@ -418,6 +454,7 @@ router.post(
 	primaryValidation,
 	getActualInfos,
 	updateUserInfos,
+	getUserLocation,
 	(req, res) => {
 		const backEndResponse = {};
 		if (!isEmpty(req.bridgeErr)) {
@@ -439,6 +476,7 @@ router.post(
 		} else {
 			backEndResponse.newAuthToken = req.theAuthToken;
 			backEndResponse.userName = req.userName;
+			backEndResponse.localisation = req.localisation;
 			backEndResponse.status = 0;
 			res.send(backEndResponse);
 		}

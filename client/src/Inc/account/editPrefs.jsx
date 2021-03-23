@@ -60,10 +60,9 @@ function EditPrefs(props) {
 				headers: { Authorization: `Bearer ${token}` }
 			});
 			// console.log(`Bearer ${token}`);
-			const {
-				data: { status }
-			} = await instance.post('http://localhost:5000/editPrefs/prefsValidator', values);
-			if (status === 0) {
+			const { data } = await instance.post('http://localhost:5000/editPrefs/prefsValidator', values);
+			console.log(data);
+			if (data.status === 0) {
 				Swal.fire({
 					title: 'YAAAP!',
 					text: 'Preferences updated successfully!',
@@ -85,13 +84,14 @@ function EditPrefs(props) {
 
 	function addTag(e) {
 		e.preventDefault();
-		const { value: tag } = e.target;
+		let { value: tag } = e.target;
 		if (
 			tag.trim() !== '' &&
 			tag.trim().length <= 20 &&
 			!values.tags.includes(tag.trim()) &&
 			values.tags.length <= 4
 		) {
+			tag = tag.trim();
 			e.target.value = '';
 			const oldTags = [...values.tags];
 			setValues({ ...values, tags: [...oldTags, tag] });

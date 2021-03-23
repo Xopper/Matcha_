@@ -1,8 +1,10 @@
 import React, { useState, createContext, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
+import socketIOClient from 'socket.io-client';
 
 export const AuthContexts = createContext();
+export const socket = socketIOClient('http://localhost:5000');
 
 function AuthProvider(props) {
 	const history = useHistory();
@@ -11,14 +13,18 @@ function AuthProvider(props) {
 	useEffect(() => {
 		const token = localStorage.getItem('token');
 		if (token) {
+			// im gonna expect the username from the backend :)
 			const isValid = async () => {
 				const {
-					data: { status, complited }
+					data: { status, complited, ...args }
 				} = await axios.post('http://localhost:5000/authToken/authTokenValidation', {
 					authToken: token
 				});
 				if (status === 0) {
-					setAuth({ token, isCompleted: complited });
+					const { userName: loggedUser, userId: loggedID } = args;
+					console.log(args);
+					setAuth({ token, isCompleted: complited, loggedUser, socketID: socket, loggedID });
+					socket.emit('usersConnected', loggedUser);
 				} else {
 					console.log(':(');
 					setAuth(oldValue => {

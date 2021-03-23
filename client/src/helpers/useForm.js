@@ -14,6 +14,7 @@ function useForm(callback, validate, values, setValues) {
 	const handleSubmit = e => {
 		e.preventDefault();
 		const newErrors = validate(values);
+		console.log(newErrors);
 		setErrors(newErrors);
 		if (Object.keys(newErrors).length === 0) {
 			callback();

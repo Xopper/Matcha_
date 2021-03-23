@@ -51,7 +51,7 @@ function getUserInfos(userName) {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
 			connection.execute(
-				'SELECT `user_name`, `first_name`, `last_name`, `gender`, `sexual_preference`, `birthdate`, `biography`, `public_famerating`, `profile_img`, `img_one`, `img_two`, `img_three`, `img_four`, `country` From `users` WHERE `user_name` = ?',
+				'SELECT `user_name`, `first_name`, `last_name`, `gender`, `sexual_preference`, `birthdate`, `biography`, `public_famerating`, `profile_img`, `img_one`, `img_two`, `img_three`, `img_four`, `country`, `last_seen` FROM `users` WHERE `user_name` = ?',
 				[userName],
 				(err, result) => {
 					if (err) reject(err);
@@ -140,6 +140,25 @@ function checkIfUserIsBlocked(currentUserId, userLookingForId) {
 		});
 	});
 }
+function checkIfIamBlocked(userLookingForId, currentUserId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT COUNT(*) AS `block` FROM `profile_blocks` WHERE `blocker_id` = ? AND `blocked_id` = ?',
+				[userLookingForId, currentUserId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result[0].block;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
 function checkIfProfileIsReported(userLookingForId) {
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
@@ -185,6 +204,7 @@ const getUserData = async (req, res, next) => {
 		allUserInfos.imgTwo = userInfos[0].img_two;
 		allUserInfos.imgThree = userInfos[0].img_three;
 		allUserInfos.imgFour = userInfos[0].img_four;
+		allUserInfos.last_seen = userInfos[0].last_seen;
 		// allUserInfos.imgFour = userInfos[0].img_four;
 		allUserInfos.country = userInfos[0].country;
 		// get current user id
@@ -206,6 +226,9 @@ const getUserData = async (req, res, next) => {
 		// get if he is blocking the profile
 		const userIsBlocked = await checkIfUserIsBlocked(currentUserId, userLookingForId);
 		allUserInfos.blocked = userIsBlocked;
+		// check if the actual user is blocked
+		const iamBlocked = await checkIfIamBlocked(userLookingForId, currentUserId);
+		allUserInfos.imBlocked = iamBlocked;
 		// get if the profile is reported
 		const profileRepoted = await checkIfProfileIsReported(userLookingForId);
 		allUserInfos.reported = profileRepoted;

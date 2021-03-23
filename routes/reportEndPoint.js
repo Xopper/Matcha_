@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const pool = require('../model/dbConnection');
 const jwt = require('jsonwebtoken');
+const { query } = require('../model/dbConnection');
 const isEmpty = obj => {
 	for (let prop in obj) {
 		if (obj.hasOwnProperty(prop)) return false;
@@ -92,25 +93,33 @@ function reportTheProfile(currentUserId, userLookingForId) {
 		});
 	});
 }
-function unreportTheProfile(currentUserId, userLookingForId) {
+
+function affectFameRating(userId) {
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
-			connection.execute(
-				'DELETE FROM `profile_reported` WHERE `reporter_id` = ?, `reported_id` = ?',
-				[currentUserId, userLookingForId],
-				(err, result) => {
-					if (err) reject(err);
-					else {
-						const queryResult = result;
-						connection.release();
-						resolve(queryResult);
-					}
+			connection.execute('SELECT `public_famerating` FROM `users` WHERE `id` = ?', [userId], (err, result) => {
+				if (err) reject(err);
+				else {
+					const fameRatingAffected = result[0].public_famerating - 0.1;
+					connection.execute(
+						'UPDATE `users` SET `public_famerating` = ? WHERE `id` = ?',
+						[fameRatingAffected, userId],
+						(err, result) => {
+							if (err) reject(err);
+							else {
+								const queryResult = result;
+								connection.release();
+								resolve(queryResult);
+							}
+						}
+					);
 				}
-			);
+			});
 		});
 	});
 }
+
 const userChecker = async (req, res, next) => {
 	let userErrors = '';
 	const currentUserName = req.userNameConnected;
@@ -132,10 +141,12 @@ const userChecker = async (req, res, next) => {
 			// const unreportProfile = await unreportTheProfile(currentUserId, userToBeReportedId);
 		} else {
 			const reportProfile = await reportTheProfile(currentUserId, userToBeReportedId);
+			const fameRating = await affectFameRating(userToBeReportedId);
 		}
 	}
 	next();
 };
+
 router.post('/report', authToken, userChecker, (req, res) => {
 	const backEndResponde = {};
 	if (!isEmpty(req.userErrors)) {

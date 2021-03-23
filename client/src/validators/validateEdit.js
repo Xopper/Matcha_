@@ -1,4 +1,4 @@
-import { getAge } from '../helpers/helpers';
+import { isValidDate, getAge } from '../helpers/helpers';
 
 export default function validateEdit(values) {
 	const errors = {};
@@ -39,6 +39,14 @@ export default function validateEdit(values) {
 		errors.email = 'Email address is required field.';
 	} else if (!/^([a-zA-Z._0-9-]+)@([a-zA-Z0-9]+[.]?)*([a-zA-Z0-9])(\.[a-zA-Z]{2,4})$/.test(values.email)) {
 		errors.email = 'Email address is not valid.';
+	}
+
+	if (!values.birthDay || values.birthDay.trim() === '') {
+		errors.birthDay = 'Date of birth is required field.';
+	} else if (!isValidDate(values.birthDay)) {
+		errors.birthDay = 'Invalid Date.';
+	} else if (getAge(values.birthDay) < 18) {
+		errors.birthDay = 'You must have 18 YO to be with us.';
 	}
 
 	if (!values.biography || values.biography.trim() === '') {

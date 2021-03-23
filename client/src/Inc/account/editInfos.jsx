@@ -63,7 +63,7 @@ export default function EditInfos() {
 			.post('http://localhost:5000/editProfileInfo/infoValidator', { ...values, ...center, country })
 			.then(res => {
 				const { data } = res;
-				// console.log(res);
+				console.log(res);
 				if (data.status === 0) {
 					const { newAuthToken } = data;
 					localStorage.removeItem('token');

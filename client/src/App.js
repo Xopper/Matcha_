@@ -1,4 +1,4 @@
-import './App.css';
+import { useState } from 'react';
 import { Switch, Route, BrowserRouter as Router } from 'react-router-dom';
 import Home from './Pages/Home';
 import NavBar from './assets/Navbar';
@@ -7,10 +7,11 @@ import Account from './Pages/account';
 import Profile from './Pages/profile';
 import Auth from './Pages/auth';
 import Browse from './Pages/browse';
-import { useState } from 'react';
+import Messanger from './Pages/messages';
 import MyFooter from './assets/myFooter';
 import AuthProvider from '../src/Contexts/authContext';
 import PrivateRoute from './routes/privateRoute';
+import './App.css';
 
 function App() {
 	const [displayToggle, SetDisplayToggle] = useState(false);
@@ -22,7 +23,8 @@ function App() {
 					<Switch>
 						<PrivateRoute path='/u/:username' component={Profile} />
 						{/**check if the user exist or not */}
-						<Route path='/browse' component={Browse} />
+						<PrivateRoute path='/browse' component={Browse} />
+						<PrivateRoute path='/messanger' component={Messanger} />
 						<Route path='/init' component={Init} />
 						<Route path='/account' component={Account} />
 						<Route path='/auth' component={Auth} />

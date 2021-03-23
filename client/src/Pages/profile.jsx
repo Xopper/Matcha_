@@ -5,8 +5,9 @@ import HalfRating from '../assets/profileRating';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faFlag, faBan } from '@fortawesome/free-solid-svg-icons';
 import SimpleSlider from '../Inc/extra/Slider';
-import { AuthContexts } from '../Contexts/authContext';
+import { AuthContexts, socket } from '../Contexts/authContext';
 import { getAge } from '../helpers/helpers';
+import Moment from 'react-moment';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
@@ -24,7 +25,10 @@ function Profile() {
 	const [isLiked, setIsLiked] = useState(0);
 	const { username } = useParams();
 	const { auth } = useContext(AuthContexts);
-	const { token } = auth;
+	const { token, loggedUser } = auth;
+	const [userStatus, setUserStatus] = useState(false);
+	const [lastSeen, setLastSeen] = useState('');
+	// console.log(loggedUser);
 	const history = useHistory();
 
 	const [data, setData] = useState({
@@ -45,7 +49,8 @@ function Profile() {
 		sexualPreference: '',
 		tags: [],
 		userName: '',
-		country: ''
+		country: '',
+		last_seen: ''
 	});
 
 	useEffect(() => {
@@ -53,7 +58,10 @@ function Profile() {
 			const {
 				data: { allUserInfos, status }
 			} = await getData(username, token);
-			if (status === 0) {
+			if (status === 0 && allUserInfos.imBlocked === 0 && allUserInfos.blocked === 0) {
+				if (loggedUser !== username) {
+					socket.emit('OnlineUser', username);
+				}
 				console.log(allUserInfos);
 				const keys = Object.keys(allUserInfos);
 				keys.forEach(el => {
@@ -74,6 +82,21 @@ function Profile() {
 			}
 		};
 		data();
+		socket.on('usersIsOnline', function (data) {
+			if (data === username) {
+				setUserStatus(true);
+				console.log('usersIsOnline', data);
+			}
+		});
+		socket.on('usersIsOffline', function (data) {
+			if (data === username) {
+				setUserStatus(false);
+				// set time on DB
+				// axios
+				console.log('usersIsOffline', data);
+			}
+		});
+		console.log('use Run :)');
 	}, [username, token, history]);
 
 	async function handleLike() {
@@ -85,6 +108,7 @@ function Profile() {
 			userName: data.userName
 		});
 		if (res.data.status === 0) {
+			socket.emit('like', data.userName);
 			setIsLiked(oldStatus => !oldStatus);
 			if (!!!isLiked) {
 				Swal.fire({
@@ -136,6 +160,7 @@ function Profile() {
 						icon: 'success',
 						confirmButtonText: 'close'
 					});
+					// setData;
 				}
 
 				// if response is 0 {no errors}
@@ -176,12 +201,13 @@ function Profile() {
 				} else {
 					Swal.fire({
 						title: 'YAAAAAP!',
-						text: `Account has been reported!`,
+						text: `Account has been blocked!`,
 						icon: 'success',
 						confirmButtonText: 'close'
 					});
 					// a way to refresh the page
 					// history.go(0);
+					history.replace('/account');
 				}
 			}
 		});
@@ -196,40 +222,44 @@ function Profile() {
 						<div className='profile__rating'>
 							<HalfRating fameRating={data.fameRating && data.fameRating.toFixed(1)} />
 						</div>
-						<div className='profile__actions'>
-							{/**must be conditional if this is the logged user or an other user */}
-							<FontAwesomeIcon
-								icon={faHeart}
-								size='lg'
-								className={isLiked ? 'clickable isLiked' : 'clickable'}
-								onClick={handleLike}
-								style={{ color: '#ccc', width: 20, height: 20 }}
-							/>
-							<FontAwesomeIcon
-								icon={faFlag}
-								size='lg'
-								className='clickable'
-								onClick={handleReport}
-								style={{ color: '#ccc', width: 20, height: 20 }}
-							/>
-							<FontAwesomeIcon
-								icon={faBan}
-								size='lg'
-								className='clickable'
-								onClick={handleBlock}
-								style={{ color: 'crimson', width: 20, height: 20 }}
-							/>
-						</div>
+						{loggedUser !== data.userName && (
+							<div className='profile__actions'>
+								{/**must be conditional if this is the logged user or an other user */}
+								<FontAwesomeIcon
+									icon={faHeart}
+									size='lg'
+									className={isLiked ? 'clickable isLiked' : 'clickable'}
+									onClick={handleLike}
+									style={{ color: '#ccc', width: 20, height: 20 }}
+								/>
+								<FontAwesomeIcon
+									icon={faFlag}
+									size='lg'
+									className='clickable'
+									onClick={handleReport}
+									style={{ color: '#ccc', width: 20, height: 20 }}
+								/>
+								<FontAwesomeIcon
+									icon={faBan}
+									size='lg'
+									className='clickable'
+									onClick={handleBlock}
+									style={{ color: 'crimson', width: 20, height: 20 }}
+								/>
+							</div>
+						)}
 					</section>
 					<section className='profile__heeder'>
 						<div className='img__wrapper'>
 							<img src={data.profileImg} alt='tacos' />
-							<span className='profile__status'></span>
+							<span className={userStatus ? `profile__status online` : `profile__status offline`}></span>
 						</div>
 						<div className='profile__fullname'>
 							{`${capitalizeFirstLetter(data.userName)}, ${data.birthday}`}{' '}
 							{/**use last seen here if hes of line */}
-							<span className='profile__lastSeen'>(last seen: 1 day ago)</span>
+							<span className='profile__lastSeen'>
+								{userStatus ? '' : <Moment fromNow>{data.last_seen}</Moment>}
+							</span>
 						</div>
 						<div className='profile__fieldset'>
 							<div className='profile__fieldset--key'>
@@ -258,7 +288,7 @@ function Profile() {
 						</div>
 						<div className='profile__fieldset'>
 							<div className='profile__fieldset--key'>
-								<p>Contry.</p>
+								<p>Country.</p>
 								<span></span>
 							</div>
 							<div className='profile__fieldset--value'>{data.country}</div>

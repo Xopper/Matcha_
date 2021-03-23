@@ -1,8 +1,9 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { AuthContexts } from '../Contexts/authContext';
+import { AuthContexts, socket } from '../Contexts/authContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSignOutAlt, faHistory } from '@fortawesome/free-solid-svg-icons';
+import { faSignOutAlt, faHistory, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faFirefoxBrowser } from '@fortawesome/free-brands-svg-icons';
 import { ReactComponent as BellIcon } from '../icons/bell.svg';
 import { ReactComponent as CogIcon } from '../icons/cog.svg';
 import { ReactComponent as MessengerIcon } from '../icons/messenger.svg';
@@ -37,7 +38,7 @@ function NavItem({ handleClick, icon, open, children, notifCount }) {
 			<div className='nav__icons clickable' onClick={handleClick}>
 				{icon}
 			</div>
-			{notifCount && <span className='notif__cercl'>{notifCount}</span>}
+			{notifCount && notifCount !== '0' && <span className='notif__cercl'>{notifCount}</span>}
 			{open && children}
 		</li>
 	);
@@ -73,14 +74,30 @@ function DropDownMenu(props) {
 }
 
 function NavBar({ parentDisplay, SetDisplayToggle }) {
+	const [notifCount, setNotifCount] = useState(0);
+	const [notifMsg, setnotifMsg] = useState(0);
+	const { auth, setAuth } = useContext(AuthContexts);
+	const { loggedUser } = auth;
+	useEffect(() => {
+		socket.on('viewd_profile', function (data) {
+			console.log('data', data);
+			if (data === true) {
+				setNotifCount(old => old + 1);
+			}
+		});
+		socket.on('notifMsg', function (data) {
+			if (data === true) {
+				setnotifMsg(old => old + 1);
+				console.log('test');
+			}
+		});
+	}, []);
 	const [toggleClass, setToggleClass] = useState(false);
 	const [open, setOpen] = useState(false);
 	const handleClick = () => {
 		setToggleClass(toggleClass => !toggleClass);
 		SetDisplayToggle(parentDisplay => !parentDisplay);
 	};
-
-	const { auth, setAuth } = useContext(AuthContexts);
 
 	return (
 		<nav className='navbar_wraper'>
@@ -114,6 +131,30 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 					)) ||
 						(auth.token && (
 							<>
+								<Link to={`/u/${auth.loggedUser}`}>
+									<NavItem
+										icon={
+											<FontAwesomeIcon
+												icon={faUser}
+												size='lg'
+												className='clickable'
+												style={{ color: 'aquamarine', width: 20, height: 20 }}
+											/>
+										}
+									/>
+								</Link>
+								<Link to='/browse'>
+									<NavItem
+										icon={
+											<FontAwesomeIcon
+												icon={faFirefoxBrowser}
+												size='lg'
+												className='clickable'
+												style={{ color: 'aquamarine', width: 20, height: 20 }}
+											/>
+										}
+									/>
+								</Link>
 								<NavItem
 									icon={
 										<FontAwesomeIcon
@@ -124,8 +165,10 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 										/>
 									}
 								/>
-								<NavItem icon={<MessengerIcon className='icon_btn' />} notifCount='2' />
-								<NavItem icon={<BellIcon className='icon_btn' />} notifCount='9+' />
+								<Link to='messanger'>
+									<NavItem icon={<MessengerIcon className='icon_btn' />} notifCount={`${notifMsg}`} />
+								</Link>
+								<NavItem icon={<BellIcon className='icon_btn' />} notifCount={`${notifCount}`} />
 								<NavItem
 									open={open}
 									handleClick={() => setOpen(!open)}
@@ -140,6 +183,7 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 											size='lg'
 											className='clickable'
 											onClick={() => {
+												socket.emit('logOut', loggedUser);
 												localStorage.clear();
 												setAuth({ token: null });
 											}}

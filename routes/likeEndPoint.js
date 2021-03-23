@@ -130,6 +130,36 @@ function dislikeTheProfile(currentUserId, userLookingForId) {
 		});
 	});
 }
+function affectFameRating(userId, sign) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute('SELECT `public_famerating` FROM `users` WHERE `id` = ?', [userId], (err, result) => {
+				if (err) reject(err);
+				else {
+					let fameRatingAffected = result[0].public_famerating;
+					if (sign === '+') {
+						fameRatingAffected = result[0].public_famerating + 0.1;
+					} else if (sign === '-') {
+						fameRatingAffected = result[0].public_famerating - 0.1;
+					}
+					connection.execute(
+						'UPDATE `users` SET `public_famerating` = ? WHERE `id` = ?',
+						[fameRatingAffected, userId],
+						(err, result) => {
+							if (err) reject(err);
+							else {
+								const queryResult = result;
+								connection.release();
+								resolve(queryResult);
+							}
+						}
+					);
+				}
+			});
+		});
+	});
+}
 const userChecker = async (req, res, next) => {
 	const userErrors = {};
 	const currentUserName = req.userNameConnected;
@@ -154,9 +184,11 @@ const userChecker = async (req, res, next) => {
 			if (userIsLiked === 0) {
 				// like the profile
 				const likeProfile = await likeTheProfile(currentUserId, userToBeLikedId);
+				const fameRating = await affectFameRating(userToBeLikedId, '+');
 			} else {
 				// dislike the profile
 				const dislikeProfile = await dislikeTheProfile(currentUserId, userToBeLikedId);
+				const fameRating = await affectFameRating(userToBeLikedId, '-');
 			}
 		}
 	}

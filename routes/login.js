@@ -181,8 +181,105 @@ const validateLoginData = async (req, res, next) => {
 		res.send(zabi);
 	}
 };
+function getUserId(userName) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute('SELECT `id` FROM `users` WHERE `user_name` = ?', [userName], (err, result) => {
+				if (err) reject(err);
+				else {
+					const queryResult = result[0].id;
+					connection.release();
+					resolve(queryResult);
+				}
+			});
+		});
+	});
+}
+function getUserLocalisation(userName) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT `latitude`, `longitude` FROM `users` WHERE `user_name` = ?',
+				[userName],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = {};
+						queryResult.latitude = result[0].latitude;
+						queryResult.longitude = result[0].longitude;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+function checkIfAccountComplited(userName) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute('SELECT `complited` FROM `users` WHERE `user_name` = ?', [userName], (err, result) => {
+				if (err) reject(err);
+				else {
+					const queryResult = result[0].complited;
+					connection.release();
+					resolve(queryResult);
+				}
+			});
+		});
+	});
+}
+function getUserTagsId(userId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT tags.tags FROM users_tags JOIN tags ON users_tags.tag_id = tags.id WHERE users_tags.user_id = ?',
+				[userId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						console.log('bamboucha : ', result);
+						const queryResult = result.map(tag => {
+							return tag.tags;
+						});
+						resolve(queryResult);
+						connection.release();
+					}
+				}
+			);
+		});
+	});
+}
+const getLocalisationAndTags = async (req, res, next) => {
+	if (!isEmpty(req.checkError)) next();
+	else if (!isEmpty(req.loginErrors)) next();
+	else {
+		const data = {};
+		const complited = await checkIfAccountComplited(req.userName);
+		data.complited = complited;
+		if (complited === 1) {
+			const localisation = await getUserLocalisation(req.userName);
+			data.localisation = localisation;
+			console.log('localisation :: ', localisation);
+			const userId = await getUserId(req.userName);
+			req.userId = userId;
+			console.log(userId);
+			const userTags = await getUserTagsId(userId);
+			console.log(userTags);
+			data.userTags = userTags;
+			req.userData = data;
+		} else {
+			req.userData = data;
+		}
+		next();
+	}
+};
 
-router.post('/validate/login', validateLoginData, (req, res) => {
+router.post('/validate/login', validateLoginData, getLocalisationAndTags, (req, res) => {
 	const msgFromBackEnd = {};
 
 	if (!isEmpty(req.checkError)) {
@@ -197,8 +294,10 @@ router.post('/validate/login', validateLoginData, (req, res) => {
 	} else {
 		msgFromBackEnd.authToken = req.authenticationToken;
 		msgFromBackEnd.userName = req.userName;
+		msgFromBackEnd.userid = req.userId;
 		// send if the dataProfile is complited or not
 		msgFromBackEnd.dataProfileIsComplited = req.dataprofileIsComplited;
+		msgFromBackEnd.localisationAndTags = req.userData;
 		msgFromBackEnd.status = 0;
 		res.send(msgFromBackEnd);
 	}

@@ -76,3 +76,31 @@ export function isValidDate(str) {
 
 	return ret;
 }
+
+export function computeDistance([prevLat, prevLong], [lat, long]) {
+	const prevLatInRad = toRad(prevLat);
+	const prevLongInRad = toRad(prevLong);
+	const latInRad = toRad(lat);
+	const longInRad = toRad(long);
+
+	return (
+		// In kilometers
+		6377.830272 *
+		Math.acos(
+			Math.sin(prevLatInRad) * Math.sin(latInRad) +
+				Math.cos(prevLatInRad) * Math.cos(latInRad) * Math.cos(longInRad - prevLongInRad)
+		)
+	);
+}
+
+export function toRad(angle) {
+	return (angle * Math.PI) / 180;
+}
+
+export function getCommonElms(arrayOne, arrayTwo) {
+	let count = 0;
+	for (let i = 0; i < arrayOne.length; i++) {
+		if (arrayTwo.includes(arrayOne[i])) count++;
+	}
+	return count;
+}

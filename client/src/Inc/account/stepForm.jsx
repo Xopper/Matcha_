@@ -140,13 +140,14 @@ function StepForm(props) {
 
 	function addTag(e) {
 		e.preventDefault();
-		const { value: tag } = e.target;
+		let { value: tag } = e.target;
 		if (
 			tag.trim() !== '' &&
 			tag.trim().length <= 20 &&
 			!values.tags.includes(tag.trim()) &&
 			values.tags.length <= 4
 		) {
+			tag = tag.trim();
 			e.target.value = '';
 			const oldTags = [...values.tags];
 			setValues({ ...values, tags: [...oldTags, tag] });

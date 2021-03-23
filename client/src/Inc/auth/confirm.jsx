@@ -21,7 +21,7 @@ function Confirm() {
 				if (status === 0) {
 					Swal.fire({
 						title: 'YAAAP!',
-						text: 'Your account has been verified successfully!',
+						text: 'Email has been successfully verified!',
 						icon: 'success',
 						confirmButtonText: 'close'
 					});
