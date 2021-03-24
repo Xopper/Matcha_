@@ -7,7 +7,6 @@ import _ from 'lodash';
 import axios from 'axios';
 import { getAge, computeDistance, capitalizeFirstLetter, getCommonElms } from '../helpers/helpers';
 import { Link } from 'react-router-dom/cjs/react-router-dom.min';
-// import { DistanceMatrixService } from '@react-google-maps/api';
 
 const sortUsers = (users, sortBy = 'age') => {
 	const sortingOrder = sortBy === 'age' || sortBy === 'distance' ? 'asc' : 'desc';
@@ -104,7 +103,7 @@ function Browse() {
 						); // for the sort
 						newElm.fullName = capitalizeFirstLetter(`${elm.last_name} ${elm.first_name}`); // for the user Card
 						newElm.age = getAge(elm.birthdate); // for the sort && user card
-						newElm.rate = elm.public_famerating; // for the sort and user card
+						newElm.rate = elm.public_famerating.toFixed(1); // for the sort and user card
 						newElm.commonTags =
 							elm.allTags && elm.allTags.length
 								? getCommonElms(loggedUser.tags, elm.allTags.split('|'))

@@ -5,7 +5,7 @@ import HalfRating from '../assets/profileRating';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faFlag, faBan } from '@fortawesome/free-solid-svg-icons';
 import SimpleSlider from '../Inc/extra/Slider';
-import { AuthContexts, socket } from '../Contexts/authContext';
+import { AuthContexts, socket, IsLoggedfn } from '../Contexts/authContext';
 import { getAge } from '../helpers/helpers';
 import Moment from 'react-moment';
 import axios from 'axios';
@@ -20,6 +20,8 @@ async function getData(strname, token) {
 	});
 	return response;
 }
+
+const isLogged = !!localStorage.getItem('token');
 
 function Profile() {
 	const [isLiked, setIsLiked] = useState(0);
@@ -99,6 +101,11 @@ function Profile() {
 		console.log('use Run :)');
 	}, [username, token, history]);
 
+	/**
+	 * please try to standrize the back-ends calls
+	 * for all Actions {handleLike }
+	 */
+
 	async function handleLike() {
 		console.log('like Clicked');
 		const instance = axios.create({
@@ -117,6 +124,7 @@ function Profile() {
 					icon: 'success',
 					confirmButtonText: 'close'
 				});
+				setData(oldVals => ({ ...oldVals, fameRating: data.fameRating + 0.1 }));
 			} else {
 				Swal.fire({
 					title: 'OUUUUUUCH!',
@@ -124,10 +132,14 @@ function Profile() {
 					icon: 'warning',
 					confirmButtonText: 'close'
 				});
+				setData(oldVals => ({ ...oldVals, fameRating: data.fameRating - 0.1 }));
 			}
 		}
 	}
 
+	/**
+	 * remove clgs :)
+	 */
 	function handleReport() {
 		console.log('report clicked');
 		Swal.fire({
@@ -160,7 +172,7 @@ function Profile() {
 						icon: 'success',
 						confirmButtonText: 'close'
 					});
-					// setData;
+					setData(oldVals => ({ ...oldVals, fameRating: data.fameRating - 0.1 }));
 				}
 
 				// if response is 0 {no errors}
@@ -172,7 +184,7 @@ function Profile() {
 	}
 
 	function handleBlock() {
-		console.log('block cicked');
+		console.log('Block Clicked');
 		Swal.fire({
 			title: 'Are you sure?',
 			text: 'Block this account ?',
@@ -197,7 +209,6 @@ function Profile() {
 						icon: 'warning',
 						confirmButtonText: 'close'
 					});
-					// Swal.fire(res.data.errors, '', 'warning');
 				} else {
 					Swal.fire({
 						title: 'YAAAAAP!',
@@ -229,21 +240,21 @@ function Profile() {
 									icon={faHeart}
 									size='lg'
 									className={isLiked ? 'clickable isLiked' : 'clickable'}
-									onClick={handleLike}
+									onClick={() => (isLogged ? handleLike() : history.go())}
 									style={{ color: '#ccc', width: 20, height: 20 }}
 								/>
 								<FontAwesomeIcon
 									icon={faFlag}
 									size='lg'
 									className='clickable'
-									onClick={handleReport}
+									onClick={() => (isLogged ? handleReport() : history.go())}
 									style={{ color: '#ccc', width: 20, height: 20 }}
 								/>
 								<FontAwesomeIcon
 									icon={faBan}
 									size='lg'
 									className='clickable'
-									onClick={handleBlock}
+									onClick={() => (isLogged ? handleBlock() : history.go())}
 									style={{ color: 'crimson', width: 20, height: 20 }}
 								/>
 							</div>

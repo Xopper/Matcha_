@@ -43,6 +43,9 @@ function AuthProvider(props) {
 	return <AuthContexts.Provider value={{ auth, setAuth }}>{props.children}</AuthContexts.Provider>;
 }
 
+/**
+ * in general cases I dont need to check the local storage
+ */
 export const IsLoggedfn = () => {
 	const {
 		auth: { token }

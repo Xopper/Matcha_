@@ -35,8 +35,12 @@ const browseLoggedData = require('./routes/browseLogedData');
 // 22-03-2021
 const getConnectedUsersRouter = require('./routes/getConnectedUsers');
 const insertMessages = require('./routes/insertMessages');
-
+// 23-03-2021
 const getMessagesRouter = require('./routes/conversations');
+
+// 24-03-2021
+const setNotificationsRouter = require('./routes/setNotifications');
+
 const { CLIENT_RENEG_LIMIT } = require('tls');
 const redis = require('redis');
 const client = redis.createClient();
@@ -165,5 +169,7 @@ app.use('/getConnectedUsers', getConnectedUsersRouter);
 app.use('/storeConversations', insertMessages);
 
 app.use('/conversations', getMessagesRouter);
+
+app.use('/notifications', setNotificationsRouter);
 
 server.listen(5000);

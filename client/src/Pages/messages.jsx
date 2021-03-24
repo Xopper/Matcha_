@@ -15,7 +15,6 @@ async function getConnectedUsrs(token) {
 }
 
 async function sendData(token, values) {
-	// console.log(values);
 	const instance = axios.create({
 		headers: { Authorization: `Bearer ${token}` }
 	});
@@ -84,21 +83,32 @@ function Messanger() {
 	}
 
 	useEffect(() => {
-		socket.on('msgRec', function (data) {
-			console.log(data);
-			setConversation(old => old.concat(data));
-		});
+		console.log('okey something happend');
 		const data = async () => {
 			const { data } = await getConnectedUsrs(token);
+			console.log(data);
 			if (data.status === 0) {
 				// setConnectedUsers(oldVals => [...oldVals, ...data.connectedUsers]);
-				setConnectedUsers(data.connectedUsers);
+				if (typeof data.connectedUsers !== 'string') {
+					console.log(data.connectedUsers);
+					setConnectedUsers(data.connectedUsers);
+				}
+				console.log(data.connectedUsers);
 				console.log(data);
 			} else {
 				console.log('something Went wrong!');
 			}
 		};
 		data();
+		
+		/**
+		 * 
+		 */
+		socket.on('msgRec', function (data) {
+			if (receiver.id) {
+				setConversation(old => old.concat(data));
+			}
+		});
 	}, [token]);
 
 	return (
@@ -110,32 +120,37 @@ function Messanger() {
 							<h1>Chat</h1>
 						</div>
 						<div className='chat__box__users__cardWraper'>
-							{connectedUsers?.map(({ id, profile_img: avatar, user_name: username }) => (
-								<div
-									className='chat__box__users__card'
-									key={id}
-									onClick={() => {
-										setReceiver({ id, username, avatar });
-										handleSelectUser(id);
-										setActiveMenu('chat');
-									}}
-								>
-									<div>
-										<img src={avatar} width='70%' height='70%' />
-									</div>
-									<div>
-										<h4>{username}</h4>
-										{/**TODO */}
-										{/* <p className='last__msg'>
+							{connectedUsers.length !== 0 ? (
+								connectedUsers.map(({ id, profile_img: avatar, user_name: username }) => (
+									<div
+										className='chat__box__users__card'
+										key={id}
+										onClick={() => {
+											setReceiver({ id, username, avatar });
+											handleSelectUser(id);
+											setActiveMenu('chat');
+										}}
+									>
+										<div>
+											<img src={avatar} width='70%' height='70%' />
+										</div>
+										<div>
+											<h4>{username}</h4>
+											{/**TODO */}
+											{/* <p className='last__msg'>
 											Lorem, ipsum dolor sit amet consectetur adipisicing elit. A asperiores
 											consectetur accusamus sint? Placeat recusandae itaque nisi aliquid
 											accusantium fugit!
 										</p> */}
+										</div>
+										<div>{/* <span>6</span> */}</div>
+										{/**TODO later :) */}
+										{/* <span className='time'>30min ago</span> */}
 									</div>
-									<div>{/* <span>6</span> */}</div>
-									<span className='time'>30min ago</span>
-								</div>
-							))}
+								))
+							) : (
+								<span className='no__matches'>there is no matches.</span>
+							)}
 						</div>
 					</div>
 				</CSSTransition>
@@ -153,7 +168,7 @@ function Messanger() {
 							<div className='chat__box__messages__wraper'>
 								{/* <div > */}
 								<ScrollableFeed className='chat__box__messages__wraper__discussion'>
-									{conversation?.map((msg, index) => (
+									{conversation.map((msg, index) => (
 										<div
 											className={
 												parseInt(msg.sender_id) === receiver.id

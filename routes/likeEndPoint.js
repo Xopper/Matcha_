@@ -160,44 +160,131 @@ function affectFameRating(userId, sign) {
 		});
 	});
 }
+const bridge = async (req, res, next) => {
+	const errors = {};
+	if (typeof req.body.userName === 'undefined' || !req.body.userName) errors.bridgeErr = 'unexpected parameters';
+	req.bridgeErrors = errors;
+	next();
+};
+function matcheUsers(currentUserId, userToBeLikedId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'INSERT INTO `connected_users`(`user_one`, `user_two`) VALUES(?, ?)',
+				[currentUserId, userToBeLikedId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+function unmatcheUsers(currentUserId, userToBeLikedId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'DELETE FROM `connected_users` WHERE (`user_one` = ? AND `user_two` = ?) OR (`user_one` = ? AND `user_two` = ?)',
+				[currentUserId, userToBeLikedId, userToBeLikedId, currentUserId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+
+function setNotification(toId, fromId, type) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'INSERT INTO `notifications`(`from_id`, `to_id`, `type`) VALUES(?, ?, ?)',
+				[fromId, toId, type],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+
 const userChecker = async (req, res, next) => {
 	const userErrors = {};
-	const currentUserName = req.userNameConnected;
-	const userNameToBeLiked = req.body.userName;
-	// check if user exists
-	const userExists = await searchUser(userNameToBeLiked);
-	if (userExists === 0) {
-		userErrors.userNotFound = 'user does not exist';
-		req.userErrors = userErrors;
-		next();
-	} else {
-		const userToBeLikedId = await getUserId(userNameToBeLiked);
-		const currentUserId = await getUserId(currentUserName);
-		const userIsBlocked = await checkIfUserIsBlocked(currentUserId, userToBeLikedId);
-		if (userIsBlocked !== 0) {
-			userErrors.userBlocked = `You are blocking ${userNameToBeLiked}`;
+	if (!isEmpty(req.bridgeErrors)) next();
+	else {
+		const currentUserName = req.userNameConnected;
+		const userNameToBeLiked = req.body.userName;
+		// check if user exists
+		const userExists = await searchUser(userNameToBeLiked);
+		if (userExists === 0) {
+			userErrors.userNotFound = 'user does not exist';
 			req.userErrors = userErrors;
 			next();
 		} else {
-			// check if already liked
-			const userIsLiked = await checkIfUserIsLiked(currentUserId, userToBeLikedId);
-			if (userIsLiked === 0) {
-				// like the profile
-				const likeProfile = await likeTheProfile(currentUserId, userToBeLikedId);
-				const fameRating = await affectFameRating(userToBeLikedId, '+');
+			const userToBeLikedId = await getUserId(userNameToBeLiked);
+			const currentUserId = await getUserId(currentUserName);
+			const userIsBlocked = await checkIfUserIsBlocked(currentUserId, userToBeLikedId);
+			if (userIsBlocked !== 0) {
+				userErrors.userBlocked = `You are blocking ${userNameToBeLiked}`;
+				req.userErrors = userErrors;
+				next();
 			} else {
-				// dislike the profile
-				const dislikeProfile = await dislikeTheProfile(currentUserId, userToBeLikedId);
-				const fameRating = await affectFameRating(userToBeLikedId, '-');
+				// check if already liked
+				const userIsLiked = await checkIfUserIsLiked(currentUserId, userToBeLikedId);
+				let type = 0;
+				if (userIsLiked === 0) {
+					// like the profile
+					const likeProfile = await likeTheProfile(currentUserId, userToBeLikedId);
+					const fameRating = await affectFameRating(userToBeLikedId, '+');
+					type = 1;
+					// check if the actual user is already liked by this user
+					const userIsLiked = await checkIfUserIsLiked(userToBeLikedId, currentUserId);
+					if (userIsLiked) {
+						const match = await matcheUsers(currentUserId, userToBeLikedId);
+						type = 3;
+					}
+					const notif = await setNotification(currentUserId, userToBeLikedId, type);
+				} else {
+					// dislike the profile
+					const dislikeProfile = await dislikeTheProfile(currentUserId, userToBeLikedId);
+					const fameRating = await affectFameRating(userToBeLikedId, '-');
+					type = 2;
+					// check if the actual user is already liked by this user
+					const userIsLiked = await checkIfUserIsLiked(userToBeLikedId, currentUserId);
+					if (userIsLiked) {
+						const unmatch = await unmatcheUsers(currentUserId, userToBeLikedId);
+					}
+					const notif = await setNotification(currentUserId, userToBeLikedId, type);
+				}
 			}
 		}
+		next();
 	}
-	next();
 };
-router.post('/like', authToken, userChecker, (req, res) => {
+router.post('/like', authToken, bridge, userChecker, (req, res) => {
 	console.log(req.userNameConnected);
 	const backEndResponde = {};
-	if (!isEmpty(req.userErrors)) {
+	if (!isEmpty(req.bridgeErrors)) {
+		backEndResponde.errors = req.bridgeErrors;
+		backEndResponde.status = 1;
+	} else if (!isEmpty(req.userErrors)) {
 		backEndResponde.errors = req.userErrors;
 		backEndResponde.status = 1;
 		res.send(backEndResponde);
@@ -206,5 +293,4 @@ router.post('/like', authToken, userChecker, (req, res) => {
 		res.send(backEndResponde);
 	}
 });
-
 module.exports = router;

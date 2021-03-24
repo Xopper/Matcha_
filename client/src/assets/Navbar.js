@@ -165,7 +165,7 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 										/>
 									}
 								/>
-								<Link to='messanger'>
+								<Link to='/messanger'>
 									<NavItem icon={<MessengerIcon className='icon_btn' />} notifCount={`${notifMsg}`} />
 								</Link>
 								<NavItem icon={<BellIcon className='icon_btn' />} notifCount={`${notifCount}`} />
@@ -182,9 +182,14 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 											icon={faSignOutAlt}
 											size='lg'
 											className='clickable'
-											onClick={() => {
+											onClick={async () => {
 												socket.emit('logOut', loggedUser);
-												localStorage.clear();
+												await localStorage.removeItem('token');
+												if (!!localStorage.getItem('token') === false) {
+													console.log('local storage is empty');
+												} else {
+													console.log('hmmmmm');
+												}
 												setAuth({ token: null });
 											}}
 											style={{ color: 'aquamarine', width: 20, height: 20 }}

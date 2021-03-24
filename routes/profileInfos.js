@@ -178,9 +178,6 @@ function checkIfProfileIsReported(userLookingForId) {
 		});
 	});
 }
-// http://localhost:5000/profileUserInfos/userInfos
-// userNameLokingFor hrafi
-// Authorization   Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImhyYWZpIiwiaWF0IjoxNjE1MTk4MjYwfQ.rIkuBx2dZHJjWmA9KhuB6aXsEq0njnGm-8vdJ5WAXZw
 const getUserData = async (req, res, next) => {
 	const errors = {};
 	const allUserInfos = {};

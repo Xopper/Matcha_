@@ -1269,6 +1269,12 @@ signature
 
 /* Chat Page  */
 
+.no__matches {
+	display: block;
+    text-align: center;
+    font-weight: lighter;
+}
+
 .chat__container {
 	min-height: 1000px;
     margin-top: 42px;
@@ -1410,11 +1416,20 @@ flex-direction: column;
 justify-content: space-between;
 
 }
+
+
 .chat__box__messages__wraper__discussion {
-height: 80%;
-overflow-y: auto;
-display: flex;
-flex-direction: column;
+	height: 80%;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+}
+
+.chat__box__messages__wraper__discussion::-webkit-scrollbar { 
+	/* width: 2px !important; */
+	/* display: none; */
+	/* color: #000000; */
+	background: none!important;
 }
 
 .chat__box__msg {
