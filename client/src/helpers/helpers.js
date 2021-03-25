@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 // Cpitalize first Letter
 export function capitalizeFirstLetter(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
@@ -103,4 +105,10 @@ export function getCommonElms(arrayOne, arrayTwo) {
 		if (arrayTwo.includes(arrayOne[i])) count++;
 	}
 	return count;
+}
+
+export function getInstance(token) {
+	return axios.create({
+		headers: { Authorization: `Bearer ${token}` }
+	});
 }

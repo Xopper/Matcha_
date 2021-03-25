@@ -41,6 +41,10 @@ const getMessagesRouter = require('./routes/conversations');
 // 24-03-2021
 const setNotificationsRouter = require('./routes/setNotifications');
 
+const getNotificationsRouter = require('./routes/getNotifications');
+const getHistoryRouter = require('./routes/getHistory');
+const deleteNotificationsRouter = require('./routes/deleteNotifications');
+const deleteHistoryRouter = require('./routes/deleteHistory');
 const { CLIENT_RENEG_LIMIT } = require('tls');
 const redis = require('redis');
 const client = redis.createClient();
@@ -54,6 +58,7 @@ const io = require('socket.io')(server, {
 
 const users = {};
 io.on('connection', socket => {
+	console.log('3iw');
 	socket.on('usersConnected', function (username) {
 		if (username) {
 			users[username] = socket;
@@ -170,6 +175,10 @@ app.use('/storeConversations', insertMessages);
 
 app.use('/conversations', getMessagesRouter);
 
-app.use('/notifications', setNotificationsRouter);
+app.use('/setNotifications', setNotificationsRouter);
+app.use('/getNotifications', getNotificationsRouter);
+app.use('/getHistory', getHistoryRouter);
+app.use('/deleteNotifications', deleteNotificationsRouter);
+app.use('/deleteHistory', deleteHistoryRouter);
 
 server.listen(5000);

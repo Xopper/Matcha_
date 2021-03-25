@@ -23,13 +23,16 @@ function checkIfUserExists(userName) {
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
+			console.log('userName ::: ', userName);
 			connection.execute(
 				'SELECT COUNT(*) AS `exists` FROM `users` WHERE `user_name` = ?',
 				[userName],
 				(err, result) => {
 					if (err) reject(err);
 					else {
+						console.log('userName ::: ', userName);
 						const queryResult = result[0].exists;
+						console.log('result[0].exists ::: ', result[0].exists);
 						connection.release();
 						resolve(queryResult);
 					}

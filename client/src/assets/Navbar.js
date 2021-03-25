@@ -168,7 +168,9 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 								<Link to='/messanger'>
 									<NavItem icon={<MessengerIcon className='icon_btn' />} notifCount={`${notifMsg}`} />
 								</Link>
-								<NavItem icon={<BellIcon className='icon_btn' />} notifCount={`${notifCount}`} />
+								<Link to='/notifications'>
+									<NavItem icon={<BellIcon className='icon_btn' />} notifCount={`${notifCount}`} />
+								</Link>
 								<NavItem
 									open={open}
 									handleClick={() => setOpen(!open)}

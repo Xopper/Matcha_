@@ -58,6 +58,7 @@ function Messanger() {
 				receiver: rec,
 				message: msgContent
 			};
+
 			setConversation(conversation?.concat(value));
 			socket.emit('newMsg', value);
 			setMsgContent('');
@@ -100,14 +101,15 @@ function Messanger() {
 			}
 		};
 		data();
-		
+
 		/**
-		 * 
+		 *
 		 */
 		socket.on('msgRec', function (data) {
-			if (receiver.id) {
-				setConversation(old => old.concat(data));
-			}
+			// if (receiver.id) {
+			setConversation(old => old.concat(data));
+			// }
+			// console.log(data);
 		});
 	}, [token]);
 

@@ -1,8 +1,12 @@
 const router = require('express').Router();
 const pool = require('../model/dbConnection');
 const jwt = require('jsonwebtoken');
-const { query } = require('../model/dbConnection');
-
+const isEmpty = obj => {
+	for (let prop in obj) {
+		if (obj.hasOwnProperty(prop)) return false;
+	}
+	return true;
+};
 const authToken = (req, res, next) => {
 	if (req.headers.authorization) {
 		const authKey = req.headers.authorization.split(' ')[1];
@@ -21,10 +25,10 @@ function getUserId(userName) {
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
-			connection.execute('SELECT `id` from `users` WHERE `user_name`', [userName], (err, result) => {
+			connection.execute('SELECT `id` from `users` WHERE `user_name = ?`', [userName], (err, result) => {
 				if (err) reject(err);
 				else {
-					const queryResult = result;
+					const queryResult = result[0].id;
 					connection.release();
 					resolve(queryResult);
 				}
@@ -38,7 +42,7 @@ function getUserNotifications(userId) {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
 			connection.execute(
-				'SELECT users.user_name as `from`, notifications.type as `notifType`, notifications.notify_at as `notifyAt` from notifications JOIN notifications.to_id = users.id WHERE `notifications.from_id = ?`',
+				'SELECT `users`.`profile_img` as `avatar`, `notifications`.`id` as `notifID`, `users`.`user_name` as `from`, `notifications`.`type` as `notifType`, `notifications`.`notify_at` as `notifyAt` from `notifications` JOIN `users` ON `notifications`.`to_id` = `users`.`id` WHERE `notifications`.`from_id` = ?',
 				[userId],
 				(err, result) => {
 					if (err) reject(err);
@@ -66,16 +70,16 @@ const getNotifications = async (req, res, next) => {
 	req.notifications = notifications;
 };
 
-router.get('/getHistory', authToken, getNotifications, (req, res) => {
+router.get('/getUserHistory', authToken, getNotifications, (req, res) => {
 	const backEndResponse = {};
-	if (typeof req.notifications !== 'undefined' || !req.notifications) {
+	if (typeof req.notifications === 'undefined' || !req.notifications) {
 		backEndResponse.errors = "can't get the notifications";
 		backEndResponse.status = 1;
 	} else if (req.notifications.empty === 1) {
 		backEndResponse.message = 'No notifications';
 		backEndResponse.status = -1;
 	} else {
-		backEndResponse.notificaions = req.notifications;
+		backEndResponse.notifications = req.notifications;
 		backEndResponse.status = 0;
 	}
 });

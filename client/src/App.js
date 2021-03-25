@@ -11,6 +11,7 @@ import Messanger from './Pages/messages';
 import MyFooter from './assets/myFooter';
 import AuthProvider from '../src/Contexts/authContext';
 import PrivateRoute from './routes/privateRoute';
+import Notifs from './Pages/notifications';
 import './App.css';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
 					<Switch>
 						<PrivateRoute path='/u/:username' component={Profile} />
 						{/**check if the user exist or not */}
+						<PrivateRoute path='/notifications' component={Notifs} />
 						<PrivateRoute path='/browse' component={Browse} />
 						<PrivateRoute path='/messanger' component={Messanger} />
 						<Route path='/init' component={Init} />

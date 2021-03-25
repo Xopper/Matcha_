@@ -205,13 +205,13 @@ function unmatcheUsers(currentUserId, userToBeLikedId) {
 	});
 }
 
-function setNotification(toId, fromId, type) {
+function setNotification(fromId, toId, type) {
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
 			connection.execute(
-				'INSERT INTO `notifications`(`from_id`, `to_id`, `type`) VALUES(?, ?, ?)',
-				[fromId, toId, type],
+				'INSERT INTO `notifications`(`from_id`, `to_id`, `type`, `notify_at`) VALUES(?, ?, ?, ?)',
+				[fromId, toId, type, new Date()],
 				(err, result) => {
 					if (err) reject(err);
 					else {

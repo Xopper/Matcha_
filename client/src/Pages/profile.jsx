@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { capitalizeFirstLetter } from '../helpers/helpers';
+import { capitalizeFirstLetter, getInstance } from '../helpers/helpers';
 import HalfRating from '../assets/profileRating';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart, faFlag, faBan } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faFlag, faUserTimes } from '@fortawesome/free-solid-svg-icons';
 import SimpleSlider from '../Inc/extra/Slider';
 import { AuthContexts, socket, IsLoggedfn } from '../Contexts/authContext';
 import { getAge } from '../helpers/helpers';
@@ -12,10 +12,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 async function getData(strname, token) {
-	const instance = axios.create({
-		headers: { Authorization: `Bearer ${token}` }
-	});
-	const response = await instance.post('http://localhost:5000/profileUserInfos/userInfos', {
+	const response = await getInstance(token).post('http://localhost:5000/profileUserInfos/userInfos', {
 		userNameLokingFor: strname
 	});
 	return response;
@@ -63,6 +60,13 @@ function Profile() {
 			if (status === 0 && allUserInfos.imBlocked === 0 && allUserInfos.blocked === 0) {
 				if (loggedUser !== username) {
 					socket.emit('OnlineUser', username);
+					/**
+					 * sift l back end bach i9iyed had l visit f notification
+					 */
+					const res = getInstance(token).post('http://localhost:5000/setNotifications/messages', {
+						to: username,
+						type: 5
+					});
 				}
 				console.log(allUserInfos);
 				const keys = Object.keys(allUserInfos);
@@ -115,6 +119,9 @@ function Profile() {
 			userName: data.userName
 		});
 		if (res.data.status === 0) {
+			/**
+			 * send like notification
+			 */
 			socket.emit('like', data.userName);
 			setIsLiked(oldStatus => !oldStatus);
 			if (!!!isLiked) {
@@ -224,7 +231,7 @@ function Profile() {
 		});
 	}
 
-	if (!data.userName) return <div />;
+	if (!data.userName) return null;
 	return (
 		<div className='profile__container'>
 			<div className='profile__wrapper'>
@@ -251,7 +258,7 @@ function Profile() {
 									style={{ color: '#ccc', width: 20, height: 20 }}
 								/>
 								<FontAwesomeIcon
-									icon={faBan}
+									icon={faUserTimes}
 									size='lg'
 									className='clickable'
 									onClick={() => (isLogged ? handleBlock() : history.go())}

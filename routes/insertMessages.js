@@ -110,6 +110,25 @@ function messageInsertion(senderId, receiverId, message) {
 		});
 	});
 }
+function insertMessageNotif(fromId, toId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'INSERT INTO `notifications`(`from_id`, `to_id`, `type`, `notify_at`) VALUES(?, ?, 4, ?)',
+				[fromId, toId, new Date()],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
 
 const insertMessages = async (req, res, next) => {
 	if (!isEmpty(req.bridgeErrors)) next();
@@ -118,6 +137,7 @@ const insertMessages = async (req, res, next) => {
 		console.log('req.userId', req.userId);
 		console.log('req.body.receiver', req.body.receiver);
 		const messageInserted = await messageInsertion(req.userId, req.body.receiver, req.body.message);
+		const messageNotification = await insertMessageNotif(req.userId, req.body.receiver);
 		console.log(req.body);
 		next();
 	}

@@ -1,7 +1,13 @@
 const router = require('express').Router();
 const pool = require('../model/dbConnection');
 const jwt = require('jsonwebtoken');
-const { query } = require('../model/dbConnection');
+
+const isEmpty = obj => {
+	for (let prop in obj) {
+		if (obj.hasOwnProperty(prop)) return false;
+	}
+	return true;
+};
 
 const authToken = (req, res, next) => {
 	if (req.headers.authorization) {
@@ -21,10 +27,10 @@ function getUserId(userName) {
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
-			connection.execute('SELECT `id` from `users` WHERE `user_name`', [userName], (err, result) => {
+			connection.execute('SELECT `id` from `users` WHERE `user_name` = ?', [userName], (err, result) => {
 				if (err) reject(err);
 				else {
-					const queryResult = result;
+					const queryResult = result[0].id;
 					connection.release();
 					resolve(queryResult);
 				}
@@ -38,18 +44,18 @@ function getUserNotifications(userId) {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
 			connection.execute(
-				'SELECT users.user_name as `from`, notifications.type as `notifType`, notifications.notify_at as `notifyAt` from notifications JOIN notifications.from_id = users.id WHERE `notifications.to_id = ?`',
+				'SELECT `users`.`profile_img` as `avatar`, `notifications`.`id` as `notifID`, `users`.`user_name` as `from`, `notifications`.`type` as `notifType`, `notifications`.`notify_at` as `notifyAt` from `notifications` JOIN `users` ON `notifications`.`from_id` = `users`.`id` WHERE `notifications`.`to_id` = ?',
 				[userId],
 				(err, result) => {
 					if (err) reject(err);
 					else {
 						const queryResult = {};
+						console.log('userId :: ', userId);
+						console.log('result :: ', result);
 						if (isEmpty(result)) queryResult.empty = 1;
 						else {
 							queryResult.empty = 0;
-							queryResult.from = result[0].from;
-							queryResult.notifType = result[0].notifType;
-							queryResult.notifyAt = result[0].notifyAt;
+							queryResult.notifications = result;
 						}
 						connection.release();
 						resolve(queryResult);
@@ -63,20 +69,24 @@ function getUserNotifications(userId) {
 const getNotifications = async (req, res, next) => {
 	const userId = await getUserId(req.userNameConnected);
 	const notifications = await getUserNotifications(userId);
+	console.log('notifications :: ', notifications);
 	req.notifications = notifications;
+	next();
 };
 
-router.get('/getNotifications', authToken, getNotifications, (req, res) => {
+router.get('/getUserNotifications', authToken, getNotifications, (req, res) => {
 	const backEndResponse = {};
-	if (typeof req.notifications !== 'undefined' || !req.notifications) {
+	if (typeof req.notifications === 'undefined' || !req.notifications) {
 		backEndResponse.errors = "can't get the notifications";
 		backEndResponse.status = 1;
 	} else if (req.notifications.empty === 1) {
 		backEndResponse.message = 'No notifications';
 		backEndResponse.status = -1;
 	} else {
-		backEndResponse.notificaions = req.notifications;
+		backEndResponse.notifications = req.notifications;
 		backEndResponse.status = 0;
 	}
+	res.send(backEndResponse);
 });
+
 module.exports = router;

@@ -1351,6 +1351,9 @@ signature
 }
 .chat__box__users__card div:nth-child(1) img {
 	border-radius: 50%;
+    height: 70px;
+    width: 70px;
+    object-fit: cover;
 }
 .chat__box__users__card div:nth-child(2)
 {
@@ -1534,6 +1537,61 @@ justify-content: space-between;
 }
 
 
+.notifications__container {
+    min-height: 1000px;
+    margin-top: 42px;
+    margin-bottom: 42px;
+}
+
+.notifications__wrapper {
+	min-height: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.notification__card{
+	height: 75px;
+    width: 42%;
+    background: white;
+    display: flex;
+    align-items: center;
+	border-radius: 12px;
+	margin: 10px 0;
+	transition: all 400ms;
+}
+.notification__card:hover{
+	/* background: aquamarine; */
+	transform: scale(1.07);
+}
+
+.notification__user__content{
+	margin-left: 20px;
+}
+.notification__user__delete {
+	cursor: pointer;
+    color: crimson;
+    margin-left: auto;
+    padding-right: 20px;
+}
+
+.notification__user__img{
+	border-radius: 50%;
+}
+
+.notification__user__img img{
+	height: 50px;
+    border-radius: 50%;
+    margin-left: 20px;
+}
+.notif__user__text {
+	font-size: 14px;
+}
+
+.notif__user__at{
+	font-size: 10px;
+    color: lightgray;
+}
 
 
 
