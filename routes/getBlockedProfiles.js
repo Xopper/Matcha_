@@ -55,13 +55,18 @@ function getProfiles(userId) {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
 			connection.execute(
-				'SELECT users.user_name from profile_blocks JOIN users ON profile_blocks.blocked_id = users.id WHERE profile_blocks.blocker_id = ?',
+				'SELECT `users`.`id`, `users`.`user_name`, `users`.`profile_img` from `profile_blocks` JOIN `users` ON `profile_blocks`.`blocked_id` = `users`.`id` WHERE `profile_blocks`.`blocker_id` = ?',
 				[userId],
 				(err, result) => {
 					if (err) reject(err);
 					else {
-						const queryResult = result.map(user => {
-							return user.user_name;
+						console.log(result);
+						const queryResult = result.map(({ id, user_name, profile_img }) => {
+							const usr = {};
+							usr.id = id;
+							usr.username = user_name;
+							usr.avatar = profile_img;
+							return usr;
 						});
 						connection.release();
 						resolve(queryResult);
@@ -83,7 +88,7 @@ const getBockedProfiles = async (req, res, next) => {
 	}
 	next();
 };
-router.get('/profieBocked', authToken, getBockedProfiles, (req, res) => {
+router.get('/Bockedprofiles', authToken, getBockedProfiles, (req, res) => {
 	const backEndResponse = {};
 	console.log(req.profileBlocked);
 	if (req.profileBlocked === []) {

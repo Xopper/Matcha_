@@ -131,16 +131,18 @@ function insertMessageNotif(fromId, toId) {
 }
 
 const insertMessages = async (req, res, next) => {
+	const errors = {};
 	if (!isEmpty(req.bridgeErrors)) next();
 	else if (!isEmpty(req.connectionErrors)) next();
 	else {
-		console.log('req.userId', req.userId);
-		console.log('req.body.receiver', req.body.receiver);
-		const messageInserted = await messageInsertion(req.userId, req.body.receiver, req.body.message);
-		const messageNotification = await insertMessageNotif(req.userId, req.body.receiver);
-		console.log(req.body);
-		next();
+		if (req.body.message.lenght > 200) errors.message = 'your message is too long';
+		else {
+			const messageInserted = await messageInsertion(req.userId, req.body.receiver, req.body.message);
+			const messageNotification = await insertMessageNotif(req.userId, req.body.receiver);
+		}
 	}
+	req.insertionError = errors;
+	next();
 };
 
 router.post('/storeMessage', authToken, bridge, connectionChecker, insertMessages, (req, res) => {
@@ -150,6 +152,9 @@ router.post('/storeMessage', authToken, bridge, connectionChecker, insertMessage
 		backEndResponse.status = 1;
 	} else if (!isEmpty(req.connectionErrors)) {
 		backEndResponse.errors = req.connectionErrors;
+		backEndResponse.status = 1;
+	} else if (!isEmpty(req.insertionError)) {
+		backEndResponse.errors = req.insertionError;
 		backEndResponse.status = 1;
 	} else {
 		backEndResponse.status = 0;

@@ -39,7 +39,7 @@ export default function EditInfos() {
 	const [popupIsOpen, setPopupIsOpen] = useState(false);
 
 	useEffect(() => {
-		const data = async () => {
+		(async () => {
 			const {
 				data: { userInfos }
 			} = await getData(token);
@@ -48,8 +48,11 @@ export default function EditInfos() {
 			userInfos[0].birthDay = formatDate(userInfos[0].birthDay);
 			setFormSchema(userInfos[0]);
 			setCenter({ lat, lng });
+		})();
+		return () => {
+			setFormSchema({});
+			setCenter({});
 		};
-		data();
 	}, [token]);
 
 	function submit() {

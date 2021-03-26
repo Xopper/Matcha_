@@ -1,8 +1,24 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faMale, faFemale, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faMale, faFemale, faUsers } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 function Home(props) {
+	const [data, setData] = useState({
+		men: 0,
+		women: 0
+	});
+	useEffect(() => {
+		(async () => {
+			const {
+				data: { users }
+			} = await axios.get('http://localhost:5000/getUsers/getAllUsers');
+			setData({
+				men: users.men,
+				women: users.women
+			});
+		})();
+	}, []);
 	return (
 		<>
 			<div className='home'>
@@ -30,23 +46,18 @@ function Home(props) {
 			<div className='statistical'>
 				<div className='statistical__card'>
 					<FontAwesomeIcon icon={faUsers} size='3x' color='#30e3ca' />
-					<h3>5009</h3>
+					<h3>{data.men + data.women}</h3>
 					<h3>Total Member</h3>
 				</div>
 				<div className='statistical__card'>
-					<FontAwesomeIcon icon={faUser} size='3x' color='#30e3ca' />
-					<h3>9</h3>
-					<h3>User Online</h3>
-				</div>
-				<div className='statistical__card'>
 					<FontAwesomeIcon icon={faMale} size='3x' color='#30e3ca' />
-					<h3>51</h3>
-					<h3> Men Online</h3>
+					<h3>{data.men}</h3>
+					<h3>Men</h3>
 				</div>
 				<div className='statistical__card'>
 					<FontAwesomeIcon icon={faFemale} size='3x' color='#30e3ca' />
-					<h3>152</h3>
-					<h3>Woman Online</h3>
+					<h3>{data.women}</h3>
+					<h3>Woman</h3>
 				</div>
 			</div>
 		</>

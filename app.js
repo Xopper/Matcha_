@@ -45,6 +45,9 @@ const getNotificationsRouter = require('./routes/getNotifications');
 const getHistoryRouter = require('./routes/getHistory');
 const deleteNotificationsRouter = require('./routes/deleteNotifications');
 const deleteHistoryRouter = require('./routes/deleteHistory');
+const unblockRouter = require('./routes/unblockEndPoint');
+const getAllUsersBonusRouter = require('./routes/getUsersBonus');
+
 const { CLIENT_RENEG_LIMIT } = require('tls');
 const redis = require('redis');
 const client = redis.createClient();
@@ -58,8 +61,8 @@ const io = require('socket.io')(server, {
 
 const users = {};
 io.on('connection', socket => {
-	console.log('3iw');
 	socket.on('usersConnected', function (username) {
+		console.log(username);
 		if (username) {
 			users[username] = socket;
 			client.set(username, socket.id);
@@ -68,12 +71,10 @@ io.on('connection', socket => {
 		socket.on('disconnect', () => {
 			client.del(username);
 			io.emit('usersIsOffline', username);
-			// tttttttttttttt
-			var time = new Date();
 			pool.getConnection((err, connection) => {
 				connection.execute(
 					'UPDATE `users` SET `last_seen` = ? WHERE `user_name` = ?',
-					[time, username],
+					[new Date(), username],
 					(err, resut) => {
 						console.log(resut);
 						console.log(err);
@@ -83,12 +84,13 @@ io.on('connection', socket => {
 		});
 	});
 	socket.on('logOut', function (username) {
+		console.log(`${username} logout`);
 		client.del(username);
-		io.emit('usersIsOnline', username);
+		io.emit('usersIsOffline', username);
 		pool.getConnection((err, connection) => {
 			connection.execute(
-				'UPDATE `users` SET `last_seen` = NOW() WHERE `user_name` = ?',
-				[username],
+				'UPDATE `users` SET `last_seen` = ? WHERE `user_name` = ?',
+				[new Date(), username],
 				(err, resut) => {}
 			);
 		});
@@ -180,5 +182,7 @@ app.use('/getNotifications', getNotificationsRouter);
 app.use('/getHistory', getHistoryRouter);
 app.use('/deleteNotifications', deleteNotificationsRouter);
 app.use('/deleteHistory', deleteHistoryRouter);
+app.use('/unblock', unblockRouter);
+app.use('/getUsers', getAllUsersBonusRouter);
 
 server.listen(5000);

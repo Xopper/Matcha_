@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContexts, socket } from '../Contexts/authContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSignOutAlt, faHistory, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faSignOutAlt, faHistory, faUser, faTrashRestoreAlt } from '@fortawesome/free-solid-svg-icons';
 import { faFirefoxBrowser } from '@fortawesome/free-brands-svg-icons';
 import { ReactComponent as BellIcon } from '../icons/bell.svg';
 import { ReactComponent as CogIcon } from '../icons/cog.svg';
@@ -32,12 +32,13 @@ function useOutsideHandler(ref, handleClick) {
 	}, [ref, handleClick]);
 }
 
-function NavItem({ handleClick, icon, open, children, notifCount }) {
+function NavItem({ handleClick, icon, open, children, notifCount, text }) {
 	return (
-		<li style={{ position: 'relative' }}>
+		<li className='nav__item--control' style={{ position: 'relative' }}>
 			<div className='nav__icons clickable' onClick={handleClick}>
 				{icon}
 			</div>
+			<span>{text}</span>
 			{notifCount && notifCount !== '0' && <span className='notif__cercl'>{notifCount}</span>}
 			{open && children}
 		</li>
@@ -91,6 +92,10 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 				console.log('test');
 			}
 		});
+		return () => {
+			setNotifCount(0);
+			setnotifMsg(0);
+		};
 	}, []);
 	const [toggleClass, setToggleClass] = useState(false);
 	const [open, setOpen] = useState(false);
@@ -106,6 +111,7 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 					<Link to='/'>MatchaV2.</Link>
 				</h1>
 			</div>
+			<div></div>
 			<div>
 				<span href='#' className='toggle-button' onClick={() => handleClick()}>
 					<span className='bar' />
@@ -131,8 +137,22 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 					)) ||
 						(auth.token && (
 							<>
+								<Link to='/blocked'>
+									<NavItem
+										text='blocked'
+										icon={
+											<FontAwesomeIcon
+												icon={faTrashRestoreAlt}
+												size='lg'
+												className='clickable'
+												style={{ color: 'aquamarine', width: 20, height: 20 }}
+											/>
+										}
+									/>
+								</Link>
 								<Link to={`/u/${auth.loggedUser}`}>
 									<NavItem
+										text='profile'
 										icon={
 											<FontAwesomeIcon
 												icon={faUser}
@@ -145,6 +165,7 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 								</Link>
 								<Link to='/browse'>
 									<NavItem
+										text='browse'
 										icon={
 											<FontAwesomeIcon
 												icon={faFirefoxBrowser}
@@ -155,21 +176,32 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 										}
 									/>
 								</Link>
-								<NavItem
-									icon={
-										<FontAwesomeIcon
-											icon={faHistory}
-											size='lg'
-											className='clickable'
-											style={{ color: 'aquamarine', width: 20, height: 20 }}
-										/>
-									}
-								/>
+								<Link to='/history'>
+									<NavItem
+										text='history'
+										icon={
+											<FontAwesomeIcon
+												icon={faHistory}
+												size='lg'
+												className='clickable'
+												style={{ color: 'aquamarine', width: 20, height: 20 }}
+											/>
+										}
+									/>
+								</Link>
 								<Link to='/messanger'>
-									<NavItem icon={<MessengerIcon className='icon_btn' />} notifCount={`${notifMsg}`} />
+									<NavItem
+										text='messages'
+										icon={<MessengerIcon className='icon_btn' />}
+										notifCount={`${notifMsg}`}
+									/>
 								</Link>
 								<Link to='/notifications'>
-									<NavItem icon={<BellIcon className='icon_btn' />} notifCount={`${notifCount}`} />
+									<NavItem
+										text='notifications'
+										icon={<BellIcon className='icon_btn' />}
+										notifCount={`${notifCount}`}
+									/>
 								</Link>
 								<NavItem
 									open={open}
@@ -179,14 +211,15 @@ function NavBar({ parentDisplay, SetDisplayToggle }) {
 									<DropDownMenu handleClick={() => setOpen(!open)} />
 								</NavItem>
 								<NavItem
+									text='logout'
 									icon={
 										<FontAwesomeIcon
 											icon={faSignOutAlt}
 											size='lg'
 											className='clickable'
-											onClick={async () => {
+											onClick={() => {
 												socket.emit('logOut', loggedUser);
-												await localStorage.removeItem('token');
+												localStorage.removeItem('token');
 												if (!!localStorage.getItem('token') === false) {
 													console.log('local storage is empty');
 												} else {

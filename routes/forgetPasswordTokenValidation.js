@@ -9,11 +9,26 @@ const isEmpty = obj => {
 	return true;
 };
 
+// const getToken = (req, res, next) => {
+// 	if (req.headers.authorization) {
+// 		const authKey = req.headers.authorization.split(' ')[1];
+// 		if (authKey) {
+// 			const authKey = req.headers.authorization.split(' ')[1];
+// 			jwt.verify(authKey, 'mafhamnachwalakinma3lichlhalwassaoulfanid04', (err, decoded) => {
+// 				if (err) return res.status(403).send('Token Error');
+// 				else {
+// 					req.userNameConnected = user.userName;
+// 					next();
+// 				}
+// 			});
+// 		}
+// 	}
+// };
 function getToken(token) {
 	return new Promise((resolve, reject) => {
 		jwt.verify(token, 'mafhamnachwalakinma3lichlhalwassaoulfanid04', (err, decoded) => {
 			if (err) reject('err: ', err);
-			resolve('decoded: ', decoded);
+			resolve(decoded);
 		});
 	});
 }
@@ -37,7 +52,7 @@ function checkIfTokenIsNull(userName) {
 	return new Promise((res, rej) => {
 		pool.getConnection((err, connection) => {
 			if (err) rej(err);
-			connection.execute('SELECT `token` FROM `users` WHERE `user_name`=?', [userName], (err, result) => {
+			connection.execute('SELECT `token` FROM `users` WHERE `user_name` = ?', [userName], (err, result) => {
 				if (err) rej(err);
 				res(result[0].token);
 			});
@@ -48,21 +63,15 @@ const tokenVerification = async (req, res, next) => {
 	try {
 		console.log('>>the token before <<: ', req.params.token);
 		const tokenDecoded = await getToken(req.params.token);
-		console.log(tokenDecoded);
-		console.log('tokenDecoded ====: ', tokenDecoded);
+		console.log('tokenDecoded :: ', tokenDecoded);
 		req.decoded = tokenDecoded;
 		const tokenIsNull = await checkIfTokenIsNull(req.decoded.userName);
-		console.log('tokenIsNull =====: ', tokenIsNull);
 		if (tokenIsNull === null) {
 			req.error = 'Invalid token.';
 			next();
 		}
-		console.log('>>the token after  <<: ', req.params.token);
-		console.log('<<the token decoded>>: ', tokenDecoded);
 		next();
 	} catch (err) {
-		console.log('the token is invalid !!');
-		console.log('ERROR PAUSE :: ', err);
 		req.decoded = '';
 		next();
 	}

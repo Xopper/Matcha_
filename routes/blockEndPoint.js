@@ -78,7 +78,7 @@ function blockTheProfile(currentUserId, userLookingForId) {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
 			connection.execute(
-				'INSERT INTO `profile_blocks`(`blocker_id`, `blocked_id`) VALUES(?, ?)',
+				'INSERT INTO `profile_blocks` (`blocker_id`, `blocked_id`) VALUES(?, ?)',
 				[currentUserId, userLookingForId],
 				(err, result) => {
 					if (err) reject(err);
@@ -141,6 +141,107 @@ function affectFameRating(userId, sign) {
 		});
 	});
 }
+
+function checkIfIamBlocked(userLookingForId, currentUserId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT COUNT(*) AS `block` FROM `profile_blocks` WHERE `blocker_id` = ? AND `blocked_id` = ?',
+				[userLookingForId, currentUserId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result[0].block;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+
+function likedProfile(currentUserId, userLookingForId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT COUNT(*) AS `liked` FROM `profile_likes` WHERE `liker_id` = ? AND `liked_id` = ?',
+				[currentUserId, userLookingForId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result[0].liked;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+
+function dislikeTheProfile(currentUserId, userLookingForId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'DELETE FROM `profile_likes` WHERE `liker_id` = ? AND `liked_id` = ?',
+				[currentUserId, userLookingForId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+
+function checkIfMatched(currentUserId, userLookingForId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT COUNT(*) AS `matched` FROM `connected_users` WHERE (`user_one` = ? AND `user_two` = ?) OR (`user_one` = ? AND `user_two` = ?)',
+				[currentUserId, userLookingForId, userLookingForId, currentUserId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result[0].matched;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+
+function unmatchUsers(currentUserId, userLookingForId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'DELETE FROM `connected_users` WHERE (`user_one` = ? AND `user_two` = ?) OR (`user_one` = ? AND `user_two` = ?)',
+				[currentUserId, userLookingForId, userLookingForId, currentUserId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
+
 const userChecker = async (req, res, next) => {
 	const userErrors = {};
 	const currentUserName = req.userNameConnected;
@@ -154,16 +255,29 @@ const userChecker = async (req, res, next) => {
 	} else {
 		const userToBeBlockedId = await getUserId(userNameToBeBlocked);
 		const currentUserId = await getUserId(currentUserName);
-		const userIsBlocked = await checkIfUserIsBlocked(currentUserId, userToBeBlockedId);
-		if (userIsBlocked !== 0) {
-			const unblockProfile = await unblockTheProfile(currentUserId, userToBeBlockedId);
-			const fameRating = await affectFameRating(userToBeBlockedId, '+');
-		} else {
-			const blockProfile = await blockTheProfile(currentUserId, userToBeBlockedId);
-			const fameRating = await affectFameRating(userToBeBlockedId, '-');
+		const iamBlocked = await checkIfIamBlocked(userToBeBlockedId, currentUserId);
+		if (iamBlocked === 0) {
+			const userIsBlocked = await checkIfUserIsBlocked(currentUserId, userToBeBlockedId);
+			console.log('userIsBlocked :: ', userIsBlocked);
+			if (userIsBlocked !== 0) {
+				const unblockProfile = await unblockTheProfile(currentUserId, userToBeBlockedId);
+				const fameRating = await affectFameRating(userToBeBlockedId, '+');
+			} else {
+				const blockProfile = await blockTheProfile(currentUserId, userToBeBlockedId);
+				const checkIfLiked = await likedProfile(currentUserId, userToBeBlockedId);
+				if (checkIfLiked !== 0) {
+					const dislikeProfile = await dislikeTheProfile(currentUserId, userToBeBlockedId);
+					const areMatched = await checkIfMatched(currentUserId, userToBeBlockedId);
+					console.log('areMatched :: ', areMatched);
+					if (areMatched !== 0) {
+						const unmatch = await unmatchUsers(currentUserId, userToBeBlockedId);
+					}
+				}
+				const fameRating = await affectFameRating(userToBeBlockedId, '-');
+			}
 		}
+		next();
 	}
-	next();
 };
 router.post('/block', authToken, userChecker, (req, res) => {
 	const backEndResponde = {};

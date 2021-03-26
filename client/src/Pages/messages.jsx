@@ -1,33 +1,25 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import { CSSTransition } from 'react-transition-group';
 import { AuthContexts, socket } from '../Contexts/authContext';
-import axios from 'axios';
+import { getInstance } from '../helpers/helpers';
 import ScrollableFeed from 'react-scrollable-feed';
+import { useHistory } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 async function getConnectedUsrs(token) {
-	const instance = axios.create({
-		headers: { Authorization: `Bearer ${token}` }
-	});
-	const response = await instance.get('http://localhost:5000/getConnectedUsers');
+	const response = await getInstance(token).get('http://localhost:5000/getConnectedUsers');
 	return response;
 }
 
 async function sendData(token, values) {
-	const instance = axios.create({
-		headers: { Authorization: `Bearer ${token}` }
-	});
-	const response = await instance.post('http://localhost:5000/storeConversations/storeMessage', values);
+	const response = await getInstance(token).post('http://localhost:5000/storeConversations/storeMessage', values);
 	return response;
 }
 
 async function getConversations(token, receiverID) {
-	console.log(receiverID);
-	const instance = axios.create({
-		headers: { Authorization: `Bearer ${token}` }
-	});
-	const response = await instance.post('http://localhost:5000/conversations/messages', {
+	const response = await getInstance(token).post('http://localhost:5000/conversations/messages', {
 		receiver: receiverID
 	});
 	return response;
@@ -40,31 +32,42 @@ function Messanger() {
 	const [msgContent, setMsgContent] = useState('');
 	const [conversation, setConversation] = useState([]);
 	const { auth } = useContext(AuthContexts);
-	const { token, socketID, loggedUser, loggedID } = auth;
+	const { token, loggedID } = auth;
+	const history = useHistory();
 
 	async function sendMsg(rec, recUser) {
 		console.log(rec);
-		if (msgContent.trim() === '') {
+		if (msgContent.trim() === '' || msgContent.trim().length >= 50 || !/^[a-z0-9A-Z\s@#.]+$/.test(msgContent)) {
 			console.log('test');
+			setMsgContent('');
 		} else {
 			console.log(rec);
 			const value = {
 				receiver_id: rec,
-				messages: msgContent,
+				messages: msgContent.trim(),
 				sender_id: loggedID,
 				reciverUsername: recUser
 			};
 			const valsToback = {
 				receiver: rec,
-				message: msgContent
+				message: msgContent.trim()
 			};
 
-			setConversation(conversation?.concat(value));
-			socket.emit('newMsg', value);
 			setMsgContent('');
 			try {
-				const res = await sendData(token, valsToback);
-				console.log(res);
+				const { data } = await sendData(token, valsToback);
+				if (data.status === 0) {
+					setConversation(conversation?.concat(value));
+					socket.emit('newMsg', value);
+				} else {
+					Swal.fire({
+						title: 'OUUUUUUCH!',
+						text: 'Something went wrong. Try Again!',
+						icon: 'warning',
+						confirmButtonText: 'close'
+					});
+					history.go();
+				}
 			} catch (e) {}
 		}
 	}
@@ -74,22 +77,29 @@ function Messanger() {
 
 	async function handleSelectUser(receiverID) {
 		const { data } = await getConversations(token, receiverID);
+		console.log(data);
 		if (data.status === 0) {
-			const {
-				conversation: { messages }
-			} = data;
-			setConversation(messages);
-			console.log(messages);
+			if (typeof data.conversation !== 'undefined') {
+				const {
+					conversation: { messages }
+				} = data;
+				setConversation(messages);
+				console.log(messages);
+			} else {
+				setConversation([]);
+				console.log('hooooooooooooowwwowowowowowow');
+			}
 		}
 	}
 
+	const nodeRef = useRef(null);
+	const nodeRefTwo = useRef(null);
+
 	useEffect(() => {
-		console.log('okey something happend');
-		const data = async () => {
+		(async () => {
 			const { data } = await getConnectedUsrs(token);
 			console.log(data);
 			if (data.status === 0) {
-				// setConnectedUsers(oldVals => [...oldVals, ...data.connectedUsers]);
 				if (typeof data.connectedUsers !== 'string') {
 					console.log(data.connectedUsers);
 					setConnectedUsers(data.connectedUsers);
@@ -99,25 +109,25 @@ function Messanger() {
 			} else {
 				console.log('something Went wrong!');
 			}
-		};
-		data();
+		})();
 
-		/**
-		 *
-		 */
 		socket.on('msgRec', function (data) {
 			// if (receiver.id) {
 			setConversation(old => old.concat(data));
-			// }
-			// console.log(data);
 		});
 	}, [token]);
 
 	return (
 		<div className='chat__container'>
 			<div className='chat__box'>
-				<CSSTransition in={activeMenu === 'users'} unmountOnExit timeout={500} classNames='menu-primary'>
-					<div className='chat__box__users'>
+				<CSSTransition
+					in={activeMenu === 'users'}
+					unmountOnExit
+					timeout={500}
+					classNames='menu-primary'
+					nodeRef={nodeRef}
+				>
+					<div className='chat__box__users' ref={nodeRef}>
 						<div className='chat__box__users__name'>
 							<h1>Chat</h1>
 						</div>
@@ -134,7 +144,7 @@ function Messanger() {
 										}}
 									>
 										<div>
-											<img src={avatar} width='70%' height='70%' />
+											<img src={avatar} width='70%' height='70%' alt='tacos' />
 										</div>
 										<div>
 											<h4>{username}</h4>
@@ -157,11 +167,17 @@ function Messanger() {
 					</div>
 				</CSSTransition>
 				{receiver.id && (
-					<CSSTransition in={activeMenu === 'chat'} unmountOnExit timeout={500} classNames='menu-secondary'>
-						<div className='chat__box__messages'>
+					<CSSTransition
+						in={activeMenu === 'chat'}
+						unmountOnExit
+						timeout={500}
+						classNames='menu-secondary'
+						nodeRef={nodeRefTwo}
+					>
+						<div className='chat__box__messages' ref={nodeRefTwo}>
 							<div className='chat__box__messages__card' onClick={() => setActiveMenu('users')}>
 								<div>
-									<img src={receiver.avatar} width='60px' height='60px' />
+									<img src={receiver.avatar} width='60px' height='60px' alt='tacos' />
 								</div>
 								<div>
 									<h4>{receiver.username}</h4>

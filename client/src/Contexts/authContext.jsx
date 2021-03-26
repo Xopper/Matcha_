@@ -14,7 +14,7 @@ function AuthProvider(props) {
 		const token = localStorage.getItem('token');
 		if (token) {
 			// im gonna expect the username from the backend :)
-			const isValid = async () => {
+			(async () => {
 				const {
 					data: { status, complited, ...args }
 				} = await axios.post('http://localhost:5000/authToken/authTokenValidation', {
@@ -32,8 +32,7 @@ function AuthProvider(props) {
 					});
 					localStorage.clear();
 				}
-			};
-			isValid();
+			})();
 		} else {
 			setAuth(oldValue => {
 				return { ...oldValue, token: null };

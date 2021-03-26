@@ -4,8 +4,7 @@ import Rate from '../assets/controlledRating';
 import HalfRating from '../assets/profileRating';
 import { AuthContexts } from '../Contexts/authContext';
 import _ from 'lodash';
-import axios from 'axios';
-import { getAge, computeDistance, capitalizeFirstLetter, getCommonElms } from '../helpers/helpers';
+import { getAge, computeDistance, capitalizeFirstLetter, getCommonElms, getInstance } from '../helpers/helpers';
 import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 
 const sortUsers = (users, sortBy = 'age') => {
@@ -15,20 +14,12 @@ const sortUsers = (users, sortBy = 'age') => {
 };
 
 async function getLoggedData(token) {
-	const instance = axios.create({
-		headers: { Authorization: `Bearer ${token}` }
-	});
-	// console.log(token);
-	const response = await instance.get('http://localhost:5000/browsedata/getBrowseLogedData');
+	const response = await getInstance(token).get('http://localhost:5000/browsedata/getBrowseLogedData');
 	return response;
 }
 
 async function getData(token) {
-	const instance = axios.create({
-		headers: { Authorization: `Bearer ${token}` }
-	});
-	// console.log(token);
-	const response = await instance.get('http://localhost:5000/filter/sex_prefs');
+	const response = await getInstance(token).get('http://localhost:5000/filter/sex_prefs');
 	return response;
 }
 
@@ -65,7 +56,7 @@ function Browse() {
 	 * get logged user Data
 	 */
 	useEffect(() => {
-		const userData = async () => {
+		(async () => {
 			if (token) {
 				const res = await getLoggedData(token);
 				console.log(res);
@@ -80,20 +71,17 @@ function Browse() {
 					}));
 				}
 			}
-		};
-		userData();
-		console.log('TIMES');
+		})();
 	}, [token]);
 
 	/**
 	 * Get all qualified users
 	 */
 	useEffect(() => {
-		const data = async () => {
+		(async () => {
 			if (token) {
 				const { data } = await getData(token);
 				if (data.status === 0) {
-					// console.log(data.filtredUsers);
 					const cleanData = data.filtredUsers.map(elm => {
 						const newElm = {};
 						newElm.username = elm.user_name; // for the url
@@ -117,10 +105,7 @@ function Browse() {
 					}));
 				}
 			}
-		};
-
-		data();
-		// setUsers(users => ({ ...users, data: usersList }));
+		})();
 	}, [token, loggedUser.lat, loggedUser.lng, loggedUser.tags]);
 
 	useEffect(() => {

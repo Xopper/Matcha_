@@ -73,8 +73,11 @@ const deleteNotification = async (req, res, next) => {
 	if (!isEmpty(req.bridgeErrors)) next();
 	else {
 		const userId = await getUserId(req.userNameConnected);
-		console.log(userId);
+		console.log('>>', userId);
+		console.log('??', req.userNameConnected);
+		console.log('!!', req.body.notificationId);
 		const notifDeleted = await deleteUserNotification(userId, req.body.notificationId);
+		console.log('>>> ', notifDeleted);
 		next();
 	}
 };

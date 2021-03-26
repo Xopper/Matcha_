@@ -5,10 +5,9 @@ import HalfRating from '../assets/profileRating';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faFlag, faUserTimes } from '@fortawesome/free-solid-svg-icons';
 import SimpleSlider from '../Inc/extra/Slider';
-import { AuthContexts, socket, IsLoggedfn } from '../Contexts/authContext';
+import { AuthContexts, socket } from '../Contexts/authContext';
 import { getAge } from '../helpers/helpers';
 import Moment from 'react-moment';
-import axios from 'axios';
 import Swal from 'sweetalert2';
 
 async function getData(strname, token) {
@@ -26,8 +25,6 @@ function Profile() {
 	const { auth } = useContext(AuthContexts);
 	const { token, loggedUser } = auth;
 	const [userStatus, setUserStatus] = useState(false);
-	const [lastSeen, setLastSeen] = useState('');
-	// console.log(loggedUser);
 	const history = useHistory();
 
 	const [data, setData] = useState({
@@ -53,7 +50,7 @@ function Profile() {
 	});
 
 	useEffect(() => {
-		const data = async () => {
+		(async () => {
 			const {
 				data: { allUserInfos, status }
 			} = await getData(username, token);
@@ -63,12 +60,11 @@ function Profile() {
 					/**
 					 * sift l back end bach i9iyed had l visit f notification
 					 */
-					const res = getInstance(token).post('http://localhost:5000/setNotifications/messages', {
+					const res = await getInstance(token).post('http://localhost:5000/setNotifications/messages', {
 						to: username,
 						type: 5
 					});
 				}
-				console.log(allUserInfos);
 				const keys = Object.keys(allUserInfos);
 				keys.forEach(el => {
 					if (el === 'birthday') {
@@ -77,7 +73,6 @@ function Profile() {
 					} else if (el === 'sexualPreference' && allUserInfos[el] === 'bi') {
 						setData(oldData => ({ ...oldData, [el]: 'bisexual' }));
 					} else if (el === 'liked') {
-						// console.log('mebenz >> ', allUserInfos[el]);
 						setIsLiked(allUserInfos[el]);
 					} else {
 						setData(oldData => ({ ...oldData, [el]: allUserInfos[el] }));
@@ -86,8 +81,7 @@ function Profile() {
 			} else {
 				history.push('/account');
 			}
-		};
-		data();
+		})();
 		socket.on('usersIsOnline', function (data) {
 			if (data === username) {
 				setUserStatus(true);
@@ -97,13 +91,9 @@ function Profile() {
 		socket.on('usersIsOffline', function (data) {
 			if (data === username) {
 				setUserStatus(false);
-				// set time on DB
-				// axios
-				console.log('usersIsOffline', data);
 			}
 		});
-		console.log('use Run :)');
-	}, [username, token, history]);
+	}, [username, token, history, loggedUser]);
 
 	/**
 	 * please try to standrize the back-ends calls
@@ -112,10 +102,7 @@ function Profile() {
 
 	async function handleLike() {
 		console.log('like Clicked');
-		const instance = axios.create({
-			headers: { Authorization: `Bearer ${token}` }
-		});
-		const res = await instance.post('http://localhost:5000/likeEndPoint/like', {
+		const res = await getInstance(token).post('http://localhost:5000/likeEndPoint/like', {
 			userName: data.userName
 		});
 		if (res.data.status === 0) {
@@ -157,10 +144,7 @@ function Profile() {
 			confirmButtonText: `Report`
 		}).then(async ({ isConfirmed }) => {
 			if (isConfirmed) {
-				const instance = axios.create({
-					headers: { Authorization: `Bearer ${token}` }
-				});
-				const res = await instance.post('http://localhost:5000/reportEndPoint/report', {
+				const res = await getInstance(token).post('http://localhost:5000/reportEndPoint/report', {
 					userName: data.userName
 				});
 				if (res.data.status) {
@@ -200,12 +184,10 @@ function Profile() {
 			confirmButtonText: `Block`
 		}).then(async ({ isConfirmed }) => {
 			if (isConfirmed) {
-				const instance = axios.create({
-					headers: { Authorization: `Bearer ${token}` }
-				});
-				const res = await instance.post('http://localhost:5000/blockEndPoint/block', {
+				const res = await getInstance(token).post('http://localhost:5000/blockEndPoint/block', {
 					userName: data.userName
 				});
+				console.log(res);
 				// normaly if the user is blocke we are not gonna be generating this page
 				// but we gonna treat it like the "Like" action
 				if (res.data.status) {
@@ -270,13 +252,21 @@ function Profile() {
 					<section className='profile__heeder'>
 						<div className='img__wrapper'>
 							<img src={data.profileImg} alt='tacos' />
-							<span className={userStatus ? `profile__status online` : `profile__status offline`}></span>
+							{loggedUser !== data.userName && (
+								<span
+									className={userStatus ? `profile__status online` : `profile__status offline`}
+								></span>
+							)}
 						</div>
 						<div className='profile__fullname'>
 							{`${capitalizeFirstLetter(data.userName)}, ${data.birthday}`}{' '}
 							{/**use last seen here if hes of line */}
 							<span className='profile__lastSeen'>
-								{userStatus ? '' : <Moment fromNow>{data.last_seen}</Moment>}
+								{userStatus || loggedUser === data.userName ? (
+									''
+								) : (
+									<Moment fromNow>{data.last_seen}</Moment>
+								)}
 							</span>
 						</div>
 						<div className='profile__fieldset'>

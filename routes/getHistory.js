@@ -25,7 +25,7 @@ function getUserId(userName) {
 	return new Promise((resolve, reject) => {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
-			connection.execute('SELECT `id` from `users` WHERE `user_name = ?`', [userName], (err, result) => {
+			connection.execute('SELECT `id` from `users` WHERE `user_name` = ?', [userName], (err, result) => {
 				if (err) reject(err);
 				else {
 					const queryResult = result[0].id;
@@ -42,7 +42,7 @@ function getUserNotifications(userId) {
 		pool.getConnection((err, connection) => {
 			if (err) reject(err);
 			connection.execute(
-				'SELECT `users`.`profile_img` as `avatar`, `notifications`.`id` as `notifID`, `users`.`user_name` as `from`, `notifications`.`type` as `notifType`, `notifications`.`notify_at` as `notifyAt` from `notifications` JOIN `users` ON `notifications`.`to_id` = `users`.`id` WHERE `notifications`.`from_id` = ?',
+				'SELECT `users`.`profile_img` as `avatar`, `notifications`.`id` as `notifID`, `users`.`user_name` as `from`, `notifications`.`type` as `notifType`, `notifications`.`notify_at` as `notifyAt` from `notifications` JOIN `users` ON `notifications`.`to_id` = `users`.`id` WHERE `notifications`.`from_id` = ? AND `type` = 5',
 				[userId],
 				(err, result) => {
 					if (err) reject(err);
@@ -51,9 +51,7 @@ function getUserNotifications(userId) {
 						if (isEmpty(result)) queryResult.empty = 1;
 						else {
 							queryResult.empty = 0;
-							queryResult.from = result[0].from;
-							queryResult.notifType = result[0].notifType;
-							queryResult.notifyAt = result[0].notifyAt;
+							queryResult.history = result;
 						}
 						connection.release();
 						resolve(queryResult);
@@ -68,6 +66,7 @@ const getNotifications = async (req, res, next) => {
 	const userId = await getUserId(req.userNameConnected);
 	const notifications = await getUserNotifications(userId);
 	req.notifications = notifications;
+	next();
 };
 
 router.get('/getUserHistory', authToken, getNotifications, (req, res) => {
@@ -82,5 +81,6 @@ router.get('/getUserHistory', authToken, getNotifications, (req, res) => {
 		backEndResponse.notifications = req.notifications;
 		backEndResponse.status = 0;
 	}
+	res.send(backEndResponse);
 });
 module.exports = router;

@@ -224,6 +224,25 @@ function setNotification(fromId, toId, type) {
 		});
 	});
 }
+function checkIfMatched(currentUserId, userLookingForId) {
+	return new Promise((resolve, reject) => {
+		pool.getConnection((err, connection) => {
+			if (err) reject(err);
+			connection.execute(
+				'SELECT COUNT(*) AS `matched` FROM `connected_users` WHERE (`user_one` = ? AND `user_two` = ?) OR (`user_one` = ? AND `user_two` = ?)',
+				[currentUserId, userLookingForId, userLookingForId, currentUserId],
+				(err, result) => {
+					if (err) reject(err);
+					else {
+						const queryResult = result[0].matched;
+						connection.release();
+						resolve(queryResult);
+					}
+				}
+			);
+		});
+	});
+}
 
 const userChecker = async (req, res, next) => {
 	const userErrors = {};
@@ -257,8 +276,11 @@ const userChecker = async (req, res, next) => {
 					// check if the actual user is already liked by this user
 					const userIsLiked = await checkIfUserIsLiked(userToBeLikedId, currentUserId);
 					if (userIsLiked) {
-						const match = await matcheUsers(currentUserId, userToBeLikedId);
-						type = 3;
+						const alreadyMatched = await checkIfMatched(currentUserId, userToBeLikedId);
+						if (alreadyMatched === 0) {
+							const match = await matcheUsers(currentUserId, userToBeLikedId);
+							type = 3;
+						}
 					}
 					const notif = await setNotification(currentUserId, userToBeLikedId, type);
 				} else {

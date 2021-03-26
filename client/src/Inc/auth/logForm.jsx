@@ -3,9 +3,8 @@ import useForm from '../../helpers/useForm';
 import validate from '../../validators/validateLogin';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import { AuthContexts } from '../../Contexts/authContext';
+import { AuthContexts, socket } from '../../Contexts/authContext';
 import { Link } from 'react-router-dom';
-// import socketIOClient from 'socket.io-client';
 
 function LogForm() {
 	const [formSchema, setFormSchema] = useState({
@@ -13,14 +12,11 @@ function LogForm() {
 		password: ''
 	});
 
-	// const socket = socketIOClient();
-
 	const { handleSubmit, handleChange, errors } = useForm(submit, validate, formSchema, setFormSchema);
 	const authContext = useContext(AuthContexts);
 
 	async function submit() {
 		const values = { ...formSchema };
-		console.log({ values });
 		try {
 			const {
 				data: { status, authToken, dataProfileIsComplited, errors, userName: loggedUser, userid }
@@ -68,6 +64,7 @@ function LogForm() {
 					loggedUser,
 					loggedID: userid
 				}));
+				socket.emit('usersConnected', loggedUser);
 			}
 		} catch (e) {}
 	}

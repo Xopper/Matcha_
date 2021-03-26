@@ -144,6 +144,12 @@ a {
     transition: filter 300ms;
 }
 
+
+.nav__item--control span{
+	display: none;
+}
+
+
 .nav__icons:hover {
 	filter: brightness(0.95);
 }
@@ -307,7 +313,7 @@ a {
 
 .statistical__card {
 	background-color: #fff;
-	width: calc(90% / 4);
+	width: calc(90% / 3);
 	padding: 50px;
 	border-radius: 30px;
 	display: flex;
@@ -1410,22 +1416,24 @@ signature
 
 
 .chat__box__messages__wraper {
-height: calc(100% - 120px);
-border-radius: 15px;
-background: #fff;
-padding: 15px;
-display: flex;
-flex-direction: column;
-justify-content: space-between;
-
+	height: calc(100% - 120px);
+	border-radius: 15px;
+	background: #fff;
+	padding: 15px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	position: relative;
 }
 
 
 .chat__box__messages__wraper__discussion {
 	height: 80%;
-	overflow-y: auto;
-	display: flex;
+    width: 100%;
+    overflow-y: auto;
+    display: flex;
 	flex-direction: column;
+	padding: 0 0 5px 5px;
 }
 
 .chat__box__messages__wraper__discussion::-webkit-scrollbar { 
@@ -1445,17 +1453,17 @@ justify-content: space-between;
 }
 
 .chat__box__msg.sender {
-	align-self: flex-end;
 	border-radius: 20px 20px 3px 20px;
-	background: rgba(93,238,217,1.8);
-	color: #fff;
+	background: #EAEFFA;
+	color: gray;
+	margin-left: auto;
 }
 
 .chat__box__msg.receiver {
 	align-self: flex-start;
 	border-radius: 20px 20px 20px 3px;
-	background: #EAEFFA;
-	color: gray;
+	background: rgba(93,238,217,1.8);
+	color: #fff;
 }
 
 
@@ -1581,6 +1589,7 @@ justify-content: space-between;
 
 .notification__user__img img{
 	height: 50px;
+	width: 50px;
     border-radius: 50%;
     margin-left: 20px;
 }
@@ -1593,6 +1602,11 @@ justify-content: space-between;
     color: lightgray;
 }
 
+
+.empty__data {
+	padding: 200px;
+    text-align: center;
+}
 
 
 
@@ -1887,6 +1901,14 @@ justify-content: space-between;
 */
 
 @media only screen and (min-width: 480px) and (max-width: 768px){
+	.nav__item--control div{
+		display: none;
+	}
+	
+	.nav__item--control span{
+		display: block;
+	}
+	
 	.browse__wrapper .profiles .profile__card {
 		width: calc(80% / 2);
 		margin: 20px auto;
@@ -1896,6 +1918,14 @@ justify-content: space-between;
 
 
 @media only screen and (min-width: 370px) and (max-width: 480px){
+	.nav__item--control div{
+		display: none;
+	}
+	
+	.nav__item--control span{
+		display: block;
+	}
+	
 	.browse__wrapper .profiles .profile__card {
 		width: calc(70%);
 		margin: 20px auto;
@@ -1903,6 +1933,14 @@ justify-content: space-between;
 }
 
 @media only screen and (min-width: 320px) and (max-width: 370px){
+	.nav__item--control div{
+		display: none;
+	}
+	
+	.nav__item--control span{
+		display: block;
+	}
+	
 	.browse__wrapper .profiles .profile__card {
 		width: calc(90%);
 		margin: 20px auto;

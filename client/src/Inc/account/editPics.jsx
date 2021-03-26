@@ -4,6 +4,7 @@ import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import { AuthContexts } from '../../Contexts/authContext';
 import Swal from 'sweetalert2';
+import { getInstance } from '../../helpers/helpers';
 
 async function getData(token) {
 	const instance = axios.create({
@@ -30,8 +31,7 @@ export default function EditPics() {
 	const { token } = auth;
 
 	useEffect(() => {
-		// console.log(token);
-		const data = async () => {
+		(async () => {
 			const {
 				data: { userPics }
 			} = await getData(token);
@@ -45,24 +45,17 @@ export default function EditPics() {
 					}
 				});
 			});
-		};
-		data();
+		})();
 	}, [token]);
 
 	async function handlesubmit(e) {
-		// TODO check if avatar isn't null
 		e.preventDefault();
 		if (avatar.avatarSrc) {
-			const instance = axios.create({
-				headers: { Authorization: `Bearer ${token}` }
-			});
-			const res = await instance.post('http://localhost:5000/editPics/editPicsValidator', {
+			const res = await getInstance(token).post('http://localhost:5000/editPics/editPicsValidator', {
 				...avatar,
 				...images
 			});
 			const { data } = res;
-			// console.log(data);
-			// console.log(data.status);
 			if (data.status === 0) {
 				Swal.fire({
 					title: 'YAAAP!',
